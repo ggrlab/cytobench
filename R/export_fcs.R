@@ -33,6 +33,13 @@
 #' sample whose column names should be used.
 #' Alternatively, give a specific vector of strings with the same length as the matrix has columns.
 #'
+#' @param extreme_template
+#' If you have an extreme sample which you want to use as a template for all other samples,
+#' you can provide it here. Usually, this would be the returned fcs_extreme_copy from a
+#' previous run of this function.
+#' Essentially, it needs at least 2 cells (high and low) as "extreme" values.
+#' The cells are replaced by the actual cells given in the matrix_list.
+#'
 #' @return fcs_extreme_copy:
 #' A copy of the extreme_template which was used to save all samples. The fcs-file
 #' ranges for all samples come from this extreme sample.
@@ -46,12 +53,12 @@ export_fcs <- function(matrix_list,
                        verbose = TRUE,
                        new_colnames_to = c("description", "colnames"),
                        new_colnames = 1,
-                       extreme_template_matrix = NULL) {
+                       extreme_template = NULL) {
     matrix_list_dt <- lapply(matrix_list, data.table::as.data.table)
     if (verbose) {
         cat("Concattenating extreme values of all samples with data.table\n")
     }
-    if (is.null(extreme_template_matrix)) {
+    if (is.null(extreme_template)) {
         matrix_list_dt_extremes <- lapply(matrix_list_dt, function(x) {
             rbind(
                 x[, lapply(.SD, max)],
@@ -98,8 +105,11 @@ export_fcs <- function(matrix_list,
         fcs_extreme <- flowCore::flowFrame(as.matrix(extreme_template) * safety_scaling + safety_shift)
         fcs_extreme_copy <- flowCore::flowFrame(as.matrix(extreme_template) * safety_scaling + safety_shift)
     } else {
-        fcs_extreme <- flowCore::flowFrame(as.matrix(extreme_template_matrix) * safety_scaling + safety_shift)
-        fcs_extreme_copy <- flowCore::flowFrame(as.matrix(extreme_template_matrix) * safety_scaling + safety_shift)
+        if ("flowFrame" %in% class(extreme_template)) {
+            extreme_template <- flowCore::exprs(extreme_template)
+        }
+        fcs_extreme <- flowCore::flowFrame(as.matrix(extreme_template) + safety_shift)
+        fcs_extreme_copy <- flowCore::flowFrame(as.matrix(extreme_template) + safety_shift)
     }
 
     for (file_x in names(matrix_list_dt)) {

@@ -159,3 +159,55 @@ test_that("Export fcs files, shifts", {
         )
     }
 })
+
+test_that("Export fcs files, existing template", {
+    # Read in the example data
+    csv_paths <- list.files(
+        system.file("extdata", "raw_csv", package = "cytobench"),
+        full.names = TRUE, recursive = TRUE,
+        pattern = "*.csv$"
+    )
+    csv_read <- lapply(csv_paths, data.table::fread)
+    names(csv_read) <- sub(".*raw_csv/", "", csv_paths)
+
+    tmpdir <- tempdir()
+    # Write the fcs files
+    extreme_fcs <- export_fcs(
+        csv_read[1:3],
+        outdir = file.path(tmpdir, "extreme_fcs_original"),
+        safety_scaling = 1.25,
+        safety_shift = 0,
+        use.names = FALSE,
+        new_colnames = 1
+    )
+    extreme_fcs_v2 <- export_fcs(
+        csv_read[1:3],
+        outdir = file.path(tmpdir, "extreme_fcs_template"),
+        safety_scaling = 10.25,
+        safety_shift = 0,
+        extreme_template = extreme_fcs
+    )
+
+    # validate the fcs
+    ## read all fcs
+    read_fcs <- lapply(
+        list(
+            "original" = file.path(tmpdir, "extreme_fcs_original"),
+            "template" = file.path(tmpdir, "extreme_fcs_template")
+        ),
+        function(x) {
+            fcs_paths <- list.files(
+                x,
+                full.names = TRUE, recursive = TRUE,
+                pattern = "*.fcs$"
+            )
+            fcs_read <- lapply(fcs_paths, flowCore::read.FCS)
+        }
+    )
+    for (i in 1:length(read_fcs[[1]])) {
+        expect_equal(
+            flowCore::exprs(read_fcs[["original"]][[i]]),
+            flowCore::exprs(read_fcs[["template"]][[i]])
+        )
+    }
+})
