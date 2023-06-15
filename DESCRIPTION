@@ -9,7 +9,8 @@ License: MIT + file LICENSE
 Imports: 
     Biobase,
     flowCore,
-    data.table
+    data.table,
+    readxl
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
