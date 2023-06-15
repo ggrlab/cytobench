@@ -83,6 +83,8 @@ usethis::use_tidy_github()
 # usethis::use_tidy_upkeep_issue()
 usethis::use_readme_md()
 
-usethis::test
+
+usethis::use_github_action("check-standard")
+usethis::use_github_action("test-coverage")
 
 ```
