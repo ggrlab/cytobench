@@ -1,10 +1,10 @@
 Package: cytobench
-Title: What the Package Does (One Line, Title Case)
+Title: Bench of tools for cytometry data
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+    person("Gunther", "Glehr", , "gunthergl@gmx.net", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-1495-9162"))
+Description: Export .fcs files to be readable within Kaluza. Rescale data with references. Extract Kaluza gatings. 
 License: MIT + file LICENSE
 Suggests: 
     testthat (>= 3.0.0)
