@@ -1,11 +1,21 @@
 test_that("Extract single negative MFI", {
-    extracted_mfis <- mfis_from_excel("inst/extdata/Pre_Arcsinh_MFI_example.xlsx")
+    extracted_mfis <- mfis_from_excel(
+        system.file("extdata", "Pre_Arcsinh_MFI_example.xlsx", package = "cytobench"),
+        negative_mfi_colname = "MFI NEGATIVE POPULATION  UNSTAINED"
+    )
+    expect_length(extracted_mfis, 4)
+
+
+    extracted_mfis <- mfis_from_excel(
+        system.file("extdata", "Pre_Arcsinh_MFI_example.xlsx", package = "cytobench"),
+        negative_mfi_colname = c("NAMED_UNSTAINED" = "MFI NEGATIVE POPULATION  UNSTAINED")
+    )
     expect_length(extracted_mfis, 4)
 })
 test_that("Extract multiple negative MFI, unnamed", {
     expect_error({
         extracted_mfis <- mfis_from_excel(
-            "inst/extdata/Pre_Arcsinh_MFI_example.xlsx",
+            system.file("extdata", "Pre_Arcsinh_MFI_example.xlsx", package = "cytobench"),
             negative_mfi_colname = c(
                 "MFI NEGATIVE POPULATION  UNSTAINED",
                 "MFI NEGATIVE POPULATION (GG)"
@@ -16,7 +26,7 @@ test_that("Extract multiple negative MFI, unnamed", {
 
 test_that("Extract multiple negative MFI, named", {
     extracted_mfis <- mfis_from_excel(
-        "inst/extdata/Pre_Arcsinh_MFI_example.xlsx",
+        system.file("extdata", "Pre_Arcsinh_MFI_example.xlsx", package = "cytobench"),
         negative_mfi_colname = c(
             "extern" = "MFI NEGATIVE POPULATION  UNSTAINED",
             "intern" = "MFI NEGATIVE POPULATION (GG)"

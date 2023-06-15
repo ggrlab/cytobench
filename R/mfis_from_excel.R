@@ -28,6 +28,7 @@
 #' MFI POSITIVE POPULATION          37488.82   131657.6   139639.11     790976.38    451150.3    54247.44      37088.07      24695.75   27504.88     10440.54
 #' MFI NEGATIVE POPULATION (GG)       219.82      298.0      437.83        615.24       364.9       66.68        164.55         98.35     824.71       792.06
 #' @examples
+#' # See tests
 mfis_from_excel <- function(excel_file = "Pre_Arcsinh_Median_FI.xlsx",
                             positive_mfi_colname = "MFI POSITIVE POPULATION",
                             negative_mfi_colname = c(
