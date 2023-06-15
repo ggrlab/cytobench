@@ -12,7 +12,8 @@ export_fcs(
   use.names = TRUE,
   verbose = TRUE,
   new_colnames_to = c("description", "colnames"),
-  new_colnames = 1
+  new_colnames = 1,
+  extreme_template_matrix = NULL
 )
 }
 \arguments{

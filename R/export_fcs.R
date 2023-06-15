@@ -37,6 +37,7 @@
 #' A copy of the extreme_template which was used to save all samples. The fcs-file
 #' ranges for all samples come from this extreme sample.
 #'
+#' @export
 export_fcs <- function(matrix_list,
                        safety_scaling = 1.25,
                        safety_shift = 0,
@@ -44,56 +45,62 @@ export_fcs <- function(matrix_list,
                        use.names = TRUE,
                        verbose = TRUE,
                        new_colnames_to = c("description", "colnames"),
-                       new_colnames = 1) {
+                       new_colnames = 1,
+                       extreme_template_matrix = NULL) {
     matrix_list_dt <- lapply(matrix_list, data.table::as.data.table)
     if (verbose) {
         cat("Concattenating extreme values of all samples with data.table\n")
     }
-    matrix_list_dt_extremes <- lapply(matrix_list_dt, function(x) {
-        rbind(
-            x[, lapply(.SD, max)],
-            x[, lapply(.SD, min)]
-        )
-    })
-
-    if (use.names) {
-        read_files_bound <- do.call(rbind, matrix_list_dt_extremes)
-    } else {
-        read_files_bound <- matrix_list_dt_extremes[[1]]
-        for (x in matrix_list_dt_extremes[-1]) {
-            if (verbose) {
-                cat(".")
-            }
-            read_files_bound <- rbind(read_files_bound, x, use.names = FALSE)
-        }
-    }
-
-    if (length(new_colnames) == 1 &&
-        (is.numeric(new_colnames[1]) || new_colnames %in% names(matrix_list_dt))) {
-        # If new_colnames = 1, this is default behaviour with rbind(...., use.names=FALSE)
-        colnames(read_files_bound) <- colnames(matrix_list_dt[[new_colnames]])
-    } else {
-        if (length(new_colnames) != ncol(read_files_bound)) {
-            stop(
-                paste0(
-                    "Must either give an integer or single string referring to the ",
-                    "sample whose column names should be used. Alternatively, ",
-                    "give a specific vector of strings with the same length as the",
-                    "matrix has columns."
-                )
+    if (is.null(extreme_template_matrix)) {
+        matrix_list_dt_extremes <- lapply(matrix_list_dt, function(x) {
+            rbind(
+                x[, lapply(.SD, max)],
+                x[, lapply(.SD, min)]
             )
-        }
-        colnames(read_files_bound) <- new_colnames
-    }
+        })
 
-    .SD <- NULL #  only for linting
-    extreme_template <- rbind(
-        read_files_bound[, lapply(.SD, max)],
-        read_files_bound[, lapply(.SD, min)]
-    )
-    # have a security net of 25% plus 100 such that no values are negative (for Kaluza)
-    fcs_extreme <- flowCore::flowFrame(as.matrix(extreme_template) * safety_scaling + safety_shift)
-    fcs_extreme_copy <- flowCore::flowFrame(as.matrix(extreme_template) * safety_scaling + safety_shift)
+        if (use.names) {
+            read_files_bound <- do.call(rbind, matrix_list_dt_extremes)
+        } else {
+            read_files_bound <- matrix_list_dt_extremes[[1]]
+            for (x in matrix_list_dt_extremes[-1]) {
+                if (verbose) {
+                    cat(".")
+                }
+                read_files_bound <- rbind(read_files_bound, x, use.names = FALSE)
+            }
+        }
+
+        if (length(new_colnames) == 1 &&
+            (is.numeric(new_colnames[1]) || new_colnames %in% names(matrix_list_dt))) {
+            # If new_colnames = 1, this is default behaviour with rbind(...., use.names=FALSE)
+            colnames(read_files_bound) <- colnames(matrix_list_dt[[new_colnames]])
+        } else {
+            if (length(new_colnames) != ncol(read_files_bound)) {
+                stop(
+                    paste0(
+                        "Must either give an integer or single string referring to the ",
+                        "sample whose column names should be used. Alternatively, ",
+                        "give a specific vector of strings with the same length as the",
+                        "matrix has columns."
+                    )
+                )
+            }
+            colnames(read_files_bound) <- new_colnames
+        }
+
+        .SD <- NULL #  only for linting
+        extreme_template <- rbind(
+            read_files_bound[, lapply(.SD, max)],
+            read_files_bound[, lapply(.SD, min)]
+        )
+        # have a security net of 25% plus 100 such that no values are negative (for Kaluza)
+        fcs_extreme <- flowCore::flowFrame(as.matrix(extreme_template) * safety_scaling + safety_shift)
+        fcs_extreme_copy <- flowCore::flowFrame(as.matrix(extreme_template) * safety_scaling + safety_shift)
+    } else {
+        fcs_extreme <- flowCore::flowFrame(as.matrix(extreme_template_matrix) * safety_scaling + safety_shift)
+        fcs_extreme_copy <- flowCore::flowFrame(as.matrix(extreme_template_matrix) * safety_scaling + safety_shift)
+    }
 
     for (file_x in names(matrix_list_dt)) {
         current_file <- file.path(outdir, paste0(file_x, ".fcs"))
