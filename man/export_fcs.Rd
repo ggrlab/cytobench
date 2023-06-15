@@ -13,7 +13,7 @@ export_fcs(
   verbose = TRUE,
   new_colnames_to = c("description", "colnames"),
   new_colnames = 1,
-  extreme_template_matrix = NULL
+  extreme_template = NULL
 )
 }
 \arguments{
@@ -48,6 +48,12 @@ within Kaluza where the marker names are extracted (and gates applied).}
 \item{new_colnames}{Can be single element numeric or character - referring to the
 sample whose column names should be used.
 Alternatively, give a specific vector of strings with the same length as the matrix has columns.}
+
+\item{extreme_template}{If you have an extreme sample which you want to use as a template for all other samples,
+you can provide it here. Usually, this would be the returned fcs_extreme_copy from a
+previous run of this function.
+Essentially, it needs at least 2 cells (high and low) as "extreme" values.
+The cells are replaced by the actual cells given in the matrix_list.}
 }
 \value{
 fcs_extreme_copy:
