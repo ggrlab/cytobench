@@ -66,5 +66,21 @@ pacman::p_load("devtools")
 usethis::create_tidy_package(
     "/home/gugl/clonedgit/packages/cytobench"
 )
+usethis::use_tidy_style(strict=TRUE)
+
+usethis::use_git()
+```
+
+```bash
+git remote add origin git@github.com:ggrlab/cytobench.git
+git branch -M main
+git push -u origin main
+```
+
+```r
+usethis::use_tidy_github()
+# usethis::use_tidy_upkeep_issue()
+usethis::use_readme_md()
+
 
 ```
