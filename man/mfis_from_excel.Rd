@@ -7,8 +7,7 @@
 mfis_from_excel(
   excel_file = "Pre_Arcsinh_Median_FI.xlsx",
   positive_mfi_colname = "MFI POSITIVE POPULATION",
-  negative_mfi_colname = c(intern = "MFI NEGATIVE POPULATION (GG)", extern =
-    "MFI NEGATIVE POPULATION  UNSTAINED")
+  negative_mfi_colname = c(extern = "MFI NEGATIVE POPULATION  UNSTAINED")
 )
 }
 \arguments{
@@ -27,6 +26,10 @@ MFI NEGATIVE POPULATION  UNSTAINED
 
 Every single staining sample should be delimited by exactly one blank row.
 The two machines "MFI NAVIOS" and "MFI EX" should be named sheets.}
+
+\item{positive_mfi_colname}{Column name of the excel sheets with the positive MFI}
+
+\item{negative_mfi_colname}{Column name of the excel sheets with the negative MFI.}
 }
 \value{
 List ("intern", "extern") of matrices with MFIs per sample, looking like
