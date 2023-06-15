@@ -6,10 +6,10 @@ output: github_document
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.path = "man/figures/README-",
-  out.width = "100%"
+    collapse = TRUE,
+    comment = "#>",
+    fig.path = "man/figures/README-",
+    out.width = "100%"
 )
 ```
 
@@ -92,4 +92,18 @@ usethis::use_github_action("test-coverage")
 ```bash
 git remote add origin_devel git@git.uni-regensburg.de:packages/cytobench.git
 git push -u origin_devel main
+```
+
+```
+##### data.table imports
+usethis::use_import_from("data.table", ":=")
+usethis::use_import_from("data.table", ".BY")
+usethis::use_import_from("data.table", ".EACHI")
+usethis::use_import_from("data.table", ".GRP")
+usethis::use_import_from("data.table", ".I")
+usethis::use_import_from("data.table", ".N")
+usethis::use_import_from("data.table", ".NGRP")
+usethis::use_import_from("data.table", ".SD")
+usethis::use_import_from("data.table", "data.table")
+
 ```
