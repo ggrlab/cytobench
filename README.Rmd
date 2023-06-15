@@ -88,3 +88,8 @@ usethis::use_github_action("check-standard")
 usethis::use_github_action("test-coverage")
 
 ```
+
+```bash
+git remote add origin_devel git@git.uni-regensburg.de:packages/cytobench.git
+git push -u origin_devel main
+```
