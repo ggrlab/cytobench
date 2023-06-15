@@ -82,5 +82,6 @@ usethis::use_tidy_github()
 # usethis::use_tidy_upkeep_issue()
 usethis::use_readme_md()
 
+usethis::test
 
 ```
