@@ -32,6 +32,7 @@
 #' MFI NEGATIVE POPULATION (GG)       219.82      298.0      437.83        615.24       364.9       66.68        164.55         98.35     824.71       792.06
 #' @examples
 #' # See tests
+#' @export
 mfis_from_excel <- function(excel_file = "Pre_Arcsinh_Median_FI.xlsx",
                             positive_mfi_colname = "MFI POSITIVE POPULATION",
                             negative_mfi_colname = c("extern" = "MFI NEGATIVE POPULATION  UNSTAINED")) {

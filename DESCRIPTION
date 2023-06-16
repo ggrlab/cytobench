@@ -1,6 +1,6 @@
 Package: cytobench
 Title: Bench of tools for cytometry data
-Version: 0.0.3
+Version: 0.0.5
 Authors@R: 
     person("Gunther", "Glehr", , "gunthergl@gmx.net", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-1495-9162"))
@@ -10,7 +10,11 @@ Imports:
     Biobase,
     flowCore,
     data.table,
-    readxl
+    readxl,
+    tibble,
+    dplyr,
+    tidyr,
+    magrittr
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
