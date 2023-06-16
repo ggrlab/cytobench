@@ -7,8 +7,8 @@
 create_mapping(
   named_mfis,
   sample_names,
-  sample_names_to_mapping_df = sample_names_to_mapping_df_packageexample,
-  single_cd3_types = c("single_CD3", "single_staining")
+  FUN.sample_names_to_mapping_df = sample_names_to_mapping_df_packageexample,
+  types_single_staining = c("single_CD3", "single_staining")
 )
 }
 \arguments{

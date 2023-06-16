@@ -105,8 +105,8 @@ map_rescale <- function(sample_dt_list,
 #'
 create_mapping <- function(named_mfis,
                            sample_names,
-                           sample_names_to_mapping_df = sample_names_to_mapping_df_packageexample,
-                           single_cd3_types = c("single_CD3", "single_staining")) {
+                           FUN.sample_names_to_mapping_df = sample_names_to_mapping_df_packageexample,
+                           types_single_staining = c("single_CD3", "single_staining")) {
     # usethis::use_pipe() # called that once to enable the pipe operator for the package
     sample_type <- lot <- NULL # linting
     split_mfi_names <- do.call(rbind, strsplit(basename(names(named_mfis)), "\\."))
@@ -118,25 +118,25 @@ create_mapping <- function(named_mfis,
         device = split_mfi_names[, 3]
     )
 
-    samples_mapped <- lapply(sample_names, sample_names_to_mapping_df)
+    samples_mapped <- lapply(sample_names, FUN.sample_names_to_mapping_df)
     mapping_sample <- do.call(rbind, samples_mapped)
-    mapped_single_cd3 <- mapping_sample %>%
-        dplyr::filter(sample_type %in% single_cd3_types) %>%
+    mapped_single <- mapping_sample %>%
+        dplyr::filter(sample_type %in% types_single_staining) %>%
         dplyr::left_join(mapping_mfi, by = c("sample", "lot", "device"), relationship = "many-to-many")
-    mapped_single_cd3[["lot_verify"]] <- NA
+    mapped_single[["lot_verify"]] <- NA
 
-    if (any(is.na(mapped_single_cd3[["mfi_file"]]))) {
-        print(mapped_single_cd3[is.na(mapped_single_cd3[["mfi_file"]]), ], n = 10000)
+    if (any(is.na(mapped_single[["mfi_file"]]))) {
+        print(mapped_single[is.na(mapped_single[["mfi_file"]]), ], n = 10000)
         stop("No MFI file found for the samples shown above in the terminal.")
     }
 
     mapped_verify <- mapping_sample %>%
-        dplyr::filter(sample_type == "verify") %>%
+        dplyr::filter(!sample_type %in% types_single_staining) %>%
         dplyr::mutate(lot_verify = lot) %>%
         dplyr::select(-lot) %>%
         dplyr::left_join(mapping_mfi, by = c("sample", "device"), relationship = "many-to-many")
 
-    mapped_all <- rbind(mapped_single_cd3, mapped_verify)
+    mapped_all <- rbind(mapped_single, mapped_verify)
     return(mapped_all)
 }
 
