@@ -1,3 +1,4 @@
+#' @export 
 rescale <- function(sample_to_rescale,
                     extracted_mfi,
                     feature_unified_dict,

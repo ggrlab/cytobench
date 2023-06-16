@@ -23,6 +23,7 @@
 #' @param ...
 #' Further arguments to \code{\link{rescale}}. 
 #' 
+#' @export 
 map_rescale <- function(sample_dt_list,
                         mfi_dt_list,
                         mapping_mfi_to_sample,
@@ -103,6 +104,7 @@ map_rescale <- function(sample_dt_list,
 #' - device: The device used for the sample
 #' - lot_verify: The lot of the verification sample
 #'
+#' @export 
 create_mapping <- function(named_mfis,
                            sample_names,
                            FUN.sample_names_to_mapping_df = sample_names_to_mapping_df_packageexample,
@@ -151,6 +153,7 @@ sample_names_to_mapping_df_default <- function(samplename) {
     )
     return(mapping_sample)
 }
+#' @export 
 sample_names_to_mapping_df_packageexample <- function(samplename) {
     split_name <- strsplit(samplename, "/")[[1]]
     mapping_sample <- tibble::tibble(

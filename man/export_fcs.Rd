@@ -9,7 +9,7 @@ export_fcs(
   safety_scaling = 1.25,
   safety_shift = 0,
   outdir = ".",
-  use.names = TRUE,
+  use.names = FALSE,
   verbose = TRUE,
   new_colnames_to = c("description", "colnames"),
   new_colnames = 1,

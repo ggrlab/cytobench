@@ -1,3 +1,4 @@
+#' @export 
 scale_column_minmax <- function(sample_to_rescale,
                                 scaling_values,
                                 colX,

@@ -1,4 +1,4 @@
-
+#' @export 
 feature_unified_dict_default <- function() {
     alternative <- unified <- NULL # lint
     f_dict <- data.frame(unified = c(
