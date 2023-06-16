@@ -1,10 +1,10 @@
 Package: cytobench
 Title: Bench of tools for cytometry data
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: 
     person("Gunther", "Glehr", , "gunthergl@gmx.net", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-1495-9162"))
-Description: Export .fcs files to be readable within Kaluza. Rescale data with references. Extract Kaluza gatings. 
+Description: Export .fcs files to be readable within Kaluza. Rescale data with references.
 License: MIT + file LICENSE
 Imports: 
     Biobase,

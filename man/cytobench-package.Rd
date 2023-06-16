@@ -6,7 +6,7 @@
 \alias{cytobench-package}
 \title{cytobench: Bench of tools for cytometry data}
 \description{
-Export .fcs files to be readable within Kaluza. Rescale data with references. Extract Kaluza gatings.
+Export .fcs files to be readable within Kaluza. Rescale data with references.
 }
 \author{
 \strong{Maintainer}: Gunther Glehr \email{gunthergl@gmx.net} (\href{https://orcid.org/0000-0002-1495-9162}{ORCID})
