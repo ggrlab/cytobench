@@ -105,5 +105,5 @@ usethis::use_import_from("data.table", ".N")
 usethis::use_import_from("data.table", ".NGRP")
 usethis::use_import_from("data.table", ".SD")
 usethis::use_import_from("data.table", "data.table")
-
+usethis::use_import_from("stats", "median")
 ```

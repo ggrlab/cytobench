@@ -1,6 +1,6 @@
 Package: cytobench
 Title: Bench of tools for cytometry data
-Version: 0.2.3
+Version: 0.2.4
 Authors@R: 
     person("Gunther", "Glehr", , "gunthergl@gmx.net", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-1495-9162"))
@@ -14,7 +14,8 @@ Imports:
     tibble,
     dplyr,
     tidyr,
-    magrittr
+    magrittr,
+    stats
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
