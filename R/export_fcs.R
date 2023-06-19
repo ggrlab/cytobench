@@ -31,7 +31,31 @@
 #'
 #' @param new_colnames Can be single element numeric or character - referring to the
 #' sample whose column names should be used.
-#' Alternatively, give a specific vector of strings with the same length as the matrix has columns.
+#' Alternatively, give a named vector of strings with the same length as the matrix has columns, e.g.:
+#'
+#' c(
+#'     "FSC-A" = NA,
+#'     "SSC-A" = NA,
+#'     "FL1-A" = "marker",
+#'     "FL4-A" = "marker",
+#'     "FL5-A" = "marker",
+#'     "FL7-A" = "marker",
+#'     "FL8-A" = "marker",
+#'     "FL9-A" = "marker",
+#'     "FL10-A" = "marker",
+#'     "FL11-A" = "marker",
+#'     "FL12-A" = "marker",
+#'     "FL13-A" = "marker",
+#'     "FL14-A" = "marker",
+#'     "FL16-A" = "marker",
+#'     "FL21-A" = "marker",
+#'     "FSC-Width" = NA,
+#'     "TIME" = NA
+#' )
+#'
+#' Every value which is called "marker" will be used as a marker name setting
+#' flowCore::markernames() IN ORDER! The other values are ignored.
+#'
 #'
 #' @param extreme_template
 #' If you have an extreme sample which you want to use as a template for all other samples,
@@ -93,7 +117,7 @@ export_fcs <- function(matrix_list,
                     )
                 )
             }
-            colnames(read_files_bound) <- new_colnames
+            colnames(read_files_bound) <- names(new_colnames)
         }
 
         .SD <- NULL #  only for linting
@@ -120,7 +144,11 @@ export_fcs <- function(matrix_list,
         # With this replacement of colnames, the "Description" will always be the names of
         # the extreme_template
         if (new_colnames_to[1] == "description") {
-            flowCore::markernames(fcs_extreme)[TRUE] <- colnames(matrix_list_dt[[file_x]])[colnames(matrix_list_dt[[file_x]]) != "TIME"]
+            if (length(new_colnames) == ncol(matrix_list_dt[[file_x]])) {
+                flowCore::markernames(fcs_extreme)[TRUE] <- names(new_colnames)[new_colnames == "marker"]
+            } else {
+                flowCore::markernames(fcs_extreme)[TRUE] <- colnames(matrix_list_dt[[file_x]])[colnames(matrix_list_dt[[file_x]]) != "TIME"]
+            }
             colnames(matrix_list_dt[[file_x]]) <- flowCore::colnames(fcs_extreme)
         } else {
             flowCore::colnames(fcs_extreme) <- colnames(matrix_list_dt[[file_x]])
