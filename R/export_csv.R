@@ -15,8 +15,8 @@ export_csv <- function(
         # after export_fcs writes the "original" column names into the "description"
         if (!all(is.na(feature_unified_dict))) {
             cp_dt <- data.table::copy(matrix_list[[x]])
-            colnames(cp_dt)[colnames(cp_dt) %in% rownames(f_dict)] <- f_dict[
-                colnames(cp_dt)[colnames(cp_dt) %in% rownames(f_dict)],
+            colnames(cp_dt)[colnames(cp_dt) %in% rownames(feature_unified_dict)] <- feature_unified_dict[
+                colnames(cp_dt)[colnames(cp_dt) %in% rownames(feature_unified_dict)],
                 "unified"
             ]
         } else {
