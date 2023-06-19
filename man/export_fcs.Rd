@@ -6,7 +6,7 @@
 \usage{
 export_fcs(
   matrix_list,
-  safety_scaling = 1.25,
+  safety_scaling = 1.2,
   safety_shift = 0,
   outdir = ".",
   use.names = FALSE,

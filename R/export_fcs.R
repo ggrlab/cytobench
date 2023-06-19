@@ -46,7 +46,7 @@
 #'
 #' @export
 export_fcs <- function(matrix_list,
-                       safety_scaling = 1.25,
+                       safety_scaling = 1.20,
                        safety_shift = 0,
                        outdir = ".",
                        use.names = FALSE,
@@ -101,9 +101,10 @@ export_fcs <- function(matrix_list,
             read_files_bound[, lapply(.SD, max)],
             read_files_bound[, lapply(.SD, min)]
         )
-        # have a security net of 25% plus 100 such that no values are negative (for Kaluza)
-        fcs_extreme <- flowCore::flowFrame(as.matrix(extreme_template) * safety_scaling + safety_shift)
-        fcs_extreme_copy <- flowCore::flowFrame(as.matrix(extreme_template) * safety_scaling + safety_shift)
+        # have a security net of 20% plus 100 such that no values are negative (for Kaluza)
+        extreme_template_safeties <- as.matrix(extreme_template) * safety_scaling + safety_shift
+        fcs_extreme <- flowCore::flowFrame(extreme_template_safeties)
+        fcs_extreme_copy <- flowCore::flowFrame(extreme_template_safeties)
     } else {
         if ("flowFrame" %in% class(extreme_template)) {
             extreme_template <- flowCore::exprs(extreme_template)
