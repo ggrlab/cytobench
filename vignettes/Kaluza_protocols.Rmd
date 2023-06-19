@@ -1,0 +1,143 @@
+---
+title: "Kaluza_protocols"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Kaluza_protocols}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+From ``scale_selection.protocol.xml``:
+
+The following part of the xml seems to organize the single plots:
+
+```xml
+        <Sheets NextID="166" SelectedSheet="132">
+          <PlotSheet I="132" N="Plot Sheet 1" U="F" Z="100" IsQCPlotSheet="False" ReadOnly="False">
+            <ScrollPosition>0,0</ScrollPosition>
+            <Node I="134">
+              <S B="14:SFF808080,28:SFFFF00FF,3C:SFF00AAFF,50:SFF00FF00,64:SFFFF0000" D="0" E="0;0;0,0;2.5,2.5" F="72" CEE="False" CBN="5" CS="SFFFF0000" CE="SFFCC00FF" DEI="A,5000,20" P="0"    U="DA8">
+                <A/>
+                <L/>
+                <AM>1;;SFF000000;11.44;Trebuchet MS</AM>
+                <G>
+                  <Gate G="A-+" J="0"/>
+                  <Gate G="A++" J="0"/>
+                  <Gate G="A--" J="0"/>
+                  <Gate G="A+-" J="0"/>
+                </G>
+                <T/>
+                <TM>1;;SFF000000;11.44;Trebuchet MS</TM>
+                <TextM>1;;SFF000000;11.44;Trebuchet MS</TextM>
+                <TSF>1;;SFF000000;15.25;Trebuchet MS</TSF>
+                <X F="D" R="0" M="FSC-A" S="C" W="-2207883.75;16777216"/>
+                <Y F="D" R="0" M="SSC-A" S="C" W="-164771.015625;16777216"/>
+                <ZML/>
+                <CEL/>
+              </S>
+            </Node>
+```
+The following two lines seem to organize the 
+  - x axis 
+```xml
+              <X F="D" R="0" M="FSC-A" S="C" W="-2207883.75;16777216"/>
+```
+  - y axis
+```xml
+              <Y F="D" R="0" M="SSC-A" S="C" W="-164771.015625;16777216"/>
+```
+where 
+  - F: 
+  - R:
+  - M: The "Name" of the marker FSC-A
+  - S: Scale of the axis, 
+        S="a"
+     - where "a" is either
+        - "I" - linear
+        - "O" - log
+        - "C" - logicle
+  - W: Visible range of the axis?
+
+The `scale` seems to refer to the following xml part
+```xml
+          <Measurements>
+            <Measurement N="FSC-A" T="A" FU="False">
+              <Description>FSC-A</Description>
+              <Detector>FS</Detector>
+              <ID>0</ID>
+              <Range>16777216</Range>
+              <IndexSorting>None</IndexSorting>
+              <Scales>
+                <LinearScale DR="1024" OFF="0" X="16777216" M="0"/>
+                <LogScale D="4" DR="1024" X="16777216" M="1677.7216"/>
+                <LogicleScale D="4.5" DR="1024" W="0.1" X="16777216" M="-5531.7294921875"/>
+              </Scales>
+            </Measurement>
+          </Measurements>
+```
+where for every marker `used in the plots`, the description, the corresponding detector, its ID, the maximum possible range (probably from `$PnR` .fcs file parameter). IndexSorting?? Scales: The parameters for the scales. I observed that when changing the `LogicleScale` parameter, that **GATE** parameters also change. 
+
+- `LinearScale`: 
+    - DR: 
+    - OFF: 
+    - X: `maXimum visible range`
+    - M: `Minimum visible range`
+- `LogScale`: 
+    - D: `Decades`
+    - DR: `Dynamic Range?`
+    - X: `maXimum visible range`
+    - M: `Minimum visible range`
+
+
+## From Parks et al 2006, https://pubmed.ncbi.nlm.nih.gov/16604519/
+
+ 
+The first choice is the **maximum data value in the displayed scale (T)**. The second is the **range of the display in relation to the width of high data value decades (M or m in decade or natural log formulations, respectively)**. We have found that a total plot width of 4.5 "decades" is usually a good choice for displaying flow cytometry data. The third choice is the strength and **range of linearization around zero (W or w)**. The linear slope at zero (in, for example, data units per pixel or data units per mm in a printout) and the range of data values in the nearly linear zone are determined by this selection. In displaying a particular data set, the linearized range must be adequate to cover broad population distributions that do not display well on log scales. This, in particular, is the selection that is critical in matching displays to particular data sets and in ensuring that the linearized zone covers the range of statistical spread in the data. If the transition toward log behavior occurs in too low data values, the artifacts seen in logarithmic displays will not be suppressed. The fourth choice is to specify the r**ange of negative values to be included in the display** (which also defines the position of the data zero in the plot). This range must be great enough to avoid truncating populations of interest. In practice, as shown in Figure 2, we find that it is desirable to link the third and fourth choices as a single value. This assures that the lowest negative data values in view correspond to the approximate edge of the linearized zone. As discussed earlier under Statistical Uncertainties, negative values should occur only as a result of statistical spreading, and, therefore, they should be displayed within the near-linear zone.
+
+$$S(x,w) = T \exp^{-(m-w)}\left(\exp^{(x-w)}-p^2\exp^{-(x-w)/p}+p^2-1\right)$$
+for $x\geq w$.
+
+ - In the equation, T is the top of scale data value (e.g., 10,000 for
+common 4 decade data or 262,144 for an 18 bit data
+range).
+ - $w =\frac{2p \ln(p)}{p+1}$ is the width of the negative data range and the range of linearized data in natural log units. p is introduced for compactness in presenting the Logicle
+function, but p and w together represent a single adjustable parameter.
+ - m is the breadth of the display in natural log units. For a 4.5 decade, display range $m=\ln(10)=10.36$.
+
+Another representation is: 
+$$S(X;W)=T 10^{-(M-W)}\left(10^{X-W}-p^2 10^{-\frac{X-W}{p}}+p^2-1\right)$$
+
+Therefore, the resulting functions for interpreting the ranges should be: 
+```r
+LinearScale <- function(x){
+    
+}
+LogScale <- function(x){
+    
+}
+
+LogicleScale <- function(
+    x, 
+    kaluza_D=4.5,
+    kaluza_DR=1024,
+    kaluza_W=0.1,
+    kaluza_X=16777216,
+    kaluza_M=-5531.7294921875
+    ){
+    # <LogicleScale D="4.5" DR="1024" W="0.1" X="16777216" M="-5531.7294921875"/>
+    10^{-(M-W)}\left(10^{X-W}-p^2 10^{-\frac{X-W}{p}}+p^2-1\right)
+    # M is the breadth of the display in "decades"
+    # W = 2p log(p)/(p + 1) is the width of the negative data range and the range of linearized data in "decades"
+    W=2*p*log(p)/(p+1)
+    constant <- kaluza_M * 10^(-(kaluza_D - kaluza_W))
+    non_constant <- 10^(x-kaluza_W) - 
+    return()
+}
+```
