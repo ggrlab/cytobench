@@ -6,8 +6,9 @@ xml_to_gatingset <- function(read_xml, analysis_fcs_file, verbose = FALSE, verbo
     datasets <- xml2::xml_find_all(all_entries, xpath = ".//DataSet")
     dataset_names <- xml2::xml_attr(datasets, "N")
     gates <- xml2::xml_find_all(all_entries, xpath = ".//Gates")
+    gate_constraints <- xml2::xml_find_all(all_entries, xpath = ".//GateConstraints")
 
-    gatelist_per_sample <- lapply(gates, xmlgates_to_gatelist)
+    gatelist_per_sample <- lapply(gates, xmlgates_to_gatelist, gate_constraints = gate_constraints)
     names(gatelist_per_sample) <- dataset_names
 
     # take one random .fcs, necessary to create a GatingSet
@@ -60,10 +61,10 @@ gatelist_to_gatingset <- function(gatelist, flowframe) {
     return(zero_gs)
 }
 
-xmlgates_to_gatelist <- function(xml_gates_single) {
+xmlgates_to_gatelist <- function(xml_gates_single, gate_constraints) {
     # Interpret the gates
-    gate_contents <- xml2::xml_contents(xml_gates_single)
-    single_gate <- xml2::xml_contents(gate_contents[[1]])
+    # gate_contents <- xml2::xml_contents(xml_gates_single)
+    # single_gate <- xml2::xml_contents(gate_contents[[1]])
     gates_list <- xml2::as_list(xml_gates_single)
     scale_interpretation <- c("I" = "linear", "O" = "log", "C" = "logicle")
     interpreted_gates <- lapply(gates_list, function(single_gate) {
@@ -98,6 +99,12 @@ xmlgates_to_gatelist <- function(xml_gates_single) {
     # P: Polygon
     # R: Rectangle
     # E: Ellipse
+    gate_constraints_content <- xml2::xml_contents(gate_constraints)
+    gate_constraints_l <- xml2::as_list(gate_constraints_content)
+    names(gate_constraints_l) <- xml2::xml_name(gate_constraints_content)
+    histogram_dividers <- gate_constraints_l[names(gate_constraints_l) == "HistogramDivider"]
+    histogram_divider_gates_right <- lapply(histogram_dividers, function(x) attr(x, "RG"))
+    histogram_divider_gates_left <- lapply(histogram_dividers, function(x) attr(x, "LG"))
 
     # If $attr contains "G" as attr(ibute), it is a child
     # $attr$N is the label of the gate
@@ -105,14 +112,22 @@ xmlgates_to_gatelist <- function(xml_gates_single) {
     for (gate_i in seq_len(length(interpreted_gates))) {
         gate_type <- names(interpreted_gates[gate_i])
         single_gate <- interpreted_gates[[gate_i]]
-
         single_gate_list <- lapply(single_gate[["markers"]], function(x) x[["name"]])
         names(single_gate_list) <- unlist(single_gate_list)
 
         coords <- do.call(rbind, single_gate[["coordinates"]])
 
         if (gate_type == "L") {
-            single_gate_list[[1]] <- coords[, "x", drop = TRUE]
+            part_coord <- coords[, "x", drop = TRUE]
+            if (gate_names[gate_i] %in% histogram_divider_gates_left) {
+                part_coord[which.min(part_coord)] <- -Inf
+                # print("LEFT gate")
+            }
+            if (gate_names[gate_i] %in% histogram_divider_gates_right) {
+                part_coord[which.max(part_coord)] <- Inf
+                # print("RIGHT gate")
+            }
+            single_gate_list[[1]] <- part_coord
             fc_gate <- flowCore::rectangleGate(filterId = gate_names[gate_i], single_gate_list)
         } else if (gate_type == "P") {
             colnames(coords) <- names(single_gate_list)
@@ -124,6 +139,14 @@ xmlgates_to_gatelist <- function(xml_gates_single) {
             # colnames(sqrcut) <- c("FSC-H","SSC-H")
             # pg <- polygonGate(filterId="nonDebris", boundaries= sqrcut)
             # pg
+            if (all(coords == 0)) {
+                warning(paste0(
+                    "Gate ",
+                    gate_names[gate_i],
+                    ": Hinged gate is giving wrong sizes. I do not know what Kaluza is exactly ",
+                    "doing. To press forward now: Do not use hinged gates, no cell will be gated but the gate created "
+                ))
+            }
         } else if (gate_type == "R") {
             colnames(coords) <- names(single_gate_list)
             fc_gate <- flowCore::rectangleGate(filterId = gate_names[gate_i], coords)
