@@ -47,7 +47,30 @@ within Kaluza where the marker names are extracted (and gates applied).}
 
 \item{new_colnames}{Can be single element numeric or character - referring to the
 sample whose column names should be used.
-Alternatively, give a specific vector of strings with the same length as the matrix has columns.}
+Alternatively, give a named vector of strings with the same length as the matrix has columns, e.g.:
+
+c(
+"FSC-A" = NA,
+"SSC-A" = NA,
+"FL1-A" = "marker",
+"FL4-A" = "marker",
+"FL5-A" = "marker",
+"FL7-A" = "marker",
+"FL8-A" = "marker",
+"FL9-A" = "marker",
+"FL10-A" = "marker",
+"FL11-A" = "marker",
+"FL12-A" = "marker",
+"FL13-A" = "marker",
+"FL14-A" = "marker",
+"FL16-A" = "marker",
+"FL21-A" = "marker",
+"FSC-Width" = NA,
+"TIME" = NA
+)
+
+Every value which is called "marker" will be used as a marker name setting
+flowCore::markernames() IN ORDER! The other values are ignored.}
 
 \item{extreme_template}{If you have an extreme sample which you want to use as a template for all other samples,
 you can provide it here. Usually, this would be the returned fcs_extreme_copy from a
