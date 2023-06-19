@@ -106,4 +106,6 @@ usethis::use_import_from("data.table", ".NGRP")
 usethis::use_import_from("data.table", ".SD")
 usethis::use_import_from("data.table", "data.table")
 usethis::use_import_from("stats", "median")
+usethis::use_package("xml2")
+usethis::use_vignette("Kaluza_protocols")
 ```
