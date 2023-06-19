@@ -25,9 +25,9 @@ transform_dts <- function(datatable_list,
         # That here effectively generates a new datatable
         # If the matrix _IS_ already a datatable, effectively a copy is created.
         # If the matrix is NOT created, this is _always_ called
-        matrix_list <- lapply(matrix_list, data.table::as.data.table)
+        datatable_list <- lapply(datatable_list, data.table::as.data.table)
     }
-    only_null_results <- lapply(matrix_list, function(cytoX) {
+    only_null_results <- lapply(datatable_list, function(cytoX) {
         if (any(is.na(cytoX))) {
             stop("Why are there NAs in the sample?")
         }
@@ -52,5 +52,5 @@ transform_dts <- function(datatable_list,
             }
         }
     })
-    return(matrix_list)
+    return(datatable_list)
 }

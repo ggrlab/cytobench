@@ -1,4 +1,4 @@
-devtools::load_all()
+# devtools::load_all()
 test_that("Transform data", {
     # Read in the example data
     csv_paths <- list.files(
