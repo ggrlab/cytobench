@@ -106,6 +106,13 @@ xmlgates_to_gatelist <- function(xml_gates_single, gate_constraints) {
     histogram_divider_gates_right <- lapply(histogram_dividers, function(x) attr(x, "RG"))
     histogram_divider_gates_left <- lapply(histogram_dividers, function(x) attr(x, "LG"))
 
+    staggered <- gate_constraints_l[names(gate_constraints_l) == "Staggered"]
+    staggered_grouped <- lapply(c("topleft" = "ULG", "topright" = "URG", "bottomleft" = "LLG", "bottomright" = "LRG"), function(x) {
+        lapply(staggered, function(y) attr(y, x))
+    })
+    staggered_grouped_unlist <- unlist(staggered_grouped)
+    # "Staggered" seem to be the Quadrant-gates
+
     # If $attr contains "G" as attr(ibute), it is a child
     # $attr$N is the label of the gate
     gatelist <- list()
@@ -116,7 +123,6 @@ xmlgates_to_gatelist <- function(xml_gates_single, gate_constraints) {
         names(single_gate_list) <- unlist(single_gate_list)
 
         coords <- do.call(rbind, single_gate[["coordinates"]])
-
         if (gate_type == "L") {
             part_coord <- coords[, "x", drop = TRUE]
             if (gate_names[gate_i] %in% histogram_divider_gates_left) {
@@ -130,6 +136,22 @@ xmlgates_to_gatelist <- function(xml_gates_single, gate_constraints) {
             single_gate_list[[1]] <- part_coord
             fc_gate <- flowCore::rectangleGate(filterId = gate_names[gate_i], single_gate_list)
         } else if (gate_type == "P") {
+            # if (gate_names[gate_i] %in% staggered_grouped_unlist) {
+            #     # I started this here but it is not finished
+            #     current_name <- names(staggered_grouped_unlist)[staggered_grouped_unlist == gate_names[gate_i]]
+            #     if (startsWith("topright", current_name)) {
+            #         coords[coords[, "x"] == max(coords[, "x"]), "x"] <- Inf
+            #     } else if (startsWith("bottomright", current_name)) {
+            #         coords[coords[, "x"] == max(coords[, "x"]), "x"] <- Inf
+            #     } else if (startsWith("topleft", current_name)) {
+            #         coords[coords[, "x"] == min(coords[, "x"]), "x"] <- -Inf
+            #     } else if (startsWith("bottomleft", current_name)) {
+            #         coords[coords[, "x"] == min(coords[, "x"]), "x"] <- -Inf
+            #         coords[coords[, "y"] == min(coords[, "y"]), "y"] <- -Inf
+            #     }
+            #     # print("LEFT gate")
+            # }
+
             colnames(coords) <- names(single_gate_list)
             fc_gate <- flowCore::polygonGate(filterId = gate_names[gate_i], coords)
             # Warning: The 'boundaries' argument is deprecated, please use '.gate' instead.
