@@ -229,8 +229,14 @@ xmlgates_to_gatelist <- function(xml_gates_single, gate_constraints) {
             colnames(covariance_matrix) <- names(single_gate_list)
             rownames(covariance_matrix) <- names(single_gate_list)
             fc_gate <- flowCore::ellipsoidGate(filterId = gate_names[gate_i], covariance_matrix, mean = c(coords))
+        } else if (gate_type == "B") {
+            # Boolean gates
+            stop("Boolean gates are not implemented yet.")
         } else {
-            stop("Unrecognized gate type")
+            print(interpreted_gates[gate_i])
+            print(single_gate)
+            stop(paste0("Unrecognized gate type '", gate_type, "'"))
+            # stop("Unrecognized gate type")
         }
         gatelist[[gate_i]] <- list("gate" = fc_gate, "parent" = single_gate$attr[["G"]])
     }
