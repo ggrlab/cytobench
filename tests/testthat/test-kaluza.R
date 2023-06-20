@@ -2,41 +2,35 @@
 devtools::load_all()
 
 
-# test_that("Read Kaluza analysis", {
-#     read_analysis <- kaluza_read_analysis(
-#         path = file.path("data-raw", "Kaluza_example_fcs", "analysis___example_fcs-testing_protocols.analysis")
-#     )
-#     read_analysis <- kaluza_read_analysis(
-#         path = file.path("data-raw", "Kaluza_example_fcs", "analysis___example_fcs-testing_protocols.analysis"),
-#         apply_fcs = FALSE
-#     )
-# })
+test_that("Read Kaluza analysis", {
+    read_analysis <- kaluza_read_analysis(
+        path = file.path("data-raw", "Kaluza_example_fcs", "analysis___example_fcs-testing_protocols.analysis")
+    )
+    read_analysis <- kaluza_read_analysis(
+        path = file.path("data-raw", "Kaluza_example_fcs", "analysis___example_fcs-testing_protocols.analysis"),
+        apply_fcs = FALSE
+    )
+})
 
-# test_that("Read and apply Kaluza analysis", {
-#     read_analysis <- kaluza_read_analysis(
-#         path = file.path("data-raw", "Kaluza_example_fcs", "analysis___example_fcs-testing_protocols.analysis"),
-#         apply_fcs = TRUE
-#     )
-# })
-test_that("Read Kaluza analysis, internal_check", {
+test_that("Read and apply Kaluza analysis", {
+    read_analysis <- kaluza_read_analysis(
+        path = file.path("data-raw", "Kaluza_example_fcs", "analysis___example_fcs-testing_protocols.analysis"),
+        apply_fcs = TRUE
+    )
+})
+test_that("Read Kaluza analysis with Kaluza-internal compensation FAILS GENERALLY", {
+    # This might be solved by reading the spillover-matrix from the .xml file within the .analysis file
     read_analysis <- kaluza_read_analysis(
         path = file.path("data-raw", "Kaluza_example_fcs", "compensation___example_fcs-testing_protocols.analysis"),
         apply_fcs = TRUE,
     )
-
-    kaluza_check_gated(
-        read_analysis,
-        exported_gates_obj_or_path = file.path("data-raw", "Kaluza_example_fcs", "compensated_example_fcs Ungated Statistics.csv"), 
-        do_plots = FALSE
-    )
-})
-stop()
-
-test_that("Read Kaluza boolean gates", {
-    read_analysis <- kaluza_read_analysis(
-        path = file.path("data-raw", "Kaluza_example_fcs", "boolean___example_fcs-testing_protocols.analysis"),
-        apply_fcs = FALSE
-    )
+    # testthat::expect_error(
+        kaluza_check_gated(
+            read_analysis,
+            exported_gates_obj_or_path = file.path("data-raw", "Kaluza_example_fcs", "compensated_example_fcs Ungated Statistics.csv"),
+            do_plots = FALSE
+        )
+    # )
 })
 
 test_that("Read Kaluza analysis with gate application", {
@@ -117,5 +111,12 @@ test_that("Read Kaluza analysis, internal_check", {
     kaluza_check_gated(
         read_analysis,
         exported_gates_obj_or_path = file.path("data-raw", "Kaluza_example_fcs", "example_fcs Ungated Statistics.csv")
+    )
+})
+
+test_that("Read Kaluza boolean gates", {
+    read_analysis <- kaluza_read_analysis(
+        path = file.path("data-raw", "Kaluza_example_fcs", "boolean___example_fcs-testing_protocols.analysis"),
+        apply_fcs = FALSE
     )
 })
