@@ -1,16 +1,36 @@
 # library(testthat)
-# devtools::load_all()
+devtools::load_all()
 
 
-test_that("Read Kaluza analysis", {
+# test_that("Read Kaluza analysis", {
+#     read_analysis <- kaluza_read_analysis(
+#         path = file.path("data-raw", "Kaluza_example_fcs", "analysis___example_fcs-testing_protocols.analysis")
+#     )
+#     read_analysis <- kaluza_read_analysis(
+#         path = file.path("data-raw", "Kaluza_example_fcs", "analysis___example_fcs-testing_protocols.analysis"),
+#         apply_fcs = FALSE
+#     )
+# })
+
+# test_that("Read and apply Kaluza analysis", {
+#     read_analysis <- kaluza_read_analysis(
+#         path = file.path("data-raw", "Kaluza_example_fcs", "analysis___example_fcs-testing_protocols.analysis"),
+#         apply_fcs = TRUE
+#     )
+# })
+test_that("Read Kaluza analysis, internal_check", {
     read_analysis <- kaluza_read_analysis(
-        path = file.path("data-raw", "Kaluza_example_fcs", "analysis___example_fcs-testing_protocols.analysis")
+        path = file.path("data-raw", "Kaluza_example_fcs", "compensation___example_fcs-testing_protocols.analysis"),
+        apply_fcs = TRUE,
     )
-    read_analysis <- kaluza_read_analysis(
-        path = file.path("data-raw", "Kaluza_example_fcs", "analysis___example_fcs-testing_protocols.analysis"),
-        apply_fcs = FALSE
+
+    kaluza_check_gated(
+        read_analysis,
+        exported_gates_obj_or_path = file.path("data-raw", "Kaluza_example_fcs", "compensated_example_fcs Ungated Statistics.csv"), 
+        do_plots = FALSE
     )
 })
+stop()
 
 test_that("Read Kaluza boolean gates", {
     read_analysis <- kaluza_read_analysis(

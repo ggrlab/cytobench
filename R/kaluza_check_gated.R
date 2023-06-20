@@ -2,7 +2,10 @@
 kaluza_check_gated <- function(obj_kaluza_read_analysis,
                                exported_gates_obj_or_path,
                                gating_pdf = "exported_gating.pdf",
-                               add_gating_tables = TRUE) {
+                               add_gating_tables = TRUE,
+                               absolute_tolerance = 5,
+                               relative_tolerance = 0.01,
+                               do_plots = TRUE) {
     pop <- Number <- count <- NULL # Avoid lint warnings
     if (length(obj_kaluza_read_analysis[["applied_gatings"]]) == 0) {
         stop(paste0(
@@ -42,7 +45,7 @@ kaluza_check_gated <- function(obj_kaluza_read_analysis,
         ) %>%
         dplyr::mutate(ratio_true_mine = Number / count)
 
-    if (require("ggcyto")) {
+    if (require("ggcyto") && do_plots) {
         gh <- obj_kaluza_read_analysis[["applied_gatings"]][[1]][[1]]
         nodes <- flowWorkspace::gs_get_pop_paths(gh)[-1] # exclude root node
 
@@ -82,8 +85,17 @@ kaluza_check_gated <- function(obj_kaluza_read_analysis,
         dev.off()
         cat("Wrote ", gating_pdf, "\n")
     }
-    if (nrow(different_gates) > 0) {
-        print(different_gates, n = 10000)
+    outside_range_gates <- different_gates %>%
+        dplyr::mutate(
+            within_absolute_tolerance = abs(Number - count) < absolute_tolerance,
+            within_relative_tolerance = abs(1 - ratio_true_mine) < relative_tolerance
+        ) %>%
+        dplyr::mutate(
+            within_tolerance = within_absolute_tolerance & within_relative_tolerance
+        ) %>% dplyr::filter(!within_tolerance) %>%
+        dplyr::select(sample, Gate, Logic, Number, count, ratio_true_mine)
+    if (nrow(outside_range_gates) > 0) {
+        print(outside_range_gates, n = 10000)
         stop("The previous gates did not match. Potentially the extracted gating was not correct.")
     }
     return(TRUE)
