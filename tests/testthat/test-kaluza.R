@@ -3,17 +3,17 @@ devtools::load_all()
 
 
 # test_that("Read Kaluza analysis", {
-#     read_analysis <- read_kaluza_analysis(
+#     read_analysis <- kaluza_read_analysis(
 #         path = file.path("data-raw", "Kaluza_example_fcs", "analysis___example_fcs-testing_protocols.analysis")
 #     )
-#     read_analysis <- read_kaluza_analysis(
+#     read_analysis <- kaluza_read_analysis(
 #         path = file.path("data-raw", "Kaluza_example_fcs", "analysis___example_fcs-testing_protocols.analysis"),
 #         apply_fcs = FALSE
 #     )
 # })
 
 # test_that("Read Kaluza analysis with gate application", {
-#     read_analysis_applied <- read_kaluza_analysis(
+#     read_analysis_applied <- kaluza_read_analysis(
 #         path = file.path("data-raw", "Kaluza_example_fcs", "analysis___example_fcs-testing_protocols.analysis"),
 #         apply_fcs = TRUE,
 #         verbose = FALSE
@@ -82,12 +82,12 @@ devtools::load_all()
 # })
 
 test_that("Read Kaluza analysis, internal_check", {
-    read_analysis <- read_kaluza_analysis(
+    read_analysis <- kaluza_read_analysis(
         path = file.path("data-raw", "Kaluza_example_fcs", "analysis___example_fcs-testing_protocols.analysis"),
         apply_fcs = TRUE,
     )
 
-    check_kaluza_gated(
+    kaluza_check_gated(
         read_analysis,
         exported_gates_obj_or_path = file.path("data-raw", "Kaluza_example_fcs", "example_fcs Ungated Statistics.csv")
     )

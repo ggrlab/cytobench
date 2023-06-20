@@ -1,12 +1,12 @@
 #' @export
-check_kaluza_gated <- function(obj_read_kaluza_analysis,
+kaluza_check_gated <- function(obj_kaluza_read_analysis,
                                exported_gates_obj_or_path,
                                gating_pdf = "exported_gating.pdf",
                                add_gating_tables = TRUE) {
     pop <- Number <- count <- NULL # Avoid lint warnings
-    if (length(obj_read_kaluza_analysis[["applied_gatings"]]) == 0) {
+    if (length(obj_kaluza_read_analysis[["applied_gatings"]]) == 0) {
         stop(paste0(
-            "Please set apply_fcs = TRUE in read_kaluza_analysis.",
+            "Please set apply_fcs = TRUE in kaluza_read_analysis.",
             " You want to compare the applied gating counts to the true ones. "
         ))
     }
@@ -25,7 +25,7 @@ check_kaluza_gated <- function(obj_read_kaluza_analysis,
 
 
     extracted_counts <- tibble::as_tibble(
-        flowWorkspace::gs_pop_get_stats(obj_read_kaluza_analysis[["applied_gatings"]])
+        flowWorkspace::gs_pop_get_stats(obj_kaluza_read_analysis[["applied_gatings"]])
     )
 
     extracted_counts <- extracted_counts %>% dplyr::mutate(
@@ -43,7 +43,7 @@ check_kaluza_gated <- function(obj_read_kaluza_analysis,
         dplyr::mutate(ratio_true_mine = Number / count)
 
     if (require("ggcyto")) {
-        gh <- obj_read_kaluza_analysis[["applied_gatings"]][[1]][[1]]
+        gh <- obj_kaluza_read_analysis[["applied_gatings"]][[1]][[1]]
         nodes <- flowWorkspace::gs_get_pop_paths(gh)[-1] # exclude root node
 
         pdf(gating_pdf)

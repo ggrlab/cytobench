@@ -1,5 +1,5 @@
-
-read_kaluza_analysis <- function(path, apply_fcs = FALSE, verbose = TRUE, which_xml = 0) {
+#' @export 
+kaluza_read_analysis <- function(path, apply_fcs = FALSE, verbose = TRUE, which_xml = 0) {
     current_tempdir <- tempdir_time()
     if (length(list.files(current_tempdir)) > 0) {
         stop("Tempdir is not empty, try again, my tempdir is including the time.")
