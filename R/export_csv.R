@@ -5,6 +5,7 @@ export_csv <- function(matrix_list,
                        feature_unified_dict = NA) {
     matrix_list_dt <- lapply(matrix_list, data.table::as.data.table)
     dir.create(outdir, recursive = TRUE)
+    all_outpaths <- c()
     invisible(lapply(names(matrix_list_dt), function(x) {
         # The following lines are only such that the .csv files have
         # always the same unified column names, regardless if it
@@ -27,8 +28,11 @@ export_csv <- function(matrix_list,
         if (verbose) {
             cat("\nWrote ", outpath)
         }
+        all_outpaths <<- c(all_outpaths, outpath)
+        names(all_outpaths)[length(all_outpaths)] <<- x
     }))
     if (verbose) {
         cat("\n")
     }
+    invisible(all_outpaths)
 }
