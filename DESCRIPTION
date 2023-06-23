@@ -18,6 +18,7 @@ Imports:
     stats,
     xml2
 Suggests: 
+    feather,
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
