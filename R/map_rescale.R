@@ -3,27 +3,27 @@
 #' Multiple samples can be rescaled at once using this function. It is necessary to
 #' supply a "map" of
 #'  - which MFI file belongs to which sample. One MFI can belong to multiple samples but also for a sample multiple MFIs can exist.
-#' @param sample_dt_list 
+#' @param sample_dt_list
 #'  A named list of data.tables. Each data.table contains the cytometry data for one sample.
 #' @param mfi_dt_list
 #' A named list of data.tables. Each data.table contains the MFI data for one sample.
 #' @param mapping_mfi_to_sample
-#' A data.table with two columns: "file" and "mfi_file". 
-#' The "file" column contains the sample names and the "mfi_file" column contains the 
-#' MFI (file) names used to rescale that sample. 
+#' A data.table with two columns: "fileX" and "mfi_file".
+#' The "fileX" column contains the sample names and the "mfi_file" column contains the
+#' MFI (file) names used to rescale that sample.
 #' @param verbose
 #' Whether to print progress messages.
 #' @param missing_feature
-#' If within the MFIs a feature is missing, this feature is rescaled according to the 
+#' If within the MFIs a feature is missing, this feature is rescaled according to the
 #' value of this parameter. See \code{\link{rescale}} for details.
 #' @param known_missing_features
 #'  See \code{\link{rescale}} for details.
 #' @param feature_unified_dict
 #' See \code{\link{rescale}} for details.
 #' @param ...
-#' Further arguments to \code{\link{rescale}}. 
-#' 
-#' @export 
+#' Further arguments to \code{\link{rescale}}.
+#'
+#' @export
 map_rescale <- function(sample_dt_list,
                         mfi_dt_list,
                         mapping_mfi_to_sample,
@@ -31,6 +31,7 @@ map_rescale <- function(sample_dt_list,
                         missing_feature = "center_median",
                         known_missing_features = c("FS INT", "FS TOF", "SS INT", "TIME"),
                         feature_unified_dict = feature_unified_dict_default(),
+                        sample_identifier_column = "fileX",
                         ...) {
     new_sample_names_unique_check <- c()
     rescaled <- list()
@@ -39,8 +40,7 @@ map_rescale <- function(sample_dt_list,
         if (verbose) {
             cat(paste0("Rescaling    \"", sample_x, "\"\n"))
         }
-        current_mfi_df <- mapping_mfi_to_sample %>%
-            dplyr::filter(file == sample_x)
+        current_mfi_df <- mapping_mfi_to_sample[mapping_mfi_to_sample[[sample_identifier_column]] == sample_x, ]
         if (nrow(current_mfi_df) == 0) {
             stop(paste0("No MFI file found for \"", sample_x, "\"\n"))
         }
@@ -104,7 +104,7 @@ map_rescale <- function(sample_dt_list,
 #' - device: The device used for the sample
 #' - lot_verify: The lot of the verification sample
 #'
-#' @export 
+#' @export
 create_mapping <- function(named_mfis,
                            sample_names,
                            FUN.sample_names_to_mapping_df = sample_names_to_mapping_df_packageexample,
@@ -145,7 +145,7 @@ create_mapping <- function(named_mfis,
 sample_names_to_mapping_df_default <- function(samplename) {
     split_name <- strsplit(samplename, "/")[[1]]
     mapping_sample <- tibble::tibble(
-        file = samplename,
+        fileX = samplename,
         sample = sub("[ ].*", "", split_name[, 3]),
         lot = split_name[, 2],
         device = ifelse(grepl("Navios", split_name[, 3], ignore.case = TRUE), "NAVIOS", "EX"),
@@ -153,11 +153,11 @@ sample_names_to_mapping_df_default <- function(samplename) {
     )
     return(mapping_sample)
 }
-#' @export 
+#' @export
 sample_names_to_mapping_df_packageexample <- function(samplename) {
     split_name <- strsplit(samplename, "/")[[1]]
     mapping_sample <- tibble::tibble(
-        file = samplename,
+        fileX = samplename,
         sample = sub("[ ].*", "", basename(samplename)),
         lot = split_name[length(split_name) - 1],
         device = ifelse(
