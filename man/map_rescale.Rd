@@ -12,6 +12,7 @@ map_rescale(
   missing_feature = "center_median",
   known_missing_features = c("FS INT", "FS TOF", "SS INT", "TIME"),
   feature_unified_dict = feature_unified_dict_default(),
+  sample_identifier_column = "fileX",
   ...
 )
 }
@@ -20,8 +21,8 @@ map_rescale(
 
 \item{mfi_dt_list}{A named list of data.tables. Each data.table contains the MFI data for one sample.}
 
-\item{mapping_mfi_to_sample}{A data.table with two columns: "file" and "mfi_file".
-The "file" column contains the sample names and the "mfi_file" column contains the
+\item{mapping_mfi_to_sample}{A data.table with two columns: "fileX" and "mfi_file".
+The "fileX" column contains the sample names and the "mfi_file" column contains the
 MFI (file) names used to rescale that sample.}
 
 \item{verbose}{Whether to print progress messages.}
