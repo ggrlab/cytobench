@@ -7,7 +7,6 @@
 rescale_named(
   sample_to_rescale,
   extracted_mfi_namedlist,
-  feature_unified_dict,
   missing_feature = c("minmax", "center_median"),
   inplace_datatable = FALSE,
   scale_column_fun = scale_column_relative,
