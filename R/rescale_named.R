@@ -45,7 +45,7 @@ rescale_named <- function(sample_to_rescale,
 
     for (colX in colnames(sample_to_rescale)) {
         scale_column_fun <- given_scale_column_fun
-        if (is.na(extracted_mfi_namedlist[[colX]])) {
+        if (all(is.na(extracted_mfi_namedlist[[colX]]))) {
             if (is.na(missing_feature[1])) {
                 # Then do not rescale this column
                 extracted_values <- NA
