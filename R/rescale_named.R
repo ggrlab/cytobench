@@ -31,12 +31,14 @@ rescale_named <- function(sample_to_rescale,
 
     missing_mfis <- colnames(sample_to_rescale)[!colnames(sample_to_rescale) %in% names(extracted_mfi_namedlist)]
     if (length(missing_mfis) > 0) {
-        warning(paste0(
-            "No MFI feature values for \'", missing_mfis, "\', used min and max of the data for standardization\n"
-        ))
         missing_mfis_list <- rep(list(NA), length(missing_mfis))
         names(missing_mfis_list) <- missing_mfis
         extracted_mfi_namedlist <- c(extracted_mfi_namedlist, missing_mfis_list)
+    }
+    if (!is.na(missing_feature[1])) {
+        warning(paste0(
+            "No MFI feature values for \'", missing_mfis, "\', added NA to the extracted_mfi_namedlist\n"
+        ))
     }
 
     given_scale_column_fun <- scale_column_fun
@@ -44,18 +46,18 @@ rescale_named <- function(sample_to_rescale,
     for (colX in colnames(sample_to_rescale)) {
         scale_column_fun <- given_scale_column_fun
         if (is.na(extracted_mfi_namedlist[[colX]])) {
-            if (missing_feature[1] == "minmax") {
+            if (is.na(missing_feature[1])) {
+                # Then do not rescale this column
+                extracted_values <- NA
+            } else if (missing_feature[1] == "center_median") {
+                extracted_values <- sample_to_rescale[, lapply(.SD, median), .SDcols = colX]
+                scale_column_fun <- scale_column_minmax
+            } else if (missing_feature[1] == "minmax") {
                 extracted_values <- c(
                     sample_to_rescale[, lapply(.SD, max), .SDcols = colX],
                     sample_to_rescale[, lapply(.SD, min), .SDcols = colX]
                 )
                 scale_column_fun <- scale_column_minmax
-            } else if (missing_feature[1] == "center_median") {
-                extracted_values <- sample_to_rescale[, lapply(.SD, median), .SDcols = colX]
-                scale_column_fun <- scale_column_minmax
-            } else if (is.na(missing_feature[1])) {
-                # Then do not rescale this column
-                extracted_values <- NA
             } else {
                 stop("Missing '", colX, "' rescaling")
             }
