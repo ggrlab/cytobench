@@ -62,13 +62,14 @@ rescale_named <- function(sample_to_rescale,
                 stop("Missing '", colX, "' rescaling")
             }
         } else {
-            extracted_values <- unlist(extracted_mfi_namedlist[[colX]])
+            extracted_values <- extracted_mfi_namedlist[[colX]]
         }
 
         if (all(is.na(extracted_values))) {
             # Then do not rescale this column
             next
         }
+        extracted_values <- unlist(extracted_values)
 
         scale_column_fun(
             sample_to_rescale = sample_to_rescale,

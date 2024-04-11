@@ -1,4 +1,4 @@
-#' @export 
+#' @export
 rescale <- function(sample_to_rescale,
                     extracted_mfi,
                     feature_unified_dict,
@@ -40,11 +40,11 @@ rescale <- function(sample_to_rescale,
             } else {
                 stop("Missing '", colX, "' rescaling")
             }
-            extracted_values <- unlist(extracted_values)
         } else {
-            extracted_values <- unlist(extracted_mfi[, feature_unified_dict[colX, "unified_single_staining"]])
+            extracted_values <- extracted_mfi[, feature_unified_dict[colX, "unified_single_staining"]]
         }
 
+        extracted_values <- unlist(extracted_values)
         scale_column_fun(
             sample_to_rescale = sample_to_rescale,
             scaling_values = extracted_values,
