@@ -35,7 +35,7 @@ rescale_named <- function(sample_to_rescale,
         names(missing_mfis_list) <- missing_mfis
         extracted_mfi_namedlist <- c(extracted_mfi_namedlist, missing_mfis_list)
     }
-    if (!is.na(missing_feature[1])) {
+    if (length(missing_mfis) > 0 && !is.na(missing_feature[1])) {
         warning(paste0(
             "No MFI feature values for \'", missing_mfis, "\', added NA to the extracted_mfi_namedlist\n"
         ))
