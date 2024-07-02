@@ -31,7 +31,7 @@
 #' )
 #' dev.off()
 #'
-plot_combinations <- function(ff,
+plot_markers_pairwise <- function(ff,
                               cofactor_namedvec,
                               special_cofactor_list,
                               bins = 50,
