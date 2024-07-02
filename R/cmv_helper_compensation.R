@@ -1,0 +1,53 @@
+cmv_helper_compensation <- function(ff_unapplied_compensations, compensation_type = "manual") {
+    params_spillover_autofluorescence <- read.FCS_custom_spillover(ff_unapplied_compensations, custom_spillover_keyword = compensation_type)
+    if (any(
+        sapply(params_spillover_autofluorescence, function(x) any(x > 1))
+    )) {
+        stop("Spillover matrix or autofluorescence vector contains values > 1. This would mean that these are not percentages.")
+    }
+    ff_compensated <- cytoKal::compensation_autofluorescence_kaluza(
+        ff_unapplied_compensations,
+        spillmat = params_spillover_autofluorescence[["spillover"]],
+        autofluorescence_vector = params_spillover_autofluorescence[["autofluorescence_proportional"]],
+        add_suffix = "",
+        calculate_absolute_values_from_ff = TRUE,
+        remove_spillover_keywords = TRUE
+    )
+    # I checked that the compensation is NOT applied to ff, so I can reuse it
+    # head(flowCore::exprs(ff_compensated))
+    # head(flowCore::exprs(ff))
+    return(ff_compensated)
+}
+
+
+read.FCS_custom_spillover <- function(fcs, custom_spillover_keyword = "spillover.original") {
+    if (is.character(fcs)) {
+        # Reading the stored spillover matrices:
+        fs_keywords <- flowCore::read.FCSheader(fcs)[[1]]
+    } else {
+        fs_keywords <- flowCore::keyword(fcs)
+    }
+
+    # This should be the standard applied. Kaluza uses this one
+    read_spillover <- flowCore:::string_to_spill(fs_keywords[["$SPILLOVER"]])
+    spillovermat <- matrix(
+        as.numeric(read.table(text = fs_keywords[[custom_spillover_keyword]])),
+        ncol = ncol(read_spillover),
+        dimnames = list(
+            NULL,
+            colnames(read_spillover)
+        )
+    )
+    autofluorescence_proportional <- as.numeric(
+        read.table(
+            text = fs_keywords[[sub("spillover", "spillover_autofluorescence", custom_spillover_keyword)]]
+        )
+    )
+    names(autofluorescence_proportional) <- colnames(read_spillover)
+    return(
+        list(
+            "spillover" = spillovermat,
+            "autofluorescence_proportional" = autofluorescence_proportional
+        )
+    )
+}

@@ -1,6 +1,6 @@
 Package: cytobench
 Title: Bench of tools for cytometry data
-Version: 0.4.3.006
+Version: 0.4.3.007
 Authors@R: 
     person("Gunther", "Glehr", , "gunthergl@gmx.net", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-1495-9162"))
@@ -21,7 +21,8 @@ Suggests:
     feather,
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    cytoKal
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
