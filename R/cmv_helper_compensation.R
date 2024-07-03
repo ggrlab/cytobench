@@ -49,8 +49,8 @@ read.FCS_custom_spillover <- function(fcs, custom_spillover_keyword = "spillover
     } else {
         fs_keywords <- flowCore::keyword(fcs)
     }
-    
-    if (!startsWith("spillover.")) {
+
+    if (!startsWith(custom_spillover_keyword, "spillover.")) {
         custom_spillover_keyword <- paste0("spillover.", custom_spillover_keyword)
     }
 
