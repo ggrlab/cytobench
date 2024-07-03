@@ -1,18 +1,31 @@
 #' CMV compensation helper function
 #'
-#' This function is a helper function to apply the compensation to the CMV data from Glehr et al. [TO BE SUBMITTED]. It reads the spillover matrix and autofluorescence vector from the FCS file and applies the compensation to the data. Different compensation options are stored within the FCS files and can hereby be selected and applied easily.
+#' This function is a helper function to apply the compensation to the CMV data from
+#' Glehr et al. [TO BE SUBMITTED]. It reads the spillover matrix and autofluorescence vector from
+#' the FCS file and applies the compensation to the data. Different compensation options are stored
+#' within the FCS files and can hereby be selected and applied easily.
 #' @param ff_unapplied_compensations
 #' A flowFrame object with the unapplied compensations, generated for the CMV data from Glehr et al. [TO BE SUBMITTED]
 #' @param compensation_type
-#' What compensation to use. Default is "manual". Other options are "auto" and "auto_singlestain". "auto" calculated the spillover matrix and autofluorescence vector  based on the DuraClone Compensation TUBES from Beckman Coulter. "auto_singlestain" calculates the spillover matrix and autofluorescence vector  based on the single stain controls from the CMV data.
+#' What compensation to use. Default is "manual". Other options are "auto" and "auto_singlestain".
+#' "auto" calculated the spillover matrix and autofluorescence vector  based on the DuraClone
+#' Compensation TUBES from Beckman Coulter. "auto_singlestain" calculates the spillover matrix and
+#' autofluorescence vector  based on the single stain controls from the CMV data.
 #' "manual" is the default option, which uses the manually curated spillover matrix and autofluorescence vector.
 #' @export
-cmv_helper_compensation <- function(ff_unapplied_compensations, compensation_type = c("manual", "auto", "auto_singlestain")) {
-    params_spillover_autofluorescence <- read.FCS_custom_spillover(ff_unapplied_compensations, custom_spillover_keyword = compensation_type[1])
+cmv_helper_compensation <- function(ff_unapplied_compensations,
+                                    compensation_type = c("manual", "auto", "auto_singlestain")) {
+    params_spillover_autofluorescence <- read.FCS_custom_spillover(
+        ff_unapplied_compensations,
+        custom_spillover_keyword = compensation_type[1]
+    )
     if (any(
         sapply(params_spillover_autofluorescence, function(x) any(x > 1))
     )) {
-        stop("Spillover matrix or autofluorescence vector contains values > 1. This would mean that these are not percentages.")
+        stop(
+            "Spillover matrix or autofluorescence vector contains values > 1.",
+            "This would mean that these are not percentages."
+        )
     }
     ff_compensated <- cytoKal::compensation_autofluorescence_kaluza(
         ff_unapplied_compensations,
@@ -29,7 +42,7 @@ cmv_helper_compensation <- function(ff_unapplied_compensations, compensation_typ
 }
 
 
-read.FCS_custom_spillover <- function(fcs, custom_spillover_keyword = "spillover.original") {
+read.FCS_custom_spillover <- function(fcs, custom_spillover_keyword = "spillover.manual") {
     if (is.character(fcs)) {
         # Reading the stored spillover matrices:
         fs_keywords <- flowCore::read.FCSheader(fcs)[[1]]
@@ -37,14 +50,15 @@ read.FCS_custom_spillover <- function(fcs, custom_spillover_keyword = "spillover
         fs_keywords <- flowCore::keyword(fcs)
     }
 
-    # This should be the standard applied. Kaluza uses this one
-    read_spillover <- flowCore:::string_to_spill(fs_keywords[["$SPILLOVER"]])
+    # Kaluza uses the following function to read the spillover matrix:
+    # read_spillover <- flowCore:::string_to_spill(fs_keywords[["$SPILLOVER"]])
+    current_spillover <- fs_keywords[["$SPILLOVER"]]
     spillovermat <- matrix(
         as.numeric(read.table(text = fs_keywords[[custom_spillover_keyword]])),
-        ncol = ncol(read_spillover),
+        ncol = ncol(current_spillover),
         dimnames = list(
             NULL,
-            colnames(read_spillover)
+            colnames(current_spillover)
         )
     )
     autofluorescence_proportional <- as.numeric(
@@ -52,7 +66,7 @@ read.FCS_custom_spillover <- function(fcs, custom_spillover_keyword = "spillover
             text = fs_keywords[[sub("spillover", "spillover_autofluorescence", custom_spillover_keyword)]]
         )
     )
-    names(autofluorescence_proportional) <- colnames(read_spillover)
+    names(autofluorescence_proportional) <- colnames(current_spillover)
     return(
         list(
             "spillover" = spillovermat,

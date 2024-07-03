@@ -12,9 +12,15 @@ cmv_helper_compensation(
 \arguments{
 \item{ff_unapplied_compensations}{A flowFrame object with the unapplied compensations, generated for the CMV data from Glehr et al. \link{TO BE SUBMITTED}}
 
-\item{compensation_type}{What compensation to use. Default is "manual". Other options are "auto" and "auto_singlestain". "auto" calculated the spillover matrix and autofluorescence vector  based on the DuraClone Compensation TUBES from Beckman Coulter. "auto_singlestain" calculates the spillover matrix and autofluorescence vector  based on the single stain controls from the CMV data.
+\item{compensation_type}{What compensation to use. Default is "manual". Other options are "auto" and "auto_singlestain".
+"auto" calculated the spillover matrix and autofluorescence vector  based on the DuraClone
+Compensation TUBES from Beckman Coulter. "auto_singlestain" calculates the spillover matrix and
+autofluorescence vector  based on the single stain controls from the CMV data.
 "manual" is the default option, which uses the manually curated spillover matrix and autofluorescence vector.}
 }
 \description{
-This function is a helper function to apply the compensation to the CMV data from Glehr et al. \link{TO BE SUBMITTED}. It reads the spillover matrix and autofluorescence vector from the FCS file and applies the compensation to the data. Different compensation options are stored within the FCS files and can hereby be selected and applied easily.
+This function is a helper function to apply the compensation to the CMV data from
+Glehr et al. \link{TO BE SUBMITTED}. It reads the spillover matrix and autofluorescence vector from
+the FCS file and applies the compensation to the data. Different compensation options are stored
+within the FCS files and can hereby be selected and applied easily.
 }
