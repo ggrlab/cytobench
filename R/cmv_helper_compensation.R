@@ -49,6 +49,10 @@ read.FCS_custom_spillover <- function(fcs, custom_spillover_keyword = "spillover
     } else {
         fs_keywords <- flowCore::keyword(fcs)
     }
+    
+    if (!startsWith("spillover.")) {
+        custom_spillover_keyword <- paste0("spillover.", custom_spillover_keyword)
+    }
 
     # Kaluza uses the following function to read the spillover matrix:
     # read_spillover <- flowCore:::string_to_spill(fs_keywords[["$SPILLOVER"]])
