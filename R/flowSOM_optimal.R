@@ -27,6 +27,7 @@
 #' @param maxMeta
 #' The maximal number of metaclusters. If NULL, the number of clusters is FIXED by nClus.
 #' @param ... Further parameters to FlowSOM
+#' @export
 flowSOM_optimal <- function(fs_train,
                             colsToUse,
                             transform = TRUE,

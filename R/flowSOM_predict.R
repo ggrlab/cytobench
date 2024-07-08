@@ -5,6 +5,7 @@
 #' @param flowset The flowset whose cells should be assigned to the clusters from flowsom_result
 #' @param colsToUse 
 #' The columns to use for clustering.
+#' @export
 flowSOM_predict <- function(flowsom_result, flowset, colsToUse) {
     if("fs_res_train" %in% names(flowsom_result)){
         flowsom_result <- flowsom_result[["fs_res_train"]]
