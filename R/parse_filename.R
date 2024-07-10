@@ -5,6 +5,7 @@
 #' Filenames, usually a vector of multiple strings
 #' @param cn
 #' The colnames the filename(s) should be split into
+#' @export
 parse_filename <- function(fn,
                            cn = c(
                                "study",
