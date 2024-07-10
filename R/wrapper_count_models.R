@@ -155,7 +155,7 @@ wrapper_count_models <- function(df_list,
             sapply(
                 df_list, function(counts_x) {
                     if (!is.na(ivs_regex)) {
-                        ivs <- colnames(df_list[[1]])[grepl(ivs_regex, ivs)]
+                        ivs <- grep(ivs_regex, colnames(counts_x), value = TRUE)
                     }
                     counts_x <- counts_x[, c(tvt_col, x, ivs)]
                     counts_x <- na.omit(counts_x)
