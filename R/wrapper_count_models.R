@@ -56,7 +56,7 @@
 #' A list of classification learners. Default is a ranger learner with 2-20 depth and 500, 1000, 1500, 2000 trees.
 #' @param learners_regression
 #' A list of regression learners. Default is a ranger learner with 2-20 depth and 500, 1000, 1500, 2000 trees.
-#' @export 
+#' @export
 wrapper_count_models <- function(df_list,
                                  tvt_col = "tvt",
                                  outdir = "res_count_models",
