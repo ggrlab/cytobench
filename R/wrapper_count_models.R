@@ -45,7 +45,7 @@
 #' If ivs_regex is given, this is ignored.
 #' @param ivs_regex
 #' A regular expression to select the independent variables based on the first dataframe.
-#' If given, ivs is ignored. Default is "[cC]luster".
+#' If given, ivs is ignored. Default is "[cC]luster".#
 #' @param dvs_multiclass
 #' The dependent variables that are multi-class. Default is c("ABO", "A_AB", "B_AB", "abo_removedAB").
 #' @param seed

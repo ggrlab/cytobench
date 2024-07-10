@@ -40,7 +40,7 @@ model is trained. Default is the first column name of the first dataframe.}
 If ivs_regex is given, this is ignored.}
 
 \item{ivs_regex}{A regular expression to select the independent variables based on the first dataframe.
-If given, ivs is ignored. Default is "\link{cC}luster".}
+If given, ivs is ignored. Default is "\link{cC}luster".#}
 
 \item{dvs_multiclass}{The dependent variables that are multi-class. Default is c("ABO", "A_AB", "B_AB", "abo_removedAB").}
 
