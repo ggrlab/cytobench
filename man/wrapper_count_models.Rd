@@ -8,8 +8,8 @@ wrapper_count_models(
   df_list,
   tvt_col = "tvt",
   outdir = "res_count_models",
-  dvs_potential = colnames(df_list[[1]])[[1]],
-  ivs = colnames(df_list[[1]])[[-1]],
+  dvs_potential = colnames(df_list[[1]])[1],
+  ivs = colnames(df_list[[1]])[-1],
   ivs_regex = "[cC]luster",
   dvs_multiclass = c("ABO", "A_AB", "B_AB", "abo_removedAB"),
   seed = 2372876,
@@ -39,8 +39,8 @@ model is trained. Default is the first column name of the first dataframe.}
 \item{ivs}{The independent variables in the dataframes. Default is all columns except the first one.
 If ivs_regex is given, this is ignored.}
 
-\item{ivs_regex}{A regular expression to select the independent variables based on the first dataframe.
-If given, ivs is ignored. Default is "\link{cC}luster".#}
+\item{ivs_regex}{A regular expression to select the independent variables WITHIN EACH dataframe. This is in contrast to ivs, which must be the same for all dataframes.
+If given, ivs is ignored. Default is "\link{cC}luster".}
 
 \item{dvs_multiclass}{The dependent variables that are multi-class. Default is c("ABO", "A_AB", "B_AB", "abo_removedAB").}
 

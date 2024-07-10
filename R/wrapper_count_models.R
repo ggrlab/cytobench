@@ -44,8 +44,8 @@
 #' The independent variables in the dataframes. Default is all columns except the first one.
 #' If ivs_regex is given, this is ignored.
 #' @param ivs_regex
-#' A regular expression to select the independent variables based on the first dataframe.
-#' If given, ivs is ignored. Default is "[cC]luster".#
+#' A regular expression to select the independent variables WITHIN EACH dataframe. This is in contrast to ivs, which must be the same for all dataframes.
+#' If given, ivs is ignored. Default is "[cC]luster".
 #' @param dvs_multiclass
 #' The dependent variables that are multi-class. Default is c("ABO", "A_AB", "B_AB", "abo_removedAB").
 #' @param seed
@@ -150,13 +150,13 @@ wrapper_count_models <- function(df_list,
     #   Outcome  abo_ab  does not have at least 2 samples in each tvt group, skipping
     # For each outcome and every feature set (cluster and metaCluster), create a task
 
-    if (!is.na(ivs_regex)) {
-        ivs <- colnames(df_list[[1]])[grepl(ivs_regex, ivs)]
-    }
     tasklist <- sapply(
         names(outcome_types), function(x) {
             sapply(
                 df_list, function(counts_x) {
+                    if (!is.na(ivs_regex)) {
+                        ivs <- colnames(df_list[[1]])[grepl(ivs_regex, ivs)]
+                    }
                     counts_x <- counts_x[, c(tvt_col, x, ivs)]
                     counts_x <- na.omit(counts_x)
                     if (outcome_types[[x]] != "continuous") {
