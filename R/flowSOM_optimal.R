@@ -84,7 +84,7 @@ flowSOM_optimal <- function(fs_train,
         dev.off()
     }
 
-    predicted_fs <- predict_flowSOM(
+    predicted_fs <- flowSOM_predict(
         flowsom_result = fs_res_train,
         flowset = fs_train,
         colsToUse = colsToUse
