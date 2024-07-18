@@ -208,11 +208,11 @@ wrapper_count_models <- function(df_list,
                 train = list(which(tvt_x == "train")),
                 test = list(which(tvt_x == "validation"))
             )
-            if (
-                length(resampling_train_validation$test_set(1)) > 50 ||
-                    length(resampling_train_validation$train_set(1)) > 50) {
-                stop("I expected a maximum of 50 samples in the training and validation set")
-            }
+            # if (
+            #     length(resampling_train_validation$test_set(1)) > 50 ||
+            #         length(resampling_train_validation$train_set(1)) > 50) {
+            #     stop("I expected a maximum of 50 samples in the training and validation set")
+            # }
             lapply(current_learners, function(lrn_x) {
                 tuning_instance <- mlr3tuning::ti(
                     task = task_x,
@@ -318,7 +318,8 @@ wrapper_count_models <- function(df_list,
     return(
         list(
             final_models = final_models,
-            predictions = predictions
+            predictions = predictions,
+            tvt_table =table(df_list[[tvt_col]])
         )
     )
 }
