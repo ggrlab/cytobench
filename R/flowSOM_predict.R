@@ -1,14 +1,17 @@
 #' @title Predict new cells using a flowsom result
-#' @description 
+#' @description
 #' Predict the (meta-) clusters for all cells using a flowsom result.
 #' @param flowsom_result Result of flowSOM_optimal() or flowSOM()
 #' @param flowset The flowset whose cells should be assigned to the clusters from flowsom_result
-#' @param colsToUse 
+#' @param colsToUse
 #' The columns to use for clustering.
 #' @export
 flowSOM_predict <- function(flowsom_result, flowset, colsToUse) {
-    if("fs_res_train" %in% names(flowsom_result)){
+    if ("fs_res_train" %in% names(flowsom_result)) {
         flowsom_result <- flowsom_result[["fs_res_train"]]
+    }
+    if (missing(colsToUse)) {
+        warning("colsToUse is missing. Using all columns.")
     }
     ### 3. Predict the (meta-) clusters for all cells (training AND test set)
     # 3.1 Bind all cells from all samples
@@ -20,7 +23,7 @@ flowSOM_predict <- function(flowsom_result, flowset, colsToUse) {
     # 3.2 Predict the clusters for all cells
     predicted_fs_train_allcells <- FlowSOM::NewData(
         flowsom_result,
-        input = as.matrix(fcs_first_dt_long[, cn_relevant, with = FALSE]),
+        input = as.matrix(fcs_first_dt_long[, colsToUse, with = FALSE]),
         # If transform and scale are NULL, the same as in the flowSOM function will be used
     )
 
