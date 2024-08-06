@@ -73,7 +73,8 @@ cmv_helper_insert_compensations <- function(fcs_filename,
     # NOTE: Kaluza CANNOT load the autofluorescence from the fcs file.
     # So the compensation will be slightly different to OUR Kaluza compensation
     # with this.
-    flowCore::keyword(ff)[["$SPILLOVER"]] <- loaded_comps$manual$spillover
+    # The ordering of the spillover matrix must be exactly the same as the ordering of the markers in the expression matrix, otherwise KALUZA(!!) will apply the wrong compensation values.
+    flowCore::keyword(ff)[["$SPILLOVER"]] <- loaded_comps$manual$spillover[, names(flowCore::markernames(ff))]
 
     if (!is.na(outdir)) {
         if (!all(is.na(sub_filename))) {
