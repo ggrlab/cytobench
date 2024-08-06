@@ -60,7 +60,7 @@ read.FCS_custom_spillover <- function(fcs, custom_spillover_keyword = "spillover
     if (is.character(fcs)) {
         # Reading the stored spillover matrices:
         fs_keywords <- flowCore::read.FCSheader(fcs)[[1]]
-        # By reading only the header, the spillover matrix is not transformed into a 
+        # By reading only the header, the spillover matrix is not transformed into a
         # matrix. So we have to do it manually.
         fs_keywords["$SPILLOVER"] <- list(
             flowCore:::string_to_spill(fs_keywords[["$SPILLOVER"]])
@@ -84,12 +84,17 @@ read.FCS_custom_spillover <- function(fcs, custom_spillover_keyword = "spillover
             colnames(current_spillover)
         )
     )
-    autofluorescence_proportional <- as.numeric(
-        read.table(
-            text = fs_keywords[[sub("spillover", "spillover_autofluorescence", custom_spillover_keyword)]]
+    if (custom_spillover_keyword == "spillover.original") {
+        autofluorescence_proportional <- spillovermat[1, ]
+        autofluorescence_proportional[TRUE] <- 0
+    } else {
+        autofluorescence_proportional <- as.numeric(
+            read.table(
+                text = fs_keywords[[sub("spillover", "spillover_autofluorescence", custom_spillover_keyword)]]
+            )
         )
-    )
-    names(autofluorescence_proportional) <- colnames(current_spillover)
+        names(autofluorescence_proportional) <- colnames(current_spillover)
+    }
     return(
         list(
             "spillover" = spillovermat,
