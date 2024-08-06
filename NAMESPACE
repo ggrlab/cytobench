@@ -2,6 +2,7 @@
 
 export("%>%")
 export(cmv_helper_compensation)
+export(cmv_helper_insert_compensations)
 export(create_mapping)
 export(export_csv)
 export(export_fcs)
