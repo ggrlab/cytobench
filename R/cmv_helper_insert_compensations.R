@@ -81,7 +81,7 @@ cmv_helper_insert_compensations <- function(fcs_filename,
         )
         flowCore::write.FCS(ff, outfile)
         if (verbose) {
-            cat("FCS file containing manual, DCtubes_auto, singlestain_auto and singlestain_manual compensations saved to ", outfile, "\n")
+            cat("FCS file containing ", paste0(names(named_compensation_files), collapse = ", "), " compensations saved to ", outfile, "\n")
         }
         # Test that reading the spillover+autofluorescence matrices works
         # This is how you would extract the compensations from the FCS file
