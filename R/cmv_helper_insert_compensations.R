@@ -8,6 +8,8 @@
 #' A named list of files containing the compensation files. The names are the compensation types.
 #' @param outdir
 #' The directory to save the fcs files with the inserted compensations. If NA, the function returns the flowFrame object with the inserted compensations.
+#' @param sub_filename
+#' A vector of two strings to substitute in the fcs_filename. The first string is substituted by the second string. The final files are saved in \code{file.path(outdir, sub(sub_filename[1], sub_filename[2], fcs_filename))}
 #' @param verbose
 #' Whether to print out the path of the saved fcs file
 #' @export
@@ -24,6 +26,7 @@ cmv_helper_insert_compensations <- function(fcs_filename,
                                                 # The manual compensation used "singlestain_auto" compensation as basis
                                                 "singlestain_manual" = NA
                                             ), outdir = file.path("res", "CT_UnappliedCompensations"),
+                                            sub_filename = c("intermediate/CT", ""),
                                             verbose = TRUE) {
     ff <- flowCore::read.FCS(fcs_filename)
     original_spillover <- flowCore::keyword(ff)[["$SPILLOVER"]]
@@ -73,6 +76,9 @@ cmv_helper_insert_compensations <- function(fcs_filename,
     flowCore::keyword(ff)[["$SPILLOVER"]] <- loaded_comps$manual$spillover
 
     if (!is.na(outdir)) {
+        if (!all(is.na(sub_filename))) {
+            fcs_filename <- sub(sub_filename[1], sub_filename[2], fcs_filename)
+        }
         outfile <- file.path(outdir, fcs_filename)
         dir.create(
             dirname(outfile),
