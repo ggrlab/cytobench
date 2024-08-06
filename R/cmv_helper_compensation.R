@@ -60,6 +60,11 @@ read.FCS_custom_spillover <- function(fcs, custom_spillover_keyword = "spillover
     if (is.character(fcs)) {
         # Reading the stored spillover matrices:
         fs_keywords <- flowCore::read.FCSheader(fcs)[[1]]
+        # By reading only the header, the spillover matrix is not transformed into a 
+        # matrix. So we have to do it manually.
+        fs_keywords["$SPILLOVER"] <- list(
+            flowCore:::string_to_spill(fs_keywords[["$SPILLOVER"]])
+        )
     } else {
         fs_keywords <- flowCore::keyword(fcs)
     }
