@@ -60,13 +60,13 @@ cmv_helper_insert_compensations <- function(fcs_filename,
             )
         )
     })
-
     # 1. Save the original spillover matrix - probably coming from the machine itself
-    flowCore::keyword(ff)[["spillover.original"]] <- original_spillover
+    flowCore::keyword(ff)[["spillover.original"]] <- flowCore:::spill2txt(original_spillover)
+
 
     # 2. Save all the calculated spillover matrices and autofluorescence vectors
     for (compensation_keyword in names(loaded_comps)) {
-        flowCore::keyword(ff)[[paste0("spillover.", compensation_keyword)]] <- loaded_comps[[compensation_keyword]]$spillover
+        flowCore::keyword(ff)[[paste0("spillover.", compensation_keyword)]] <- flowCore:::spill2txt(loaded_comps[[compensation_keyword]]$spillover)
         flowCore::keyword(ff)[[paste0("spillover_autofluorescence.", compensation_keyword)]] <- loaded_comps[[compensation_keyword]]$autofluorescence_proportion
     }
 
@@ -74,7 +74,8 @@ cmv_helper_insert_compensations <- function(fcs_filename,
     # So the compensation will be slightly different to OUR Kaluza compensation
     # with this.
     # The ordering of the spillover matrix must be exactly the same as the ordering of the markers in the expression matrix, otherwise KALUZA(!!) will apply the wrong compensation values.
-    flowCore::keyword(ff)[["$SPILLOVER"]] <- loaded_comps$manual$spillover[, names(flowCore::markernames(ff))]
+    rownames(loaded_comps$manual$spillover) <- colnames(loaded_comps$manual$spillover)
+    flowCore::keyword(ff)[["$SPILLOVER"]] <- loaded_comps$manual$spillover[names(flowCore::markernames(ff)), names(flowCore::markernames(ff))]
 
     if (!is.na(outdir)) {
         if (!all(is.na(sub_filename))) {

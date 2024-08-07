@@ -75,30 +75,29 @@ read.FCS_custom_spillover <- function(fcs, custom_spillover_keyword = "spillover
 
     # Kaluza uses the following function to read the spillover matrix:
     # read_spillover <- flowCore:::string_to_spill(fs_keywords[["$SPILLOVER"]])
-    current_spillover <- fs_keywords[["$SPILLOVER"]]
-    spillovermat <- matrix(
-        as.numeric(read.table(text = fs_keywords[[custom_spillover_keyword]])),
-        ncol = ncol(current_spillover),
-        dimnames = list(
-            NULL,
-            colnames(current_spillover)
-        )
-    )
+
+    spillovermat <- flowCore:::string_to_spill(fs_keywords[[custom_spillover_keyword]])
     if (custom_spillover_keyword == "spillover.original") {
         autofluorescence_proportional <- spillovermat[1, ]
         autofluorescence_proportional[TRUE] <- 0
     } else {
         autofluorescence_proportional <- as.numeric(
-            read.table(
-                text = fs_keywords[[sub("spillover", "spillover_autofluorescence", custom_spillover_keyword)]]
-            )
+            read.table(text = fs_keywords[[sub(
+                "spillover",
+                "spillover_autofluorescence", custom_spillover_keyword
+            )]])
         )
-        names(autofluorescence_proportional) <- colnames(current_spillover)
+        names(autofluorescence_proportional) <- colnames(spillovermat)
     }
+    current_spillover <- fs_keywords[["$SPILLOVER"]]
+    # Order the spillover matrix according to the current spillover matrix
+    spillover_reordered <- spillovermat
+    rownames(spillover_reordered) <- colnames(spillover_reordered)
+    spillover_reordered <- spillover_reordered[colnames(current_spillover), colnames(current_spillover)]
     return(
         list(
-            "spillover" = spillovermat,
-            "autofluorescence_proportional" = autofluorescence_proportional
+            spillover = spillover_reordered,
+            autofluorescence_proportional = autofluorescence_proportional[colnames(current_spillover)]
         )
     )
 }
