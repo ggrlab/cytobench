@@ -45,13 +45,20 @@ cmv_helper_insert_compensations <- function(fcs_filename,
         file_autofluorescence <- compfiles[grepl("autofluorescence", compfiles)]
 
         spillover_mat <- as.matrix(data.table::fread(file_spillover))
-        # rownames(spillover_mat) <- colnames(spillover_mat)
         colnames(spillover_mat) <- paste0(colnames(spillover_mat), "-A")
-        spillover_mat <- spillover_mat[, colnames(original_spillover)]
+        rownames(spillover_mat) <- colnames(spillover_mat)
 
-        autofluorescence_vec <- as.numeric(data.table::fread(file_autofluorescence))
-        names(autofluorescence_vec) <- colnames(spillover_mat)
-        autofluorescence_vec[colnames(original_spillover)]
+        spillover_mat <- spillover_mat[colnames(original_spillover), colnames(original_spillover)]
+
+        # Fread to have the column names
+        autofluorescence_vec <- data.table::fread(file_autofluorescence)
+        # Take first row with dropping (would be implicit)
+        # to create a (named) vector)
+        autofluorescence_vec <- as.matrix(autofluorescence_vec)[1, , drop = TRUE]
+        names(autofluorescence_vec) <- paste0(names(autofluorescence_vec), "-A")
+        # Then sort the autofluorescence vector to match the spillover matrix
+        # which was sorted according to the original spillover matrix.
+        autofluorescence_vec <- autofluorescence_vec[colnames(spillover_mat)]
 
         return(
             list(
@@ -74,7 +81,6 @@ cmv_helper_insert_compensations <- function(fcs_filename,
     # So the compensation will be slightly different to OUR Kaluza compensation
     # with this.
     # The ordering of the spillover matrix must be exactly the same as the ordering of the markers in the expression matrix, otherwise KALUZA(!!) will apply the wrong compensation values.
-    rownames(loaded_comps$manual$spillover) <- colnames(loaded_comps$manual$spillover)
     flowCore::keyword(ff)[["$SPILLOVER"]] <- loaded_comps$manual$spillover[names(flowCore::markernames(ff)), names(flowCore::markernames(ff))]
 
     if (!is.na(outdir)) {
