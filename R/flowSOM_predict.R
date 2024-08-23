@@ -5,8 +5,10 @@
 #' @param flowset The flowset whose cells should be assigned to the clusters from flowsom_result
 #' @param colsToUse
 #' The columns to use for clustering.
+#' @param madAllowed
+#' See FlowSOM::TestOutliers() or flowSOM_is.outlier()
 #' @export
-flowSOM_predict <- function(flowsom_result, flowset, colsToUse) {
+flowSOM_predict <- function(flowsom_result, flowset, colsToUse, madAllowed = 4) {
     if ("fs_res_train" %in% names(flowsom_result)) {
         flowsom_result <- flowsom_result[["fs_res_train"]]
     }
@@ -49,11 +51,19 @@ flowSOM_predict <- function(flowsom_result, flowset, colsToUse) {
         # The following mainly resorts the cluster_I columns
         tmp_wide[, c(id_cols, levels(tmp[[x]]))]
     }, USE.NAMES = TRUE, simplify = FALSE)
+
+    ### 5. Get the outliers
+    is_cell_outlier <- flowSOM_is.outlier(
+        fsom = predicted_fs_train_allcells,
+        fsomReference = flowsom_result,
+        madAllowed = madAllowed
+    )
     return(
         list(
             cells_clusters_from_train = cells_clusters_from_train,
             ncells_per_x = ncells_per_x,
-            flowsom_newdata = predicted_fs_train_allcells
+            flowsom_newdata = predicted_fs_train_allcells,
+            cell_outlier = is_cell_outlier
         )
     )
 }
