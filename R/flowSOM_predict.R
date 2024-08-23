@@ -3,18 +3,14 @@
 #' Predict the (meta-) clusters for all cells using a flowsom result.
 #' @param flowsom_result Result of flowSOM_optimal() or flowSOM()
 #' @param flowset The flowset whose cells should be assigned to the clusters from flowsom_result
-#' @param colsToUse
-#' The columns to use for clustering.
 #' @param madAllowed
 #' See FlowSOM::TestOutliers() or flowSOM_is.outlier()
 #' @export
-flowSOM_predict <- function(flowsom_result, flowset, colsToUse, madAllowed = 4) {
+flowSOM_predict <- function(flowsom_result, flowset, madAllowed = 4) {
     if ("fs_res_train" %in% names(flowsom_result)) {
         flowsom_result <- flowsom_result[["fs_res_train"]]
     }
-    if (missing(colsToUse)) {
-        warning("colsToUse is missing. Using all columns.")
-    }
+    colsToUse <- flowsom_result$map$colsUsed
     ### 3. Predict the (meta-) clusters for all cells (training AND test set)
     # 3.1 Bind all cells from all samples
     fcs_first_dt_long <- flowCore::fsApply(flowset, function(y) {
@@ -58,12 +54,20 @@ flowSOM_predict <- function(flowsom_result, flowset, colsToUse, madAllowed = 4) 
         fsomReference = flowsom_result,
         madAllowed = madAllowed
     )
-    return(
-        list(
-            cells_clusters_from_train = cells_clusters_from_train,
-            ncells_per_x = ncells_per_x,
-            flowsom_newdata = predicted_fs_train_allcells,
-            cell_outlier = is_cell_outlier
-        )
+    res <- list(
+        cells_clusters_from_train = cells_clusters_from_train,
+        ncells_per_x = ncells_per_x,
+        flowsom_newdata = predicted_fs_train_allcells,
+        cell_outlier = is_cell_outlier
     )
+    class(res) <- "flowSOMpredict"
+    return(res)
+}
+
+#' @export
+print.flowSOMpredict <- function(x, ...) {
+    print(x[-which(names(x) == "cell_outlier")], ...)
+    cat("$cell_outlier: \n")
+    str(x[["cell_outlier"]])
+    invisible(x)
 }
