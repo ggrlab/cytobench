@@ -4,7 +4,7 @@
 \alias{flowSOM_predict}
 \title{Predict new cells using a flowsom result}
 \usage{
-flowSOM_predict(flowsom_result, flowset, colsToUse)
+flowSOM_predict(flowsom_result, flowset, colsToUse, madAllowed = 4)
 }
 \arguments{
 \item{flowsom_result}{Result of flowSOM_optimal() or flowSOM()}
@@ -12,6 +12,8 @@ flowSOM_predict(flowsom_result, flowset, colsToUse)
 \item{flowset}{The flowset whose cells should be assigned to the clusters from flowsom_result}
 
 \item{colsToUse}{The columns to use for clustering.}
+
+\item{madAllowed}{See FlowSOM::TestOutliers() or flowSOM_is.outlier()}
 }
 \description{
 Predict the (meta-) clusters for all cells using a flowsom result.
