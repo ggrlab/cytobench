@@ -52,7 +52,8 @@ flowSOM_predict <- function(flowsom_result, flowset, colsToUse) {
     return(
         list(
             cells_clusters_from_train = cells_clusters_from_train,
-            ncells_per_x = ncells_per_x
+            ncells_per_x = ncells_per_x,
+            flowsom_newdata = predicted_fs_train_allcells
         )
     )
 }
