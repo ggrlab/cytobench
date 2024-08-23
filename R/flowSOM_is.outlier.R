@@ -13,7 +13,7 @@
 #'                       the original fsom object is used.
 #' @param channels If channels are given, return the result of FlowSOM::TestOutliers()
 #' @export
-flowSOM_outliers <- function(fsom,
+flowSOM_is.outlier <- function(fsom,
                              madAllowed = 4,
                              fsomReference = NULL,
                              channels = NULL) {
@@ -29,36 +29,44 @@ flowSOM_outliers <- function(fsom,
         )
     }
 
-    # The following is a copy of the FlowSOM::TestOutliers() function
-
+    # The following is a copy of the FlowSOM::TestOutliers() function, 
+    # the comments were mostly added by me.
     fsom <- FlowSOM::UpdateFlowSOM(fsom)
+    # If no reference FlowSOM object is provided, use the original fsom object
     if (is.null(fsomReference)) {
         fsomReference <- fsom
-    } else {
-        fsomReference <- FlowSOM::UpdateFlowSOM(fsomReference)
     }
 
+    # Get cluster assignments for the reference FlowSOM object as factor
     referenceClusters <- factor(FlowSOM::GetClusters(fsomReference),
         levels = seq_len(fsomReference$map$nNodes)
     )
+
+    # Get cluster assignments for the current FlowSOM object as factor
     clusters <- factor(FlowSOM::GetClusters(fsom),
         levels = seq_len(fsom$map$nNodes)
     )
 
-    # Distance in high-dimensional space
+    # Distance in high-dimensional space [is written in fsomReference$map$mapping[, 2]]
+    # Calculate the median values within each reference cluster
     medians <- tapply(
         fsomReference$map$mapping[, 2],
         referenceClusters,
         stats::median
     )
 
+    # Calculate the median absolute deviations (MAD) within each reference cluster
     mads <- tapply(
         fsomReference$map$mapping[, 2],
         referenceClusters,
         stats::mad
     )
 
+    # Determine the threshold within outliers based on the allowed deviation in terms of MAD
     thresholds <- medians + madAllowed * mads
-    browser()
+
+    # Identify outliers by comparing the mapping values to the calculated thresholds
+    # of the cell's assigned cluster
     outliers <- (fsom$map$mapping[, 2] > thresholds[clusters])
+    return(unname(outliers))
 }
