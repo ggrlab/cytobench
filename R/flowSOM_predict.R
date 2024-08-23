@@ -54,20 +54,11 @@ flowSOM_predict <- function(flowsom_result, flowset, madAllowed = 4) {
         fsomReference = flowsom_result,
         madAllowed = madAllowed
     )
+    cells_clusters_from_train[["is_som_outlier"]] <- is_cell_outlier
     res <- list(
         cells_clusters_from_train = cells_clusters_from_train,
         ncells_per_x = ncells_per_x,
-        flowsom_newdata = predicted_fs_train_allcells,
-        cell_outlier = is_cell_outlier
+        flowsom_newdata = predicted_fs_train_allcells
     )
-    class(res) <- "flowSOMpredict"
     return(res)
-}
-
-#' @export
-print.flowSOMpredict <- function(x, ...) {
-    print(x[-which(names(x) == "cell_outlier")], ...)
-    cat("$cell_outlier: \n")
-    str(x[["cell_outlier"]])
-    invisible(x)
 }
