@@ -29,11 +29,14 @@ flowSOM_predict <- function(flowsom_result, flowset, madAllowed = 4) {
     cells_clusters_from_train[, metaCluster := FlowSOM::GetMetaclusters(predicted_fs_train_allcells)]
     cells_clusters_from_train[, cluster := FlowSOM::GetClusters(predicted_fs_train_allcells)]
 
+    all_cluster_x_ids <- list(
+        "cluster" = as.character(1:predicted_fs_train_allcells$map$nNodes),
+        "metaCluster" = levels(predicted_fs_train_allcells$metaclustering)
+    )
     # # 3.3 Save the predicted clusters
     # if (!is.null(outdir)) {
     #     qs::qsave(cells_clusters_from_train, file.path(outdir, "r2-FlowSOM_predicted_withTrain.qs"))
     # }
-
 
     ### 4. Extract the number of cells per cluster
     # id_cols <- c("tvt", "sample")
@@ -41,9 +44,20 @@ flowSOM_predict <- function(flowsom_result, flowset, madAllowed = 4) {
     ncells_per_x <- sapply(c("cluster", "metaCluster"), function(x) {
         grouping_columns <- c(id_cols, x)
         tmp <- cells_clusters_from_train[, .N, by = grouping_columns]
-        tmp[[x]] <- factor(tmp[[x]], levels = sort(unique(tmp[[x]])))
+        tmp[[x]] <- factor(tmp[[x]], levels = sort(as.numeric(all_cluster_x_ids[[x]])))
         levels(tmp[[x]]) <- paste0(x, "_", levels(tmp[[x]]))
-        tmp_wide <- tmp |> tidyr::pivot_wider(names_from = tidyr::all_of(x), values_from = "N", values_fill = 0)
+        tmp_wide <- rbind(
+            tmp,
+            # Add a REMOVEME sample just to make sure that all clusters are present in the output
+            data.frame("sample" = "REMOVEME", "cluster" = levels(tmp[[x]]), N = 0)
+        ) |>
+            tidyr::pivot_wider(
+                names_from = tidyr::all_of(x),
+                values_from = "N",
+                values_fill = 0
+            ) |>
+            # After the pivot_wider, the REMOVEME sample is not needed anymore
+            dplyr::filter(sample != "REMOVEME")
         # The following mainly resorts the cluster_I columns
         tmp_wide[, c(id_cols, levels(tmp[[x]]))]
     }, USE.NAMES = TRUE, simplify = FALSE)
