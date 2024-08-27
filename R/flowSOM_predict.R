@@ -29,7 +29,6 @@ flowSOM_predict <- function(flowsom_result, flowset, madAllowed = 4) {
     cells_clusters_from_train[, metaCluster := FlowSOM::GetMetaclusters(predicted_fs_train_allcells)]
     cells_clusters_from_train[, cluster := FlowSOM::GetClusters(predicted_fs_train_allcells)]
 
-    browser()
     all_cluster_x_ids <- list(
         "cluster" = as.character(1:predicted_fs_train_allcells$map$nNodes),
         "metaCluster" = levels(predicted_fs_train_allcells$metaclustering)
