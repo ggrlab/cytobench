@@ -62,7 +62,7 @@ flowSOM_predict <- function(flowsom_result, flowset, madAllowed = 4) {
                 values_fill = 0
             ) |>
             # After the pivot_wider, the REMOVEME sample is not needed anymore
-            dplyr::filter(sample != "REMOVEME")
+            dplyr::filter(sample != "_____REMOVEME_____")
         # The following mainly resorts the cluster_I columns
         tmp_wide[, c(id_cols, levels(tmp[[x]]))]
     }, USE.NAMES = TRUE, simplify = FALSE)
