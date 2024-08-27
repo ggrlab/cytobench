@@ -29,6 +29,7 @@ flowSOM_predict <- function(flowsom_result, flowset, madAllowed = 4) {
     cells_clusters_from_train[, metaCluster := FlowSOM::GetMetaclusters(predicted_fs_train_allcells)]
     cells_clusters_from_train[, cluster := FlowSOM::GetClusters(predicted_fs_train_allcells)]
 
+    browser()
     all_cluster_x_ids <- list(
         "cluster" = as.character(1:predicted_fs_train_allcells$map$nNodes),
         "metaCluster" = levels(predicted_fs_train_allcells$metaclustering)
@@ -37,7 +38,6 @@ flowSOM_predict <- function(flowsom_result, flowset, madAllowed = 4) {
     # if (!is.null(outdir)) {
     #     qs::qsave(cells_clusters_from_train, file.path(outdir, "r2-FlowSOM_predicted_withTrain.qs"))
     # }
-
     ### 4. Extract the number of cells per cluster
     # id_cols <- c("tvt", "sample")
     id_cols <- c("sample")
@@ -46,10 +46,16 @@ flowSOM_predict <- function(flowsom_result, flowset, madAllowed = 4) {
         tmp <- cells_clusters_from_train[, .N, by = grouping_columns]
         tmp[[x]] <- factor(tmp[[x]], levels = sort(as.numeric(all_cluster_x_ids[[x]])))
         levels(tmp[[x]]) <- paste0(x, "_", levels(tmp[[x]]))
-        tmp_wide <- rbind(
+
+        removin_sample <- data.frame(
+            "_____REMOVEME_____", levels(tmp[[x]]), 0
+        )
+        # ensure that the column names are the same
+        colnames(removin_sample) <- colnames(tmp)
+        tmp_wide <- dplyr::add_row(
             tmp,
             # Add a REMOVEME sample just to make sure that all clusters are present in the output
-            data.frame("sample" = "REMOVEME", "cluster" = levels(tmp[[x]]), N = 0)
+            removin_sample
         ) |>
             tidyr::pivot_wider(
                 names_from = tidyr::all_of(x),
