@@ -32,13 +32,16 @@
 #' dev.off()
 #'
 plot_markers_pairwise <- function(ff,
-                              cofactor_namedvec,
-                              special_cofactor_list,
-                              bins = 50,
-                              diag_plot = FALSE,
-                              debugplots = FALSE,
-                              axis_full_labels = TRUE,
-                              n_cells = Inf) {
+                                  cofactor_namedvec,
+                                  special_cofactor_list,
+                                  bins = 50,
+                                  diag_plot = FALSE,
+                                  debugplots = FALSE,
+                                  axis_full_labels = TRUE,
+                                  n_cells = Inf,
+                                  count_transform = function(x) {
+                                      x
+                                  }) {
     xy_plots <- list()
     xy_plots_rotated <- list()
     for (marker_x in names(flowCore::markernames(ff))) {
@@ -92,7 +95,10 @@ plot_markers_pairwise <- function(ff,
                         y = asinh(gated_exprs[[marker_y]] / cofactor_y)
                     )
                     p_markers <- ggplot2::ggplot(dt_transformed, ggplot2::aes(x = x, y = y)) +
-                        ggplot2::geom_hex(bins = bins) +
+                        ggplot2::geom_hex(
+                            bins = bins,
+                            ggplot2::aes(fill = ggplot2::stat(count_transform(ggplot2::after_stat(count))))
+                        ) +
                         # geom_density_2d_filled() +
                         ggpubr::theme_pubr() +
                         ggplot2::scale_fill_continuous(type = "viridis", trans = "log10") +
