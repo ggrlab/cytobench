@@ -92,7 +92,8 @@ wrapper_count_models <- function(df_list,
                                      #     predict_sets = c("train", "test"),
                                      #     alpha = paradox::to_tune(0, 1), s = "lambda.1se"
                                      # )
-                                 )) {
+                                 ),
+                                 dv_class_positive = NULL) {
     pacman::p_load("mlr3learners")
     pacman::p_load("glmnet")
     pacman::p_load("ranger")
@@ -160,9 +161,15 @@ wrapper_count_models <- function(df_list,
                     counts_x <- counts_x[, c(tvt_col, x, ivs)]
                     counts_x <- na.omit(counts_x)
                     if (outcome_types[[x]] != "continuous") {
+                        positive_label <- NULL
+                        if (!all(is.null(dv_class_positive))) {
+                            # If the positive label is defined, use it, otherwise infer from the data
+                            positive_label <- dv_class_positive[[x]]
+                        }
                         new_task <- mlr3::as_task_classif(
                             counts_x[, c(x, ivs)],
-                            target = x
+                            target = x,
+                            positive = positive_label
                         )
                     } else {
                         new_task <- mlr3::as_task_regr(
@@ -319,7 +326,7 @@ wrapper_count_models <- function(df_list,
         list(
             final_models = final_models,
             predictions = predictions,
-            tvt_table =table(df_list[[tvt_col]])
+            tvt_table = table(df_list[[tvt_col]])
         )
     )
 }
