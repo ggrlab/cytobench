@@ -8,3 +8,5 @@ data-raw/PRE_ARCSINH_CSV
 inst/
 example_flowcyto.csv
 inst/doc
+data-raw/CT_p001_s001_raw_ungated_none_Inf_navios_01-CD3-FITC-single_CD3_compensation.flowWorkspace_gatingset
+data-raw/s001

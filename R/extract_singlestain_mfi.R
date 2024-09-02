@@ -135,9 +135,11 @@ extract_singlestain_mfi <- function(fcs_dir = "data-raw/s001",
     all_unstained_joint <- Reduce(dplyr::left_join, relevant_unstained)
 
     # Return the joined data frame of single stainings and unstained samples
-    return(dplyr::left_join(
+    joint_df <- dplyr::left_join(
         single_stainings,
         all_unstained_joint,
         by = "feature"
-    ))
+    )
+    # Unname each column
+    return(dplyr::mutate(joint_df, across(everything(), ~unname(.))) )
 }
