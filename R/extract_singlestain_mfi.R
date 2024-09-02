@@ -141,5 +141,5 @@ extract_singlestain_mfi <- function(fcs_dir = "data-raw/s001",
         by = "feature"
     )
     # Unname each column
-    return(dplyr::mutate(joint_df, across(everything(), ~unname(.))) )
+    return(dplyr::mutate(joint_df, dplyr::across(tidyr::everything(), ~unname(.))) )
 }
