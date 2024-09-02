@@ -12,7 +12,10 @@ plot_markers_pairwise(
   diag_plot = FALSE,
   debugplots = FALSE,
   axis_full_labels = TRUE,
-  n_cells = Inf
+  n_cells = Inf,
+  count_transform = function(x) {
+     x
+ }
 )
 }
 \arguments{

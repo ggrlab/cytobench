@@ -19,7 +19,9 @@ wrapper_count_models(
     paradox::to_tune(c(500, 1000, 1500, 2000)))),
   learners_regression = list(mlr3::lrn("regr.ranger", predict_sets = c("train", "test"),
     max.depth = paradox::to_tune(2, 20), num.trees = paradox::to_tune(c(500, 1000, 1500,
-    2000))))
+    2000)))),
+  dv_class_positive = NULL,
+  measures = NULL
 )
 }
 \arguments{
