@@ -93,7 +93,8 @@ wrapper_count_models <- function(df_list,
                                      #     alpha = paradox::to_tune(0, 1), s = "lambda.1se"
                                      # )
                                  ),
-                                 dv_class_positive = NULL) {
+                                 dv_class_positive = NULL,
+                                 measures = NULL) {
     pacman::p_load("mlr3learners")
     pacman::p_load("glmnet")
     pacman::p_load("ranger")
@@ -197,7 +198,10 @@ wrapper_count_models <- function(df_list,
             # Here you can define measures. We go directly with the defaults
             # https://mlr3tuning.mlr-org.com/reference/ti.html#default-measures
             # https://mlr3tuning.mlr-org.com/reference/TuningInstanceBatchMultiCrit.html
-            measures <- NULL
+
+            if (all(is.null(measures))) {
+                measures <- NULL
+            }
             if (task_x$task_type == "classif") {
                 current_learners <- learners_classification
                 # if (task_x$properties != "multiclass") {
