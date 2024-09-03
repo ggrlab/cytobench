@@ -4,6 +4,8 @@
 #' @param ff A flowFrame object
 #' @param cofactor_namedvec A named vector with the cofactors for each marker. The names of the vector should be the same as the marker names in the flowFrame object.
 #' @param special_cofactor_list A named list with special cofactors for certain marker combinations. The names of the list should be the marker combinations, separated by an underscore. The values should be a vector of two values, the first for the x-axis marker and the second for the y-axis marker.
+#' @param transform_fun The transformation function to apply to the data. Default is asinh.
+#' @param transform_fun_name The name of the transformation function. Default is "asinh".
 #' @param bins The number of bins for the hexbin plot
 #' @param diag_plot Whether to include the diagonal plots
 #' @param debugplots Whether to include debug plots (No cells, only text to show the layout)
@@ -36,6 +38,8 @@
 plot_markers_pairwise <- function(ff,
                                   cofactor_namedvec,
                                   special_cofactor_list,
+                                  transform_fun = asinh,
+                                  transform_fun_name = "asinh",
                                   bins = 50,
                                   diag_plot = FALSE,
                                   debugplots = FALSE,
@@ -94,8 +98,8 @@ plot_markers_pairwise <- function(ff,
                         ggplot2::theme_void()
                 } else {
                     dt_transformed <- tibble::tibble(
-                        x = asinh(gated_exprs[[marker_x]] / cofactor_x),
-                        y = asinh(gated_exprs[[marker_y]] / cofactor_y)
+                        x = transform_fun(gated_exprs[[marker_x]] / cofactor_x),
+                        y = transform_fun(gated_exprs[[marker_y]] / cofactor_y)
                     )
                     p_markers <- ggplot2::ggplot(dt_transformed, ggplot2::aes(x = x, y = y)) +
                         ggplot2::geom_hex(
@@ -111,17 +115,17 @@ plot_markers_pairwise <- function(ff,
                         )
                     if (axis_full_labels) {
                         p_markers <- p_markers +
-                            ggplot2::xlab(paste0(marker_x, " [asinh(z/", cofactor_x, ")]")) +
-                            ggplot2::ylab(paste0(marker_y, " [asinh(z/", cofactor_y, ")]"))
+                            ggplot2::xlab(paste0(marker_x, " [", transform_fun_name, "(z/", cofactor_x, ")]")) +
+                            ggplot2::ylab(paste0(marker_y, " [", transform_fun_name, "(z/", cofactor_y, ")]"))
                     } else {
                         p_markers <- p_markers +
-                            ggplot2::xlab(paste0("asinh(z/", cofactor_x, ")")) +
-                            ggplot2::ylab(paste0("asinh(z/", cofactor_y, ")"))
+                            ggplot2::xlab(paste0(transform_fun_name, "(z/", cofactor_x, ")")) +
+                            ggplot2::ylab(paste0(transform_fun_name, "(z/", cofactor_y, ")"))
                     }
                 }
 
-                if(length(add_ggplot_elements) != 0){
-                    for(element in add_ggplot_elements){
+                if (length(add_ggplot_elements) != 0) {
+                    for (element in add_ggplot_elements) {
                         p_markers <- p_markers + element
                     }
                 }

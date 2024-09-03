@@ -8,6 +8,8 @@ plot_markers_pairwise(
   ff,
   cofactor_namedvec,
   special_cofactor_list,
+  transform_fun = asinh,
+  transform_fun_name = "asinh",
   bins = 50,
   diag_plot = FALSE,
   debugplots = FALSE,
@@ -15,7 +17,8 @@ plot_markers_pairwise(
   n_cells = Inf,
   count_transform = function(x) {
      x
- }
+ },
+  add_ggplot_elements = list()
 )
 }
 \arguments{
@@ -24,6 +27,10 @@ plot_markers_pairwise(
 \item{cofactor_namedvec}{A named vector with the cofactors for each marker. The names of the vector should be the same as the marker names in the flowFrame object.}
 
 \item{special_cofactor_list}{A named list with special cofactors for certain marker combinations. The names of the list should be the marker combinations, separated by an underscore. The values should be a vector of two values, the first for the x-axis marker and the second for the y-axis marker.}
+
+\item{transform_fun}{The transformation function to apply to the data. Default is asinh.}
+
+\item{transform_fun_name}{The name of the transformation function. Default is "asinh".}
 
 \item{bins}{The number of bins for the hexbin plot}
 
@@ -34,6 +41,10 @@ plot_markers_pairwise(
 \item{axis_full_labels}{Whether to include the cofactors in the axis labels}
 
 \item{n_cells}{The number of cells to plot. Default is Inf, which plots all cells.}
+
+\item{count_transform}{A function to transform the count values. Default is the identity function.}
+
+\item{add_ggplot_elements}{A list of ggplot elements to add to the plot. Default is an empty list.}
 }
 \description{
 Plots all pairwise marker combinations with given cofactors. The cofactors are used to scale the markers before plotting. The plot is a hexbin plot of the asinh transformed values of the markers. The cofactors are used to scale the markers before plotting.
