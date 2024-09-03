@@ -9,6 +9,8 @@
 #' @param debugplots Whether to include debug plots (No cells, only text to show the layout)
 #' @param axis_full_labels Whether to include the cofactors in the axis labels
 #' @param n_cells The number of cells to plot. Default is Inf, which plots all cells.
+#' @param count_transform A function to transform the count values. Default is the identity function.
+#' @param add_ggplot_elements A list of ggplot elements to add to the plot. Default is an empty list.
 #' @export
 #' @examples
 #' pdf("removeme.pdf", width = 60, height = 50)
@@ -41,7 +43,8 @@ plot_markers_pairwise <- function(ff,
                                   n_cells = Inf,
                                   count_transform = function(x) {
                                       x
-                                  }) {
+                                  },
+                                  add_ggplot_elements = list()) {
     xy_plots <- list()
     xy_plots_rotated <- list()
     for (marker_x in names(flowCore::markernames(ff))) {
@@ -114,6 +117,12 @@ plot_markers_pairwise <- function(ff,
                         p_markers <- p_markers +
                             ggplot2::xlab(paste0("asinh(z/", cofactor_x, ")")) +
                             ggplot2::ylab(paste0("asinh(z/", cofactor_y, ")"))
+                    }
+                }
+
+                if(length(add_ggplot_elements) != 0){
+                    for(element in add_ggplot_elements){
+                        p_markers <- p_markers + element
                     }
                 }
                 p_m <- list(p_markers)
