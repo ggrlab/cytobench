@@ -4,7 +4,13 @@
 \alias{flowSOM_predict}
 \title{Predict new cells using a flowsom result}
 \usage{
-flowSOM_predict(flowsom_result, flowset, madAllowed = 4)
+flowSOM_predict(
+  flowsom_result,
+  flowset,
+  madAllowed = 4,
+  n_metacluster = NULL,
+  missing_seed = 3711283
+)
 }
 \arguments{
 \item{flowsom_result}{Result of flowSOM_optimal() or flowSOM()}
@@ -12,6 +18,12 @@ flowSOM_predict(flowsom_result, flowset, madAllowed = 4)
 \item{flowset}{The flowset whose cells should be assigned to the clusters from flowsom_result}
 
 \item{madAllowed}{See FlowSOM::TestOutliers() or flowSOM_is.outlier()}
+
+\item{n_metacluster}{If not NULL, the number of metaclusters will be changed to this number in flowsom_result.}
+
+\item{missing_seed}{If flowsom_result does not contain a "seed" element (as usually by FlowSOM, flowSOM_optimal saves the seed),
+this seed will be used for re-metaclustering.
+Only used and relevant if n_metaclusters != NULL.}
 }
 \description{
 Predict the (meta-) clusters for all cells using a flowsom result.

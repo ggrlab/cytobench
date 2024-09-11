@@ -55,6 +55,7 @@ flowSOM_optimal <- function(fs_train,
         seed = seed,
         ...
     )
+    fs_res_train[["seed"]] <- seed
     ### 2. Plot and save FlowSOM results into outdir
     if (!is.null(outdir)) {
         dir.create(outdir, showWarnings = FALSE, recursive = TRUE)

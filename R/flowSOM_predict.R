@@ -3,10 +3,20 @@
 #' Predict the (meta-) clusters for all cells using a flowsom result.
 #' @param flowsom_result Result of flowSOM_optimal() or flowSOM()
 #' @param flowset The flowset whose cells should be assigned to the clusters from flowsom_result
+#' @param n_metacluster
+#' If not NULL, the number of metaclusters will be changed to this number in flowsom_result.
+#' @param missing_seed
+#' If flowsom_result does not contain a "seed" element (as usually by FlowSOM, flowSOM_optimal saves the seed),
+#' this seed will be used for re-metaclustering.
+#' Only used and relevant if n_metaclusters != NULL.
 #' @param madAllowed
 #' See FlowSOM::TestOutliers() or flowSOM_is.outlier()
 #' @export
-flowSOM_predict <- function(flowsom_result, flowset, madAllowed = 4) {
+flowSOM_predict <- function(flowsom_result,
+                            flowset,
+                            madAllowed = 4,
+                            n_metacluster = NULL,
+                            missing_seed = 3711283) {
     if ("fs_res_train" %in% names(flowsom_result)) {
         flowsom_result <- flowsom_result[["fs_res_train"]]
     }
@@ -18,6 +28,23 @@ flowSOM_predict <- function(flowsom_result, flowset, madAllowed = 4) {
     }, simplify = FALSE) |>
         data.table::rbindlist(idcol = "sample", fill = FALSE)
 
+    if (!all(is.null(n_metacluster))) {
+        # If the number of metaclusters is given, CHANGE the metaclusters to the new number
+        if ("seed" %in% names(flowsom_result)) {
+            seed <- flowsom_result$seed
+        } else {
+            seed <- missing_seed
+        }
+        if (n_metacluster <= 2) {
+            stop("n_metacluster must be greater than 2, otherwise FlowSOM fails.")
+        }
+        cl <- as.factor(FlowSOM::metaClustering_consensus(flowsom_result$map$codes, n_metacluster, seed = seed))
+        flowsom_result$map$nMetaclusters <- length(levels(cl))
+        flowsom_result$metaclustering <- cl
+        # See what happens in the FlowSOM:::UpdateDerivedValues function:
+        # https://github.com/SofieVG/FlowSOM/blob/56892b583a0dbae5535665e45290ffce355bd503/R/2_buildSOM.R#L116
+        flowsom_result <- FlowSOM:::UpdateDerivedValues(flowsom_result)
+    }
     # 3.2 Predict the clusters for all cells
     predicted_fs_train_allcells <- FlowSOM::NewData(
         flowsom_result,
