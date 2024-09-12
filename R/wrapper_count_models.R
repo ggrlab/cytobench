@@ -249,8 +249,6 @@ wrapper_count_models <- function(df_list,
         qs::qsave(learners_tuned, file = file.path(outdir, "learners_tuned.qs"))
     }
     ### Select "cluster" or "metaCluster" based on the performance
-
-    ### Train the optimal learner on training + validation data together
     learners_tuned_whichCluster <- lapply(learners_tuned, function(outcome_x) {
         performances <- sapply(outcome_x, function(x) {
             lapply(x, function(y) {
@@ -271,6 +269,11 @@ wrapper_count_models <- function(df_list,
     })
     # Note that you might have multiple list elements called "cluster" or "metaCluster" now.
 
+    # Establish the optimal cutoffs based on the validation set
+    # BEFORE retraining on training and validation set together. I am unsure if this
+    # is the perfect choice, but after training on the training and validation set together,
+    # the performance is often perfect(ly overfit). Thus any established cutoff on
+    # the following performance is likely to be useless.
 
     ### Now train everything using this hyperparameter-optimized learner
     final_models <- sapply(names(learners_tuned_whichCluster), function(task_XX) {
@@ -279,28 +282,54 @@ wrapper_count_models <- function(df_list,
         models[[task_XX]] <- list()
         for (i in seq_along(task_x)) {
             clustering_x <- names(task_x)[[i]]
-            lrn_x_hparam_optimized <- task_x[[i]]$clone()
+            lrn_x_hparam_optimized_train <- task_x[[i]]$clone()
+            lrn_x_hparam_optimized_final <- task_x[[i]]$clone()
             task_data <- tasklist[[task_XX]][[clustering_x]]
-            cat("\n\nStarting task  ", task_XX, " on ", clustering_x, " with learner ", lrn_x_hparam_optimized$id, "\n")
-            lrn_x_hparam_optimized$train(
-                task_data$task,
-                row_ids = which(task_data[["tvt"]] %in% c("train", "validation"))
-            )
+
+            # first train a model only on the training data
+            cat("\n\nStarting task  ", task_XX, " on ", clustering_x, " with learner ", lrn_x_hparam_optimized_final$id, "\n")
+            lrn_x_hparam_optimized_train$train(task_data$task, row_ids = which(task_data[["tvt"]] == "train"))
+            lrn_x_hparam_optimized_final$train(task_data$task, row_ids = which(task_data[["tvt"]] %in% c("train", "validation")))
+
+            task_data$task$col_info
+            data_validation <- data.table::as.data.table(task_data[["task"]])[task_data[["tvt"]] == "validation"]
+            pred_fromtrain_toval <- lrn_x_hparam_optimized_train$predict_newdata(data_validation) |>
+                data.table::as.data.table()
+            tasklabels <- names(pred_fromtrain_toval)[4:5]
+            names(tasklabels) <- c("positive", "negative") # MLR3 convention
+            tasklabels <- sub("prob.", "", tasklabels)
+            res_roc <- pROC::roc(
+                response = pred_fromtrain_toval[["truth"]],
+                predictor = pred_fromtrain_toval[[4]],
+                levels = tasklabels[c("negative", "positive")], # pROC convention
+                # If I change the direction here, I have to change it in the predictions as well!!
+                direction = "<"
+            ) |>
+                # get the best threshold:
+                pROC::coords("best", ret = "all", best.method = "closest.topleft")
+            res_roc_first <- res_roc[1, ]
+
+
             # n_glmnet <- lrn_x_hparam_optimized$model$glmnet.fit$nobs
             # n_ranger <- lrn_x_hparam_optimized$model$num.samples
             # n_samples <- max(n_glmnet, n_ranger)
             # if (n_samples > 100 || n_samples < 75) {
             #     stop("I expected to use most of the samples in the training and validation set TOGETHER. This must be less or equal to 100, potentially less, but also probably more than 75.")
             # }
-            models[[task_XX]][[lrn_x_hparam_optimized$id]] <- list(lrn_x_hparam_optimized$clone())
-            names(models[[task_XX]][[lrn_x_hparam_optimized$id]]) <- clustering_x
+            final_model <- lrn_x_hparam_optimized_final$clone()
+            # I cannot change "final_model" directly (R6 class)
+            # but I can change the underlying model. This is a bit hacky, but it works.
+            final_model[["model"]][["threshold_proc_closest.topleft"]] <- res_roc_first[["threshold"]]
+            models[[task_XX]][[final_model$id]] <- list(final_model)
+            names(models[[task_XX]][[final_model$id]]) <- clustering_x
         }
-        return(models[[1]])
+        return(models[[1]]) # Todo: only in case of only one single model?
+        # return(models[[1]])
     }, simplify = FALSE)
     if (!is.null(outdir)) {
         qs::qsave(final_models, file = file.path(outdir, "final_models.qs"))
     }
-
+    
     ### Finally, apply the models to all samples - including the test set.
     predictions <- sapply(names(final_models), function(outcome_xx) {
         sapply(names(final_models[[outcome_xx]]), function(model_xx) {
@@ -309,6 +338,15 @@ wrapper_count_models <- function(df_list,
                 current_task <- tasklist[[outcome_xx]][[cluster_xx]][["task"]]
                 dt_pred <- current_model$predict(current_task) |>
                     data.table::as.data.table()
+                # Set the predicted response according to the threshold identified through
+                # the ROC curve on the validation set.
+                # dt_pred[[4]] is the positive class
+                predicted_negative <- dt_pred[[4]] < current_model[["model"]][["threshold_proc_closest.topleft"]]
+                ll_pred <- levels(dt_pred[["response"]])
+                dt_pred[["response"]] <- factor(
+                    ifelse(predicted_negative, ll_pred[2], ll_pred[1]),
+                    levels = ll_pred
+                )
                 orig_cn <- colnames(dt_pred)
                 which_probs <- grepl("prob", orig_cn)
                 prob_names <- paste0(sub("prob.", "", orig_cn[which_probs]), collapse = "__,__")

@@ -91,3 +91,45 @@ test_that("FlowSOM new Metaclusters", {
         )
     )
 })
+
+# test wrapper_count_model
+test_that("FlowSOM wrapper_count_model", {
+    ff_example <- example_processed()
+    fsom <- do_flowsom(ff_example)
+    res <- flowSOM_predict(
+        flowsom_result = fsom,
+        flowset = flowCore::flowSet(ff_example)
+    )
+    fake_clusterings <- lapply(res[["ncells_per_x"]], function(x) {
+        lapply(1:50, function(y) {
+            x[1, -1] <- as.list(sample(1000, ncol(x) - 1))
+            x[1, 1] <- sample(c("A", "B"), 1)
+            x[["tvt"]] <- sample(c("train", "validation", "test", "prospective"), 1)
+            return(x)
+        }) |> do.call(what = rbind)
+    })
+    allowed_clusterings <- c("cluster", "metaCluster")
+    finalmodels_predictions <- wrapper_count_models(
+        df_list = fake_clusterings[allowed_clusterings],
+        tvt_col = "tvt",
+        # outdir = file.path(outdir_base, basename(metaclustering_dir), training_device),
+        outdir = "removeme",
+        dvs_potential = c("sample"),
+        dvs_multiclass = c(),
+        ivs_regex = "[cC]luster",
+        hparam_n_evaluations = 3,
+        seed = 1372873,
+        learners_classification = list(
+            mlr3::lrn(
+                "classif.ranger",
+                predict_type = "prob", predict_sets = c("train", "test"),
+                max.depth = paradox::to_tune(2, 20), # minimum and maximum depth
+                num.trees = paradox::to_tune(c(500, 1000, 1500, 2000)),
+                importance = "impurity"
+            )
+        ),
+        dv_class_positive = c("sample" = "B"),
+        measures = mlr3::msr("classif.logloss")
+    )
+    testthat::expect_true(TRUE)
+})
