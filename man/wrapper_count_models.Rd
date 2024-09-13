@@ -21,7 +21,8 @@ wrapper_count_models(
     max.depth = paradox::to_tune(2, 20), num.trees = paradox::to_tune(c(500, 1000, 1500,
     2000)))),
   dv_class_positive = NULL,
-  measures = NULL
+  measures = NULL,
+  hpoptimized_final_trainsets = c("train", "validation")
 )
 }
 \arguments{
@@ -53,6 +54,12 @@ If given, ivs is ignored. Default is "\link{cC}luster".}
 \item{learners_classification}{A list of classification learners. Default is a ranger learner with 2-20 depth and 500, 1000, 1500, 2000 trees.}
 
 \item{learners_regression}{A list of regression learners. Default is a ranger learner with 2-20 depth and 500, 1000, 1500, 2000 trees.}
+
+\item{dv_class_positive}{A vector of positive labels for the classification tasks. If NULL, the positive label is inferred from the data.}
+
+\item{measures}{The performance measures for the hyperparameter optimization. If NULL, the default measures are used.}
+
+\item{hpoptimized_final_trainsets}{The sets that are used to train the final model. Default is c("train", "validation").}
 }
 \description{
 Use the list of dataframes in df_list to create hyperparameter-optimized models for all potential dependent variables

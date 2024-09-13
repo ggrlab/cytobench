@@ -56,6 +56,12 @@
 #' A list of classification learners. Default is a ranger learner with 2-20 depth and 500, 1000, 1500, 2000 trees.
 #' @param learners_regression
 #' A list of regression learners. Default is a ranger learner with 2-20 depth and 500, 1000, 1500, 2000 trees.
+#' @param dv_class_positive
+#' A vector of positive labels for the classification tasks. If NULL, the positive label is inferred from the data.
+#' @param measures
+#' The performance measures for the hyperparameter optimization. If NULL, the default measures are used.
+#' @param hpoptimized_final_trainsets
+#' The sets that are used to train the final model. Default is c("train", "validation").
 #' @export
 wrapper_count_models <- function(df_list,
                                  tvt_col = "tvt",
@@ -94,7 +100,8 @@ wrapper_count_models <- function(df_list,
                                      # )
                                  ),
                                  dv_class_positive = NULL,
-                                 measures = NULL) {
+                                 measures = NULL, 
+                                 hpoptimized_final_trainsets = c("train", "validation")) {
     pacman::p_load("mlr3learners")
     pacman::p_load("glmnet")
     pacman::p_load("ranger")
@@ -289,7 +296,7 @@ wrapper_count_models <- function(df_list,
             # first train a model only on the training data
             cat("\n\nStarting task  ", task_XX, " on ", clustering_x, " with learner ", lrn_x_hparam_optimized_final$id, "\n")
             lrn_x_hparam_optimized_train$train(task_data$task, row_ids = which(task_data[["tvt"]] == "train"))
-            lrn_x_hparam_optimized_final$train(task_data$task, row_ids = which(task_data[["tvt"]] %in% c("train", "validation")))
+            lrn_x_hparam_optimized_final$train(task_data$task, row_ids = which(task_data[["tvt"]] %in% hpoptimized_final_trainsets))
 
             task_data$task$col_info
             data_validation <- data.table::as.data.table(task_data[["task"]])[task_data[["tvt"]] == "validation"]
