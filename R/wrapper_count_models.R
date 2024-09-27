@@ -120,10 +120,10 @@ wrapper_count_models <- function(df_list,
     # At least for "table(df_list[[1]][, c(tvt_col, outcome_x)]) < 2" to work correctly,
     # I need to have dataframes as data, certainly NOT data.tables
     df_list <- lapply(df_list, function(x) {
-        if (is.data.frame(x)) {
-            return(x)
-        } else {
+        if (data.table::is.data.table(x) || !is.data.frame(x)) {
             return(as.data.frame(x))
+        } else {
+            return(x)
         }
     })
 
