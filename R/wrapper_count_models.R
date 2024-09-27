@@ -100,7 +100,7 @@ wrapper_count_models <- function(df_list,
                                      # )
                                  ),
                                  dv_class_positive = NULL,
-                                 measures = NULL, 
+                                 measures = NULL,
                                  hpoptimized_final_trainsets = c("train", "validation")) {
     pacman::p_load("mlr3learners")
     pacman::p_load("glmnet")
@@ -116,6 +116,17 @@ wrapper_count_models <- function(df_list,
     if (any(sapply(df_list, function(x) !all(dvs_potential %in% colnames(x))))) {
         stop("Not all dataframes have the potential dependent variable columns")
     }
+
+    # At least for "table(df_list[[1]][, c(tvt_col, outcome_x)]) < 2" to work correctly,
+    # I need to have dataframes as data, certainly NOT data.tables
+    df_list <- lapply(df_list, function(x) {
+        if (is.data.frame(x)) {
+            return(x)
+        } else {
+            return(as.data.frame(x))
+        }
+    })
+
     outcome_types <- c()
     for (outcome_x in dvs_potential) {
         # Check if binary, multiclass or continuous
@@ -336,7 +347,7 @@ wrapper_count_models <- function(df_list,
     if (!is.null(outdir)) {
         qs::qsave(final_models, file = file.path(outdir, "final_models.qs"))
     }
-    
+
     ### Finally, apply the models to all samples - including the test set.
     predictions <- sapply(names(final_models), function(outcome_xx) {
         sapply(names(final_models[[outcome_xx]]), function(model_xx) {
