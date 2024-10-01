@@ -38,6 +38,7 @@ flowSOM_predict <- function(flowsom_result,
         if (n_metacluster <= 2) {
             stop("n_metacluster must be greater than 2, otherwise FlowSOM fails.")
         }
+        # The as.factor comes from FlowSOM. 
         cl <- as.factor(FlowSOM::metaClustering_consensus(flowsom_result$map$codes, n_metacluster, seed = seed))
         flowsom_result$map$nMetaclusters <- length(levels(cl))
         flowsom_result$metaclustering <- cl

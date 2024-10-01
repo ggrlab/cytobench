@@ -24,6 +24,8 @@ do_flowsom <- function(ff) {
     fSOM[["seed"]] <- 237123
     return(fSOM)
 }
+
+
 test_that("FlowSOM outliers", {
     fileName <- system.file("extdata", "68983.fcs", package = "FlowSOM")
     ff <- flowCore::read.FCS(fileName)
@@ -132,4 +134,47 @@ test_that("FlowSOM wrapper_count_model", {
         measures = mlr3::msr("classif.logloss")
     )
     testthat::expect_true(TRUE)
+})
+
+
+
+test_that("FlowSOM new Metaclusters, with/out new clustering", {
+    ff_example <- example_processed()
+    fsom <- do_flowsom(ff_example)
+    testthat::expect_true(fsom$map$nMetaclusters == 10)
+
+    for (n_metaclusters in c(3, 20, 44)) {
+        res <- flowSOM_predict(
+            flowsom_result = fsom,
+            flowset = flowCore::flowSet(ff_example),
+            n_metacluster = n_metaclusters
+        )
+
+        res_norecluster <- flowSOM_newMetacluster(
+            flowsom_result = fsom,
+            clustered_df = res[["ncells_per_x"]][["cluster"]],
+            n_metacluster = n_metaclusters
+        )
+        testthat::expect_true(res$flowsom_newdata$map$nMetaclusters == n_metaclusters)
+        testthat::expect_true(ncol(res[["ncells_per_x"]][["metaCluster"]]) == n_metaclusters + 1)
+        testthat::expect_equal(res["ncells_per_x"], res_norecluster["ncells_per_x"])
+        testthat::expect_false(identical(res_norecluster[["cells_clusters_from_train"]], res[["cells_clusters_from_train"]]))
+
+
+        res_norecluster_cellwise <- flowSOM_newMetacluster(
+            flowsom_result = fsom,
+            clustered_df = res[["cells_clusters_from_train"]],
+            n_metacluster = n_metaclusters
+        )
+        testthat::expect_equal(res["ncells_per_x"], res_norecluster_cellwise["ncells_per_x"])
+        testthat::expect_true(identical(res_norecluster_cellwise[["cells_clusters_from_train"]], res[["cells_clusters_from_train"]]))
+        for (relevant_value in c(
+            "pattern", "compensate", "spillover", "transform", "toTransform",
+            "transformFunction", "transformList", "scale", "metaData", "map",
+            "MST", "metaclustering", "outliers"
+        )) {
+            testthat::expect_identical(res_norecluster_cellwise[[relevant_value]], res[[relevant_value]])
+            testthat::expect_identical(res_norecluster[[relevant_value]], res[[relevant_value]])
+        }
+    }
 })
