@@ -1,3 +1,11 @@
+empty_tibble <- tibble::tibble(
+    "feature" = NA,
+    "negative" = NA,
+    "positive" = NA,
+    "positive.sd" = NA,
+    "negative.sd" = NA
+)
+
 #' Extract Single Stain Median Fluorescence Intensity (MFI)
 #'
 #' This function extracts the median fluorescence intensity (MFI) from single-stain FCS files.
@@ -110,7 +118,10 @@ extract_mfi <- function(fcs_dir = "data-raw/s001",
                     "feature" = NA,
                     "negative" = NA,
                     "positive" = NA,
-                    "unstained" = NA
+                    "unstained" = NA,
+                    "negative.sd" = NA,
+                    "positive.sd" = NA,
+                    "unstained.sd" = NA
                 ))
             }
         )
@@ -121,11 +132,10 @@ extract_mfi <- function(fcs_dir = "data-raw/s001",
             by = "feature",
             suffix = c("", ".multi")
         )
-        if (all(is.na(joint_df[["negative"]]))) {
-            joint_df[["negative"]] <- joint_df[["negative.multi"]]
-        }
-        if (all(is.na(joint_df[["positive"]]))) {
-            joint_df[["positive"]] <- joint_df[["positive.multi"]]
+        for (x in c("positive", "negative", "positive.sd", "negative.sd")) {
+            if (all(is.na(joint_df[[x]]))) {
+                joint_df[[x]] <- joint_df[[paste0(x, ".multi")]]
+            }
         }
     }
 
@@ -137,12 +147,12 @@ extract_mfi <- function(fcs_dir = "data-raw/s001",
 #' @inheritParams extract_mfi
 #' @export
 extract_singlestain_mfi <- function(fcs_dir = "data-raw/s001",
-                                   regex_singlestain = "-(CD3-.*)|(none)\\.fcs",
-                                   transform = function(x) {
-                                       asinh(x / 1e3)
-                                   },
-                                   gating_set_file = NULL,
-                                   gate_extract = NULL) {
+                                    regex_singlestain = "-(CD3-.*)|(none)\\.fcs",
+                                    transform = function(x) {
+                                        asinh(x / 1e3)
+                                    },
+                                    gating_set_file = NULL,
+                                    gate_extract = NULL) {
     .Deprecated("extract_mfi")
     extract_mfi(
         fcs_dir = fcs_dir,
@@ -239,11 +249,7 @@ extract_singlestain_mfi_wrapper <- function(loaded_fcs,
             extract_relevant_mfis_singlestain(loaded_fcs, transform_fun = transform_fun, ...)
         },
         error = function(e) {
-            list(tibble::tibble(
-                "feature" = NA,
-                "negative" = NA,
-                "positive" = NA
-            ))
+            list(empty_tibble)
         }
     )
     # Combine single stainings into a single data frame
@@ -254,7 +260,9 @@ extract_singlestain_mfi_wrapper <- function(loaded_fcs,
                 single_stainings <- rbind(single_stainings, tibble::tibble(
                     "feature" = relevant_x,
                     "negative" = NA,
-                    "positive" = NA
+                    "positive" = NA,
+                    "negative.sd" = NA,
+                    "positive.sd" = NA
                 ))
             }
         }
@@ -270,7 +278,6 @@ extract_singlestain_mfi_wrapper <- function(loaded_fcs,
     } else {
         warning("More than one unstained sample found, returning each MFI by filename")
     }
-
     # Join all unstained samples
     all_unstained_joint <- Reduce(dplyr::left_join, relevant_unstained)
     if (!is.null(all_unstained_joint)) {
@@ -286,6 +293,22 @@ extract_singlestain_mfi_wrapper <- function(loaded_fcs,
     }
     return(joint_df)
 }
+
+clustering_seeded_mfi <- function(values, seed, transform_fun, featurename) {
+    set.seed(seed)
+    clustering <- stats::kmeans(transform_fun(values), centers = 2)
+    mfis <- sort(tapply(values, clustering$cluster, median))
+    mfis_sd <- sort(tapply(values, clustering$cluster, sd))
+    mfis_tib <- tibble::tibble(
+        "feature" = featurename,
+        "negative" = mfis[1],
+        "positive" = mfis[2],
+        "positive.sd" = mfis_sd[1],
+        "negative.sd" = mfis_sd[2]
+    )
+
+    return(mfis_tib)
+}
 extract_relevant_mfis_singlestain <- function(loaded_fcs_singlestain,
                                               transform_fun = function(x) {
                                                   x
@@ -298,11 +321,7 @@ extract_relevant_mfis_singlestain <- function(loaded_fcs_singlestain,
         # Check if there is more than one non-empty channel
         if (length(nonempty_channel) > 1) {
             warning("More than one non-empty channel in ", f_x)
-            return(tibble::tibble(
-                "feature" = NA,
-                "negative" = NA,
-                "positive" = NA
-            ))
+            return(empty_tibble)
         }
 
         # If no non-empty channel, it is the unstained sample
@@ -315,13 +334,11 @@ extract_relevant_mfis_singlestain <- function(loaded_fcs_singlestain,
         } else {
             # Cluster the relevant channel into two populations and return the median of both
             values_nonempty <- flowCore::exprs(ff_x)[, names(nonempty_channel)]
-            set.seed(seed)
-            clustering <- stats::kmeans(transform_fun(values_nonempty), centers = 2)
-            mfis <- sort(tapply(values_nonempty, clustering$cluster, median))
-            mfis_tib <- tibble::tibble(
-                "feature" = names(nonempty_channel),
-                "negative" = mfis[1],
-                "positive" = mfis[2]
+            mfis_tib <- clustering_seeded_mfi(
+                values = values_nonempty,
+                seed = seed,
+                transform_fun = transform_fun,
+                featurename = names(nonempty_channel)
             )
         }
 
@@ -341,14 +358,13 @@ extract_relevant_mfis_multistain <- function(loaded_fcs_multistain,
     multistain_mfis <- lapply(loaded_fcs_multistain, function(ff_x) {
         values_relevantcols <- flowCore::exprs(flowWorkspace::cytoframe_to_flowFrame(ff_x[, relevant_columns][[1]]))
         mfis <- apply(values_relevantcols, 2, function(col_x) {
-            set.seed(seed)
-            clustering <- stats::kmeans(transform_fun(col_x), centers = 2)
-            mfis <- sort(tapply(col_x, clustering$cluster, median))
-            mfis_tib <- tibble::tibble(
-                # "feature" = names(nonempty_channel),
-                "negative" = mfis[1],
-                "positive" = mfis[2]
+            mfis_tib <- clustering_seeded_mfi(
+                values = col_x,
+                seed = seed,
+                transform_fun = transform_fun,
+                featurename = NULL # is filled by the following data.table::rbindlist
             )
+            return(mfis_tib)
         })
         mfis_tib <- data.table::rbindlist(mfis, idcol = "feature")
     }) |>
