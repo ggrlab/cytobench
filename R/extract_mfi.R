@@ -4,7 +4,7 @@
 #'
 #' @param fcs_dir A character string specifying the directory containing the FCS files. Default is "data-raw/s001".
 #' @param regex_singlestain A regular expression pattern to identify single-stain FCS files. Default is "-(CD3-.*)|(none)\\.fcs".
-#' @param transform
+#' @param transform_fun
 #' A function to transform the fluorescence values. Default is `function(x) { asinh(x / 1e3) }`.
 #' The reported MFIs are calculated as the median of the UNtransformed values. Transformation is
 #' only used to cluster the negative and positive populations.
@@ -65,7 +65,7 @@
 #' @export
 extract_mfi <- function(fcs_dir = "data-raw/s001",
                         regex_singlestain = "-(CD3-.*)|(none)\\.fcs",
-                        transform = function(x) {
+                        transform_fun = function(x) {
                             asinh(x / 1e3)
                         },
                         multistaining = FALSE,
@@ -84,10 +84,10 @@ extract_mfi <- function(fcs_dir = "data-raw/s001",
     )
     if (!multistaining) {
         # Extract the single stainings
-        joint_df <- extract_singlestain_mfi_wrapper(loaded_fcs, transform_fun = transform)
+        joint_df <- extract_singlestain_mfi_wrapper(loaded_fcs, transform_fun = transform_fun)
     } else {
         # If multistaining is enabled, the following extracts the potential UNSTAINED sample
-        joint_df <- extract_singlestain_mfi_wrapper(loaded_fcs, transform_fun = transform, relevant_columns = multistain_columns)
+        joint_df <- extract_singlestain_mfi_wrapper(loaded_fcs, transform_fun = transform_fun, relevant_columns = multistain_columns)
 
         # Then extract the actually multi-stained sample(s)
         loaded_fcs_multistain <- load_mfi_files(
@@ -100,7 +100,7 @@ extract_mfi <- function(fcs_dir = "data-raw/s001",
             {
                 extract_relevant_mfis_multistain(
                     loaded_fcs_multistain,
-                    transform_fun = transform,
+                    transform_fun = transform_fun,
                     relevant_columns = multistain_columns
                 )
             },
@@ -147,7 +147,7 @@ extract_singlestain_mfi <- function(fcs_dir = "data-raw/s001",
     extract_mfi(
         fcs_dir = fcs_dir,
         regex_singlestain = regex_singlestain,
-        transform = transform,
+        transform_fun = transform,
         gating_set_file = gating_set_file,
         gate_extract = gate_extract,
         multistaining = FALSE
@@ -236,7 +236,7 @@ extract_singlestain_mfi_wrapper <- function(loaded_fcs,
     # Extract median fluorescence intensities (MFIs) from the loaded FCS files
     relevant_mfis_single <- tryCatch(
         {
-            extract_relevant_mfis_singlestain(loaded_fcs, transform_fun = transform, ...)
+            extract_relevant_mfis_singlestain(loaded_fcs, transform_fun = transform_fun, ...)
         },
         error = function(e) {
             list(tibble::tibble(
