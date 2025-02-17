@@ -303,12 +303,59 @@ clustering_seeded_mfi <- function(values, seed, transform_fun, featurename) {
         "feature" = featurename,
         "negative" = mfis[1],
         "positive" = mfis[2],
-        "positive.sd" = mfis_sd[1],
-        "negative.sd" = mfis_sd[2]
+        "negative.sd" = mfis_sd[1],
+        "positive.sd" = mfis_sd[2]
     )
 
     return(mfis_tib)
 }
+clustering_seeded_mfi_multicolor <- function(values, seed=42, transform_fun, featurename) {
+    set.seed(seed)
+    clustering <- stats::kmeans(transform_fun(values), centers = 2)
+    values_copy <- data.table::data.table(values)
+    values_copy[, cluster := clustering$cluster]
+    # calculate median per column grouped by cluster with data.table
+    medians <- values_copy[, lapply(.SD, median), by = cluster]
+    sds <- values_copy[, lapply(.SD, sd), by = cluster]
+    index_negative_median <- which.min(apply(medians, 1, sum))
+    index_positive_sds <- which.max(apply(sds, 1, sum))
+
+    melted_medians <- data.table::melt(medians, id.vars = "cluster")
+    melted_medians[, cluster := ifelse(cluster == index_negative_median, "negative", "positive")]
+    cast_medians <- data.table::dcast(melted_medians, variable ~ cluster)
+
+    melted_sds <- data.table::melt(sds, id.vars = "cluster")
+    melted_sds[, cluster := ifelse(cluster == index_negative_median, "negative.sd", "positive.sd")]
+    cast_sds <- data.table::dcast(melted_sds, variable ~ cluster)
+
+    joint <- dplyr::left_join(
+        cast_medians,
+        cast_sds,
+        by = "variable"
+    ) |>
+        tibble::as_tibble()
+    colnames(joint)[1] <- "feature"
+    # # A tibble: 10 × 5
+    #    variable     negative positive negative.sd positive.sd
+    #    <fct>           <dbl>    <dbl>       <dbl>       <dbl>
+    #  1 Blue - 530-A     35.3     332.        68.2       147.
+    #  2 Blue - 575-A     25.2     225.        51.9        94.3
+    #  3 Blue - 610-A     39.2     449.        94.6       172.
+    return(joint)
+}
+
+#' Extract Single Stain Median Fluorescence Intensity (MFI)
+#' This function extracts the median fluorescence intensity (MFI) from single-stain FCS files.
+#' @param loaded_fcs_singlestain A list of cytosets containing the loaded FCS files.
+#' @param transform_fun A function to transform the fluorescence values. Default is `function(x) { asinh(x / 1e3) }`.
+#' The reported MFIs are calculated as the median of the UNtransformed values. Transformation is only used to cluster the negative and positive populations.
+#' @return A data frame with the extracted MFIs. E.g.:
+#' \preformatted{
+#'   feature negative positive unstained
+#'  <chr>      <dbl>    <dbl>     <dbl>
+#' 1 FITC-A      530.   58567.     576.
+#' 2 PE-A        526.  149506.     511.
+#' @export
 extract_relevant_mfis_singlestain <- function(loaded_fcs_singlestain,
                                               transform_fun = function(x) {
                                                   x
@@ -346,6 +393,19 @@ extract_relevant_mfis_singlestain <- function(loaded_fcs_singlestain,
     }, simplify = FALSE)
 }
 
+#' Extract Multi-Stain Median Fluorescence Intensity (MFI)
+#' This function extracts the median fluorescence intensity (MFI) from multi-stained FCS files.
+#' @param loaded_fcs_multistain A list of cytosets containing the loaded FCS files.
+#' @param transform_fun A function to transform the fluorescence values. Default is `function(x) { asinh(x / 1e3) }`.
+#' The reported MFIs are calculated as the median of the UNtransformed values. Transformation is only used to cluster the negative and positive populations.
+#' @param relevant_columns A character vector specifying the relevant columns for multi-staining. Default is c("FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A", "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A").
+#' @return A data frame with the extracted MFIs. E.g.:
+#' \preformatted{
+#'  feature negative positive negative.sd positive.sd
+#' <chr>      <dbl>    <dbl>     <dbl>      <dbl>
+#' 1 FITC-A      530.   58567.     576.      576.
+#' 2 PE-A        526.  149506.     511.      511.
+#' @export
 extract_relevant_mfis_multistain <- function(loaded_fcs_multistain,
                                              transform_fun = function(x) {
                                                  asinh(x / 1e3)
@@ -357,16 +417,11 @@ extract_relevant_mfis_multistain <- function(loaded_fcs_multistain,
     }
     multistain_mfis <- lapply(loaded_fcs_multistain, function(ff_x) {
         values_relevantcols <- flowCore::exprs(flowWorkspace::cytoframe_to_flowFrame(ff_x[, relevant_columns][[1]]))
-        mfis <- apply(values_relevantcols, 2, function(col_x) {
-            mfis_tib <- clustering_seeded_mfi(
-                values = col_x,
-                seed = seed,
-                transform_fun = transform_fun,
-                featurename = NULL # is filled by the following data.table::rbindlist
-            )
-            return(mfis_tib)
-        })
-        mfis_tib <- data.table::rbindlist(mfis, idcol = "feature")
+        clustering_seeded_mfi_multicolor(
+            values = values_relevantcols,
+            seed = 2,
+            transform_fun = function(x) asinh(x / 1e3),
+        )
     }) |>
         data.table::rbindlist(idcol = "sample") |>
         tibble::as_tibble()
