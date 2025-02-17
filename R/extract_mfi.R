@@ -420,7 +420,7 @@ extract_relevant_mfis_multistain <- function(loaded_fcs_multistain,
         clustering_seeded_mfi_multicolor(
             values = values_relevantcols,
             seed = 2,
-            transform_fun = function(x) asinh(x / 1e3),
+            transform_fun = transform_fun
         )
     }) |>
         data.table::rbindlist(idcol = "sample") |>
