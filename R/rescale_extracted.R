@@ -25,10 +25,14 @@ rescale_extracted <- function(sample_to_rescale,
                               missing_feature = c("minmax", "center_median"),
                               inplace_datatable = FALSE,
                               scale_column_fun = scale_column_relative, ...) {
-    extracted_mfi_namedlist <- sapply(extracted_mfi[["feature"]], function(feature_x) {
-        current_feature_mfi <- extracted_mfi |> dplyr::filter(feature == feature_x)
-        return(unlist(current_feature_mfi[, c(column_negative[1], column_positive[1])]))
-    }, simplify = FALSE)
+    extracted_mfi <- tibble::as_tibble(extracted_mfi)  # when this was a data.table, the following code would fail
+    extracted_mfi_namedlist <- sapply(
+        extracted_mfi[["feature"]], function(feature_x) {
+            current_feature_mfi <- extracted_mfi |> dplyr::filter(feature == feature_x)
+            return(unlist(current_feature_mfi[, c(column_negative[1], column_positive[1])]))
+        },
+        simplify = FALSE
+    )
 
     cn_sample <- flowCore::colnames(sample_to_rescale)
     cn_sample_missing <- cn_sample[!cn_sample %in% extracted_mfi[["feature"]]]
