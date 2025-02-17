@@ -309,30 +309,38 @@ clustering_seeded_mfi <- function(values, seed, transform_fun, featurename) {
 
     return(mfis_tib)
 }
-clustering_seeded_mfi_multicolor <- function(values, seed=42, transform_fun, featurename) {
+clustering_seeded_mfi_multicolor <- function(values, seed = 42, transform_fun, featurename) {
     set.seed(seed)
     clustering <- stats::kmeans(transform_fun(values), centers = 2)
     values_copy <- data.table::data.table(values)
     values_copy[, cluster := clustering$cluster]
     # calculate median per column grouped by cluster with data.table
     medians <- values_copy[, lapply(.SD, median), by = cluster]
-    sds <- values_copy[, lapply(.SD, sd), by = cluster]
     index_negative_median <- which.min(apply(medians, 1, sum))
-    index_positive_sds <- which.max(apply(sds, 1, sum))
 
     melted_medians <- data.table::melt(medians, id.vars = "cluster")
     melted_medians[, cluster := ifelse(cluster == index_negative_median, "negative", "positive")]
     cast_medians <- data.table::dcast(melted_medians, variable ~ cluster)
 
+    sds <- values_copy[, lapply(.SD, sd), by = cluster]
     melted_sds <- data.table::melt(sds, id.vars = "cluster")
     melted_sds[, cluster := ifelse(cluster == index_negative_median, "negative.sd", "positive.sd")]
     cast_sds <- data.table::dcast(melted_sds, variable ~ cluster)
+
+    iqrs <- values_copy[, lapply(.SD, IQR), by = cluster]
+    melted_iqrs <- data.table::melt(iqrs, id.vars = "cluster")
+    melted_iqrs[, cluster := ifelse(cluster == index_negative_median, "negative.iqr", "positive.iqr")]
+    cast_iqrs <- data.table::dcast(melted_iqrs, variable ~ cluster)
 
     joint <- dplyr::left_join(
         cast_medians,
         cast_sds,
         by = "variable"
     ) |>
+        dplyr::left_join(
+            cast_iqrs,
+            by = "variable"
+        ) |>
         tibble::as_tibble()
     colnames(joint)[1] <- "feature"
     # # A tibble: 10 × 5
@@ -343,7 +351,6 @@ clustering_seeded_mfi_multicolor <- function(values, seed=42, transform_fun, fea
     #  3 Blue - 610-A     39.2     449.        94.6       172.
     return(joint)
 }
-
 #' Extract Single Stain Median Fluorescence Intensity (MFI)
 #' This function extracts the median fluorescence intensity (MFI) from single-stain FCS files.
 #' @param loaded_fcs_singlestain A list of cytosets containing the loaded FCS files.
