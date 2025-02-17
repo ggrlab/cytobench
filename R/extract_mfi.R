@@ -362,6 +362,7 @@ clustering_seeded_mfi_multicolor <- function(values, seed = 42, transform_fun, f
 #'  <chr>      <dbl>    <dbl>     <dbl>
 #' 1 FITC-A      530.   58567.     576.
 #' 2 PE-A        526.  149506.     511.
+#' }
 #' @export
 extract_relevant_mfis_singlestain <- function(loaded_fcs_singlestain,
                                               transform_fun = function(x) {
@@ -412,6 +413,7 @@ extract_relevant_mfis_singlestain <- function(loaded_fcs_singlestain,
 #' <chr>      <dbl>    <dbl>     <dbl>      <dbl>
 #' 1 FITC-A      530.   58567.     576.      576.
 #' 2 PE-A        526.  149506.     511.      511.
+#' }
 #' @export
 extract_relevant_mfis_multistain <- function(loaded_fcs_multistain,
                                              transform_fun = function(x) {
