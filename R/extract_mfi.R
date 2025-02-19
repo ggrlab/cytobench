@@ -317,19 +317,20 @@ clustering_seeded_mfi_multicolor <- function(values, seed = 42, transform_fun, f
     # calculate median per column grouped by cluster with data.table
     medians <- values_copy[, lapply(.SD, median), by = cluster]
     index_negative_median <- which.min(apply(medians, 1, sum))
-
+    clusternumber_negative_median <- values_copy[["cluster"]][index_negative_median]
+    
     melted_medians <- data.table::melt(medians, id.vars = "cluster")
-    melted_medians[, cluster := ifelse(cluster == index_negative_median, "negative", "positive")]
+    melted_medians[, cluster := ifelse(cluster == clusternumber_negative_median, "negative", "positive")]
     cast_medians <- data.table::dcast(melted_medians, variable ~ cluster)
 
     sds <- values_copy[, lapply(.SD, sd), by = cluster]
     melted_sds <- data.table::melt(sds, id.vars = "cluster")
-    melted_sds[, cluster := ifelse(cluster == index_negative_median, "negative.sd", "positive.sd")]
+    melted_sds[, cluster := ifelse(cluster == clusternumber_negative_median, "negative.sd", "positive.sd")]
     cast_sds <- data.table::dcast(melted_sds, variable ~ cluster)
 
     iqrs <- values_copy[, lapply(.SD, IQR), by = cluster]
     melted_iqrs <- data.table::melt(iqrs, id.vars = "cluster")
-    melted_iqrs[, cluster := ifelse(cluster == index_negative_median, "negative.iqr", "positive.iqr")]
+    melted_iqrs[, cluster := ifelse(cluster == clusternumber_negative_median, "negative.iqr", "positive.iqr")]
     cast_iqrs <- data.table::dcast(melted_iqrs, variable ~ cluster)
 
     joint <- dplyr::left_join(
