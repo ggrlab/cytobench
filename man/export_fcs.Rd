@@ -13,7 +13,8 @@ export_fcs(
   verbose = TRUE,
   new_colnames_to = c("description", "colnames"),
   new_colnames = 1,
-  extreme_template = NULL
+  extreme_template = NULL,
+  cytname = "cytobench_exportedFCS"
 )
 }
 \arguments{
@@ -77,6 +78,8 @@ you can provide it here. Usually, this would be the returned fcs_extreme_copy fr
 previous run of this function.
 Essentially, it needs at least 2 cells (high and low) as "extreme" values.
 The cells are replaced by the actual cells given in the matrix_list.}
+
+\item{cytname}{The name of the cytometer. This is a custom keyword that we use to track the source. It is e.g. used by Kaluza to identify the default parameters for the cytometer.}
 }
 \value{
 fcs_extreme_copy:

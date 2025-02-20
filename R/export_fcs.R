@@ -64,6 +64,8 @@
 #' Essentially, it needs at least 2 cells (high and low) as "extreme" values.
 #' The cells are replaced by the actual cells given in the matrix_list.
 #'
+#' @param cytname
+#' The name of the cytometer. This is a custom keyword that we use to track the source. It is e.g. used by Kaluza to identify the default parameters for the cytometer.
 #' @return fcs_extreme_copy:
 #' A copy of the extreme_template which was used to save all samples. The fcs-file
 #' ranges for all samples come from this extreme sample.
@@ -77,7 +79,8 @@ export_fcs <- function(matrix_list,
                        verbose = TRUE,
                        new_colnames_to = c("description", "colnames"),
                        new_colnames = 1,
-                       extreme_template = NULL) {
+                       extreme_template = NULL,
+                       cytname = "cytobench_exportedFCS") {
     matrix_list_dt <- lapply(matrix_list, data.table::as.data.table)
     if (verbose) {
         cat("Concattenating extreme values of all samples with data.table\n")
@@ -161,6 +164,7 @@ export_fcs <- function(matrix_list,
         flowCore::keyword(fcs_extreme)[["$FIL"]] <- file_x
         flowCore::keyword(fcs_extreme)[["GUID"]] <- file_x
         flowCore::keyword(fcs_extreme)[["FILENAME"]] <- file_x
+        flowCore::keyword(fcs_extreme)[["$CYT"]] <- cytname
 
         # This is a custom (by us) keyword that we use to track
         # the source of how the fcs file was generated
