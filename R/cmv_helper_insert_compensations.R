@@ -10,6 +10,8 @@
 #' The directory to save the fcs files with the inserted compensations. If NA, the function returns the flowFrame object with the inserted compensations.
 #' @param sub_filename
 #' A vector of two strings to substitute in the fcs_filename. The first string is substituted by the second string. The final files are saved in \code{file.path(outdir, sub(sub_filename[1], sub_filename[2], fcs_filename))}
+#' @param spillover_keyword
+#' The keyword in the fcs file containing the original spillover matrix.
 #' @param verbose
 #' Whether to print out the path of the saved fcs file
 #' @export
@@ -27,9 +29,13 @@ cmv_helper_insert_compensations <- function(fcs_filename,
                                                 "singlestain_manual" = NA
                                             ), outdir = file.path("res", "CT_UnappliedCompensations"),
                                             sub_filename = c("intermediate/CT", ""),
+                                            spillover_keyword = "$SPILLOVER",
                                             verbose = TRUE) {
     ff <- flowCore::read.FCS(fcs_filename)
-    original_spillover <- flowCore::keyword(ff)[["$SPILLOVER"]]
+    original_spillover <- flowCore::keyword(ff)[[spillover_keyword]]
+    if(is.null(original_spillover)) {
+        stop("Spillover matrix not found in fcs file ", fcs_filename, "\n")
+    }
     loaded_comps <- lapply(named_compensation_files, function(x) {
         if (is.null(x)) {
             return(list(
@@ -81,7 +87,7 @@ cmv_helper_insert_compensations <- function(fcs_filename,
     # So the compensation will be slightly different to OUR Kaluza compensation
     # with this.
     # The ordering of the spillover matrix must be exactly the same as the ordering of the markers in the expression matrix, otherwise KALUZA(!!) will apply the wrong compensation values.
-    flowCore::keyword(ff)[["$SPILLOVER"]] <- loaded_comps$manual$spillover[names(flowCore::markernames(ff)), names(flowCore::markernames(ff))]
+    flowCore::keyword(ff)[[spillover_keyword]] <- loaded_comps$manual$spillover[names(flowCore::markernames(ff)), names(flowCore::markernames(ff))]
 
     if (!is.na(outdir)) {
         if (!all(is.na(sub_filename))) {

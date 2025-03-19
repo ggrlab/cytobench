@@ -10,6 +10,7 @@ cmv_helper_insert_compensations(
     singlestain_manual = NA),
   outdir = file.path("res", "CT_UnappliedCompensations"),
   sub_filename = c("intermediate/CT", ""),
+  spillover_keyword = "$SPILLOVER",
   verbose = TRUE
 )
 }
@@ -21,6 +22,8 @@ cmv_helper_insert_compensations(
 \item{outdir}{The directory to save the fcs files with the inserted compensations. If NA, the function returns the flowFrame object with the inserted compensations.}
 
 \item{sub_filename}{A vector of two strings to substitute in the fcs_filename. The first string is substituted by the second string. The final files are saved in \code{file.path(outdir, sub(sub_filename[1], sub_filename[2], fcs_filename))}}
+
+\item{spillover_keyword}{The keyword in the fcs file containing the original spillover matrix.}
 
 \item{verbose}{Whether to print out the path of the saved fcs file}
 }
