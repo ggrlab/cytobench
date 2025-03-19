@@ -15,12 +15,20 @@
 #' @param expected_max_proportion_value
 #' The expected maximum value for the spillover matrix and autofluorescence vector. Default is 1 which corresponds to 100%. However, technically nothing speaks against spillover values above 100%.
 #' Within Kaluza, the spillover values can be a maximum of +/- 500% (+/-5). Thus the default value of 5. This is a safety measure to avoid using the already calculated absolute autofluorescence values.
+#' @param original_spillover_keyword
+#' The keyword to use for the original spillover matrix. Default is "$SPILLOVER".
 #' @export
 cmv_helper_compensation <- function(ff_unapplied_compensations,
-                                    compensation_type = c("manual", "auto", "auto_singlestain"), expected_max_proportion_value = 5) {
+                                    compensation_type = c(
+                                        "manual", "auto",
+                                        "auto_singlestain"
+                                    ),
+                                    expected_max_proportion_value = 5,
+                                    original_spillover_keyword = "$SPILLOVER") {
     params_spillover_autofluorescence <- read.FCS_custom_spillover(
-        ff_unapplied_compensations,
-        custom_spillover_keyword = compensation_type[1]
+        fcs = ff_unapplied_compensations,
+        custom_spillover_keyword = compensation_type[1],
+        original_spillover_keyword = original_spillover_keyword
     )
     if (any(
         sapply(params_spillover_autofluorescence, function(x) any(x > expected_max_proportion_value))

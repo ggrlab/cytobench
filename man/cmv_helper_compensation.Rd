@@ -7,7 +7,8 @@
 cmv_helper_compensation(
   ff_unapplied_compensations,
   compensation_type = c("manual", "auto", "auto_singlestain"),
-  expected_max_proportion_value = 5
+  expected_max_proportion_value = 5,
+  original_spillover_keyword = "$SPILLOVER"
 )
 }
 \arguments{
@@ -21,6 +22,8 @@ autofluorescence vector  based on the single stain controls from the CMV data.
 
 \item{expected_max_proportion_value}{The expected maximum value for the spillover matrix and autofluorescence vector. Default is 1 which corresponds to 100\%. However, technically nothing speaks against spillover values above 100\%.
 Within Kaluza, the spillover values can be a maximum of +/- 500\% (+/-5). Thus the default value of 5. This is a safety measure to avoid using the already calculated absolute autofluorescence values.}
+
+\item{original_spillover_keyword}{The keyword to use for the original spillover matrix. Default is "$SPILLOVER".}
 }
 \description{
 This function is a helper function to apply the compensation to the CMV data from

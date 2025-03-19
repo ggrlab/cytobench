@@ -33,7 +33,7 @@ cmv_helper_insert_compensations <- function(fcs_filename,
                                             verbose = TRUE) {
     ff <- flowCore::read.FCS(fcs_filename)
     original_spillover <- flowCore::keyword(ff)[[spillover_keyword]]
-    if(is.null(original_spillover)) {
+    if (is.null(original_spillover)) {
         stop("Spillover matrix not found in fcs file ", fcs_filename, "\n")
     }
     loaded_comps <- lapply(named_compensation_files, function(x) {
@@ -107,7 +107,11 @@ cmv_helper_insert_compensations <- function(fcs_filename,
         # This is how you would extract the compensations from the FCS file
         for (comp_x in c("spillover.original", names(loaded_comps))) {
             # cytobench::read.FCS_custom_spillover(outfile, comp_x)
-            read.FCS_custom_spillover(outfile, comp_x)
+            read.FCS_custom_spillover(
+                fcs = outfile,
+                custom_spillover_keyword = comp_x,
+                original_spillover_keyword = spillover_keyword
+            )
         }
     } else {
         return(ff)
