@@ -4,12 +4,21 @@
 \alias{read.FCS_custom_spillover}
 \title{Read custom spillover matrix and autofluorescence vector from FCS file}
 \usage{
-read.FCS_custom_spillover(fcs, custom_spillover_keyword = "spillover.manual")
+read.FCS_custom_spillover(
+  fcs,
+  custom_spillover_keyword = "spillover.manual",
+  original_spillover_keyword = "$SPILLOVER"
+)
 }
 \arguments{
 \item{fcs}{Either a path to an FCS file or a flowFrame object}
 
 \item{custom_spillover_keyword}{The keyword to use for the custom spillover matrix and autofluorescence vector. Default is "spillover.manual".}
+
+\item{original_spillover_keyword}{The keyword to use for the original spillover matrix. Default is "$SPILLOVER".}
+}
+\value{
+A list with the spillover matrix and the autofluorescence vector
 }
 \description{
 Be careful when using it. This is primarily a helper function for the cmv_helper_compensation function and the related data.

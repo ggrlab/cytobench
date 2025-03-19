@@ -55,15 +55,19 @@ cmv_helper_compensation <- function(ff_unapplied_compensations,
 #' Either a path to an FCS file or a flowFrame object
 #' @param custom_spillover_keyword
 #' The keyword to use for the custom spillover matrix and autofluorescence vector. Default is "spillover.manual".
+#' @param original_spillover_keyword
+#' The keyword to use for the original spillover matrix. Default is "$SPILLOVER".
+#' @return
+#' A list with the spillover matrix and the autofluorescence vector
 #' @export
-read.FCS_custom_spillover <- function(fcs, custom_spillover_keyword = "spillover.manual") {
+read.FCS_custom_spillover <- function(fcs, custom_spillover_keyword = "spillover.manual", original_spillover_keyword = "$SPILLOVER") {
     if (is.character(fcs)) {
         # Reading the stored spillover matrices:
         fs_keywords <- flowCore::read.FCSheader(fcs)[[1]]
         # By reading only the header, the spillover matrix is not transformed into a
         # matrix. So we have to do it manually.
-        fs_keywords["$SPILLOVER"] <- list(
-            flowCore:::string_to_spill(fs_keywords[["$SPILLOVER"]])
+        fs_keywords[original_spillover_keyword] <- list(
+            flowCore:::string_to_spill(fs_keywords[[original_spillover_keyword]])
         )
     } else {
         fs_keywords <- flowCore::keyword(fcs)
@@ -74,7 +78,7 @@ read.FCS_custom_spillover <- function(fcs, custom_spillover_keyword = "spillover
     }
 
     # Kaluza uses the following function to read the spillover matrix:
-    # read_spillover <- flowCore:::string_to_spill(fs_keywords[["$SPILLOVER"]])
+    # read_spillover <- flowCore:::string_to_spill(fs_keywords[[original_spillover_keyword]])
 
     spillovermat <- flowCore:::string_to_spill(fs_keywords[[custom_spillover_keyword]])
     if (custom_spillover_keyword == "spillover.original") {
@@ -89,7 +93,7 @@ read.FCS_custom_spillover <- function(fcs, custom_spillover_keyword = "spillover
         )
         names(autofluorescence_proportional) <- colnames(spillovermat)
     }
-    current_spillover <- fs_keywords[["$SPILLOVER"]]
+    current_spillover <- fs_keywords[[original_spillover_keyword]]
     # Order the spillover matrix according to the current spillover matrix
     spillover_reordered <- spillovermat
     rownames(spillover_reordered) <- colnames(spillover_reordered)
