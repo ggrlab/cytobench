@@ -168,7 +168,6 @@ load_mfi_files <- function(fcs_dir = "data-raw/s001",
                            regex_singlestain = "-(CD3-.*)|(none)\\.fcs",
                            gating_set_file = NULL,
                            gate_extract = NULL) {
-
     # List all files in the specified directory that match the given regex pattern
     dir_files <- list.files(fcs_dir, full.names = TRUE, pattern = regex_singlestain)
 
@@ -317,8 +316,8 @@ clustering_seeded_mfi_multicolor <- function(values, seed = 42, transform_fun, f
     # calculate median per column grouped by cluster with data.table
     medians <- values_copy[, lapply(.SD, median), by = cluster]
     index_negative_median <- which.min(apply(medians, 1, sum))
-    clusternumber_negative_median <- values_copy[["cluster"]][index_negative_median]
-    
+    clusternumber_negative_median <- medians[["cluster"]][index_negative_median]
+
     melted_medians <- data.table::melt(medians, id.vars = "cluster")
     melted_medians[, cluster := ifelse(cluster == clusternumber_negative_median, "negative", "positive")]
     cast_medians <- data.table::dcast(melted_medians, variable ~ cluster)
