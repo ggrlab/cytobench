@@ -1,4 +1,4 @@
-#' @export 
+#' @export
 scale_column_minmax <- function(sample_to_rescale,
                                 scaling_values,
                                 colX,
@@ -27,11 +27,13 @@ scale_column_minmax <- function(sample_to_rescale,
     low <- min(scaling_values)
     high <- max(scaling_values)
 
+    low_subtractbg <- ifelse(subtract_bg, low, 0)
+
     data.table::set(
         sample_to_rescale,
         i = NULL,
         j = colX,
-        value = (sample_to_rescale[, colX, with = FALSE] - low) / (high - low)
+        value = (sample_to_rescale[, colX, with = FALSE] - low_subtractbg) / (high - low)
     )
     invisible(sample_to_rescale)
 }

@@ -428,7 +428,7 @@ extract_relevant_mfis_multistain <- function(loaded_fcs_multistain,
         values_relevantcols <- flowCore::exprs(flowWorkspace::cytoframe_to_flowFrame(ff_x[, relevant_columns][[1]]))
         clustering_seeded_mfi_multicolor(
             values = values_relevantcols,
-            seed = 2,
+            seed = seed,
             transform_fun = transform_fun
         )
     }) |>
