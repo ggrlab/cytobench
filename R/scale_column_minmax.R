@@ -5,7 +5,7 @@ scale_column_minmax <- function(sample_to_rescale,
                                 subtract_bg = TRUE) {
     # Careful, this function works always inplace!
 
-
+    mediancenter <- FALSE
     if (length(scaling_values) == 1) {
         # Then only one median given which should be centered around 0
         #
@@ -20,6 +20,7 @@ scale_column_minmax <- function(sample_to_rescale,
         #         (tensor - low) / (low + 1 - low) =
         #         (tensor - low) / (1) = tensor - low
         scaling_values <- c(scaling_values, scaling_values + 1)
+        mediancenter <- TRUE
     } else if (length(scaling_values) > 2) {
         stop("Why are there more than 2 parameters?")
     }
@@ -27,7 +28,7 @@ scale_column_minmax <- function(sample_to_rescale,
     low <- min(scaling_values)
     high <- max(scaling_values)
 
-    low_subtractbg <- ifelse(subtract_bg, low, 0)
+    low_subtractbg <- ifelse(subtract_bg || mediancenter, low, 0)
 
     data.table::set(
         sample_to_rescale,
