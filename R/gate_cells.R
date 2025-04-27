@@ -97,6 +97,7 @@ gate_cells <- function(flowset,
         all_cn_as_markernames <- all_cn_as_markernames[unique(names(all_cn_as_markernames))]
         # Extract the population MFIs
         tmp_gates <- flowWorkspace::gs_clone(applied_gates)
+        flowCore::markernames(tmp_gates) <- all_cn_as_markernames
 
         # Get the counts and percentages for each population
         counts_freqs <- lapply(c("count", "percent"), function(statistic) {
