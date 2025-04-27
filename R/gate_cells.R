@@ -85,10 +85,24 @@ gate_cells <- function(flowset,
             compensation_source = "none"
         ))
         suppressMessages(flowWorkspace::recompute(applied_gates))
+        
+        # Set all columns as markernames such that pop.MFI applies to all of them
+        all_cn_as_markernames <- c(
+            flowCore::markernames(applied_gates),
+            setNames(
+                flowCore::colnames(applied_gates),
+                flowCore::colnames(applied_gates)
+            )
+        )
+        all_cn_as_markernames <- all_cn_as_markernames[all_cn_as_markernames != "empty"]
+        all_cn_as_markernames <- all_cn_as_markernames[unique(names(all_cn_as_markernames))]
+        # Extract the population MFIs
+        tmp_gates <- flowWorkspace::gs_clone(applied_gates)
+
         # Get the counts and percentages for each population
         counts_freqs <- lapply(c("count", "percent"), function(statistic) {
             flowWorkspace::gs_pop_get_stats(
-                applied_gates,
+                tmp_gates,
                 type = statistic
             )
         })
@@ -103,7 +117,7 @@ gate_cells <- function(flowset,
         colnames(counts_dt)[4] <- "percent_from_parent"
         # Extract the population MFIs
         # This only extracts for the columns in flowCore::markernames()
-        pop_mfis <- flowWorkspace::gh_pop_get_stats(applied_gates, type = flowWorkspace::pop.MFI)
+        pop_mfis <- flowWorkspace::gh_pop_get_stats(tmp_gates, type = flowWorkspace::pop.MFI)
         counts_dt_MFI <- dplyr::left_join(counts_dt, pop_mfis, by = c("pop"))
         counts_dt_MFI[["sample"]] <- fcs_x_sID
 
