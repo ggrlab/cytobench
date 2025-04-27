@@ -50,7 +50,7 @@ gate_cells <- function(flowset,
             stop("Not all panel files have a corresponding gating file")
         }
     }
-    if(!inplace){
+    if (!inplace) {
         flowset <- flowCore::flowSet(flowCore::flowSet_to_list(flowset))
     }
     # Initialize an empty variable to store complete counts
@@ -85,10 +85,9 @@ gate_cells <- function(flowset,
             compensation_source = "none"
         ))
         suppressMessages(flowWorkspace::recompute(applied_gates))
-        
+
         # Set all columns as markernames such that pop.MFI applies to all of them
         all_cn_as_markernames <- c(
-            flowCore::markernames(applied_gates),
             setNames(
                 flowCore::colnames(applied_gates),
                 flowCore::colnames(applied_gates)
@@ -106,6 +105,7 @@ gate_cells <- function(flowset,
                 type = statistic
             )
         })
+
         # Merge the counts and percentages into a single data table
         counts_dt <- dplyr::left_join(
             counts_freqs[[1]],
