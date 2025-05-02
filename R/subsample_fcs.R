@@ -63,6 +63,9 @@ subsample_fcs <- function(file_x,
 subsample_ff <- function(flowframe,
                          n_cells = 10000,
                          seed = 427764) {
+    if (is.na(n_cells) || is.infinite(n_cells)) {
+        return(flowframe)
+    }
     # Note that if you select more cells than are available, the function will upsample.
     # But the first indices will be the same as the original flowframe. (up to the number
     # of cells in the original flowframe)
