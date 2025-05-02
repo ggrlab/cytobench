@@ -1,9 +1,112 @@
+# test_that("Testing rescale_extracted", {
+#     extracted_mfis <- extract_singlestain_mfi(
+#         "data-raw/s001",
+#         gating_set_file = "data-raw/CT_p001_s001_raw_ungated_none_Inf_navios_01-CD3-FITC-single_CD3_compensation.flowWorkspace_gatingset"
+#     )
+#     loaded_fcs <- flowCore::read.FCS("data-raw/s001/CT_p001_s001_comp-manual_ungated_none_100k_navios_14-01..11-SingleNone.fcs")
+#     rescaled_sample <- rescale_extracted(
+#         sample_to_rescale = flowCore::exprs(loaded_fcs),
+#         extracted_mfi = extracted_mfis
+#     )
+#     testthat::expect(TRUE)
+# })
+
+# devtools::load_all()
 test_that("Testing rescale_extracted", {
     extracted_mfis <- extract_singlestain_mfi(
         "data-raw/s001",
         gating_set_file = "data-raw/CT_p001_s001_raw_ungated_none_Inf_navios_01-CD3-FITC-single_CD3_compensation.flowWorkspace_gatingset"
     )
-    loaded_fcs <- flowCore::read.FCS("data-raw/s001/CT_p001_s001_comp-manual_ungated_none_100k_navios_14-01..11-SingleNone.fcs")
+    # loaded_fcs <- flowCore::read.FCS("data-raw/s001/CT_p001_s001_comp-manual_ungated_none_100k_navios_14-01..11-SingleNone.fcs")
+    loaded_lx <- flowCore::read.FCS("data-raw/s001_cd3/CT_p001_s001_comp-manual_cd3_none_Inf_lx_12-panel.fcs")
+    loaded_navios <- flowCore::read.FCS("data-raw/s001_cd3/CT_p001_s001_comp-manual_cd3_none_Inf_navios_12-panel.fcs")
+
+
+    tmpplot <- function(df_x, asdf) {
+        ggplot2::ggplot(
+            df_x, ggplot2::aes(x = !!ggplot2::sym(asdf))
+        ) +
+            ggplot2::geom_density(fill = "blue", alpha = .3) +
+            ggplot2::ylim(c(0, .1)) +
+            ggpubr::theme_pubclean()
+    }
+
+    pc7_neg <- extracted_mfis[extracted_mfis$feature == "PC7-A", "negative"][[1]]
+    pc7_pos <- extracted_mfis[extracted_mfis$feature == "PC7-A", "positive"][[1]]
+
+    plot(((1:1000) / (10)))
+    x <- (-1000:1000) / 200
+    plot(x, (exp(x) / (1 + exp(x))))
+    absolute_sigmoid <- function(x) {
+        ((1 / (1 + exp(-x))) - .5) * 2
+    }
+    plot(x, absolute_sigmoid(x))
+
+
+    refactor <- 1e3
+    df <- tibble::tibble(
+        x = c(
+            flowCore::exprs(loaded_lx)[, "PC7-A"],
+            flowCore::exprs(loaded_navios)[, "PC7-A"]
+        ),
+        device = c(rep("lx", nrow(loaded_lx)), rep("navios", nrow(loaded_navios)))
+    ) |>
+        dplyr::mutate(
+            x_asinh = asinh(x / 500),
+            x_minmax = (x - min(x)) / (max(x) - min(x)),
+            x_minmax_asinh = asinh(x_minmax * refactor),
+            x_aligned = (x - pc7_neg) / (pc7_pos - pc7_neg),
+            x_aligned_asinh = asinh(x_aligned * refactor),
+            x_aligned_v2 = ((x - pc7_neg) / (pc7_pos - pc7_neg)) * abs(absolute_sigmoid(x)) * refactor,
+            x_aligned_v2_asinh = asinh(x_aligned_v2),
+            x_aligned_v3_asinh = asinh(absolute_sigmoid(x_aligned) * refactor)
+        )
+    pdf("removeme.pdf")
+    print(tmpplot(df, "x_asinh"))
+    print(tmpplot(df, "x_minmax_asinh"))
+    print(tmpplot(df, "x_aligned_asinh"))
+    print(tmpplot(df, "x_aligned_v2_asinh"))
+    print(tmpplot(df, "x_aligned_v3_asinh"))
+    dev.off()
+
+
+
+
+
+
+
+    ##### PB:
+    pb_neg <- extracted_mfis[extracted_mfis$feature == "PB-A", "negative"][[1]]
+    pb_pos <- extracted_mfis[extracted_mfis$feature == "PB-A", "positive"][[1]]
+
+    plot(((1:1000) / (10)))
+    x <- (-1000:1000) / 200
+    plot(x, (exp(x) / (1 + exp(x))))
+    absolute_sigmoid <- function(x) {
+        ((1 / (1 + exp(-x))) - .5) * 2
+    }
+    plot(x, absolute_sigmoid(x))
+
+
+    refactor <- 1e2
+    df <- tibble::tibble(x = flowCore::exprs(loaded_fcs)[, "PB-A"]) |>
+        dplyr::mutate(
+            x_asinh = asinh(x / 500),
+            x_minmax = (x - min(x)) / (max(x) - min(x)),
+            x_minmax_asinh = asinh(x_minmax * refactor),
+            x_aligned = (x - pb_neg) / (pb_pos - pb_neg),
+            x_aligned_asinh = asinh(x_aligned * refactor),
+            x_aligned_v2 = ((x - pb_neg) / (pb_pos - pb_neg)) * abs(absolute_sigmoid(x)) * refactor,
+            x_aligned_v2_asinh = asinh(x_aligned_v2),
+            x_aligned_v3_asinh = asinh(absolute_sigmoid(x_aligned) * refactor)
+        )
+    pdf("removeme.pdf")
+    print(tmpplot(df, "x_asinh"))
+    print(tmpplot(df, "x_minmax_asinh"))
+    print(tmpplot(df, "x_aligned_asinh"))
+    print(tmpplot(df, "x_aligned_v2_asinh"))
+    print(tmpplot(df, "x_aligned_v3_asinh"))
+    dev.off()
     rescaled_sample <- rescale_extracted(
         sample_to_rescale = flowCore::exprs(loaded_fcs),
         extracted_mfi = extracted_mfis

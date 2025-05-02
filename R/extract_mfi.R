@@ -11,7 +11,7 @@ empty_tibble <- tibble::tibble(
 #' This function extracts the median fluorescence intensity (MFI) from single-stain FCS files.
 #'
 #' @param fcs_dir A character string specifying the directory containing the FCS files. Default is "data-raw/s001".
-#' @param regex_singlestain A regular expression pattern to identify single-stain FCS files. Default is "-(CD3-.*)|(none)\\.fcs".
+#' @param regex_singlestain A regular expression pattern to identify single-stain FCS files. Default is "(-(CD3-.*)|(none))\\.fcs$".
 #' @param transform_fun
 #' A function to transform the fluorescence values. Default is `function(x) { asinh(x / 1e3) }`.
 #' The reported MFIs are calculated as the median of the UNtransformed values. Transformation is
@@ -44,7 +44,7 @@ empty_tibble <- tibble::tibble(
 #' If there have been NO single-stained samples (except for the unstained samples),
 #' "negative" and "positive" will be filled with the values from the multi-stained samples.
 #'
-#' @param regex_multistain A regular expression pattern to identify multi-stain FCS files. Default is "(_15-MasterMix)\\.fcs".
+#' @param regex_multistain A regular expression pattern to identify multi-stain FCS files. Default is "(_15-MasterMix)\\.fcs$".
 #' @param multistain_columns A character vector specifying the relevant columns for multi-staining. Default is c("FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A", "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A").
 #'
 #' @return A data frame with the extracted MFIs. E.g.:
@@ -71,71 +71,82 @@ empty_tibble <- tibble::tibble(
 #' )
 #' }
 #' @export
+#' @export
 extract_mfi <- function(fcs_dir = "data-raw/s001",
-                        regex_singlestain = "-(CD3-.*)|(none)\\.fcs",
+                        regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
                         transform_fun = function(x) {
                             asinh(x / 1e3)
                         },
-                        multistaining = FALSE,
                         regex_multistain = "(_15-MasterMix)\\.fcs",
                         multistain_columns = c(
                             "FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A",
                             "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A"
                         ),
                         gating_set_file = NULL,
-                        gate_extract = NULL) {
-    loaded_fcs <- load_mfi_files(
-        fcs_dir = fcs_dir,
-        regex_singlestain = regex_singlestain,
-        gating_set_file = gating_set_file,
-        gate_extract = gate_extract
+                        gate_extract = NULL,
+                        ...) {
+    joint_df <- tryCatch(
+        {
+            loaded_fcs <- cytobench:::load_mfi_files(
+                fcs_dir = fcs_dir,
+                regex_singlestain = regex_singlestain,
+                gating_set_file = gating_set_file,
+                gate_extract = gate_extract
+            )
+            # If multistaining is enabled, the following extracts the potential UNSTAINED sample
+            extract_singlestain_mfi_wrapper(loaded_fcs, transform_fun = transform_fun, relevant_columns = multistain_columns)
+        },
+        error = function(e) {
+            list(tibble::tibble(
+                "feature" = NA,
+                "negative" = NA,
+                "positive" = NA,
+                "unstained" = NA,
+                "negative.sd" = NA,
+                "positive.sd" = NA,
+                "unstained.sd" = NA
+            ))
+        }
     )
-    if (!multistaining) {
-        # Extract the single stainings
-        joint_df <- extract_singlestain_mfi_wrapper(loaded_fcs, transform_fun = transform_fun)
-    } else {
-        # If multistaining is enabled, the following extracts the potential UNSTAINED sample
-        joint_df <- extract_singlestain_mfi_wrapper(loaded_fcs, transform_fun = transform_fun, relevant_columns = multistain_columns)
 
-        # Then extract the actually multi-stained sample(s)
-        loaded_fcs_multistain <- load_mfi_files(
-            fcs_dir = fcs_dir,
-            regex_singlestain = regex_multistain,
-            gating_set_file = gating_set_file,
-            gate_extract = gate_extract
-        )
-        relevant_mfis_multi <- tryCatch(
-            {
-                extract_relevant_mfis_multistain(
-                    loaded_fcs_multistain,
-                    transform_fun = transform_fun,
-                    relevant_columns = multistain_columns
-                )
-            },
-            error = function(e) {
-                list(tibble::tibble(
-                    "sample" = NA,
-                    "feature" = NA,
-                    "negative" = NA,
-                    "positive" = NA,
-                    "unstained" = NA,
-                    "negative.sd" = NA,
-                    "positive.sd" = NA,
-                    "unstained.sd" = NA
-                ))
-            }
-        )
-        #  Merge single and multi stainings
-        joint_df <- dplyr::left_join(
-            joint_df,
-            relevant_mfis_multi,
-            by = "feature",
-            suffix = c("", ".multi")
-        )
-        for (x in c("positive", "negative", "positive.sd", "negative.sd")) {
-            if (all(is.na(joint_df[[x]]))) {
-                joint_df[[x]] <- joint_df[[paste0(x, ".multi")]]
-            }
+    relevant_mfis_multi <- tryCatch(
+        {
+            # Then extract the actually multi-stained sample(s)
+            loaded_fcs_multistain <- load_mfi_files(
+                fcs_dir = fcs_dir,
+                regex_singlestain = regex_multistain,
+                gating_set_file = gating_set_file,
+                gate_extract = gate_extract
+            )
+            extract_relevant_mfis_multistain(
+                loaded_fcs_multistain,
+                transform_fun = transform_fun,
+                relevant_columns = multistain_columns
+            )
+        },
+        error = function(e) {
+            list(tibble::tibble(
+                "sample" = NA,
+                "feature" = NA,
+                "negative" = NA,
+                "positive" = NA,
+                "unstained" = NA,
+                "negative.sd" = NA,
+                "positive.sd" = NA,
+                "unstained.sd" = NA
+            ))
+        }
+    )
+    #  Merge single and multi stainings
+    joint_df <- dplyr::left_join(
+        joint_df,
+        relevant_mfis_multi,
+        by = "feature",
+        suffix = c("", ".multi")
+    )
+    for (x in c("positive", "negative", "positive.sd", "negative.sd")) {
+        if (all(is.na(joint_df[[x]]))) {
+            joint_df[[x]] <- joint_df[[paste0(x, ".multi")]]
         }
     }
 
@@ -143,11 +154,12 @@ extract_mfi <- function(fcs_dir = "data-raw/s001",
     return(dplyr::mutate(joint_df, dplyr::across(tidyr::everything(), ~ unname(.))))
 }
 
+
 #' Extract Single Stain Median Fluorescence Intensity (MFI)
 #' @inheritParams extract_mfi
 #' @export
 extract_singlestain_mfi <- function(fcs_dir = "data-raw/s001",
-                                    regex_singlestain = "-(CD3-.*)|(none)\\.fcs",
+                                    regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
                                     transform = function(x) {
                                         asinh(x / 1e3)
                                     },
@@ -165,11 +177,12 @@ extract_singlestain_mfi <- function(fcs_dir = "data-raw/s001",
 }
 
 load_mfi_files <- function(fcs_dir = "data-raw/s001",
-                           regex_singlestain = "-(CD3-.*)|(none)\\.fcs",
+                           regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
                            gating_set_file = NULL,
                            gate_extract = NULL) {
     # List all files in the specified directory that match the given regex pattern
-    dir_files <- list.files(fcs_dir, full.names = TRUE, pattern = regex_singlestain)
+    dir_files <- list.files(fcs_dir, full.names = TRUE)
+    dir_files <- dir_files[grepl(regex_singlestain, dir_files)]
 
     # Load the FCS files into a list of cytosets
     loaded_fcs <- sapply(dir_files, flowWorkspace::load_cytoset_from_fcs, simplify = FALSE)

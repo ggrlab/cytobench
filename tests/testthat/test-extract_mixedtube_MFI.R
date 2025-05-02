@@ -2,7 +2,7 @@ devtools::load_all()
 test_that("Extract mixed tube MFI", {
     extracted_mfis_singlestain <- extract_mfi(
         "data-raw/MX.compensated-manual.navios.s050/",
-        regex_singlestain = "-(CD3-.*)|(none)\\.fcs",
+        regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
         gating_set_file = "data-raw/MX.compensated-manual.navios.s050/gatingset.s050/MX_p048_s050_raw_ungated_none_Inf_navios_01-CD3-FITC-single_CD3_compensation_navios.flowWorkspace_gatingset"
     )
     # # A tibble: 10 × 6
@@ -21,10 +21,10 @@ test_that("Extract mixed tube MFI", {
 
     extracted_mfis_multistain <- extract_mfi(
         "data-raw/MX.compensated-manual.navios.s050/",
-        regex_singlestain = "(none)\\.fcs",
+        regex_singlestain = "(none)\\.fcs$",
         gating_set_file = "data-raw/MX.compensated-manual.navios.s050/gatingset.s050/MX_p048_s050_raw_ungated_none_Inf_navios_01-CD3-FITC-single_CD3_compensation_navios.flowWorkspace_gatingset",
         multistaining = TRUE,
-        regex_multistain = "(_15-MasterMix)\\.fcs",
+        regex_multistain = "(_15-MasterMix)\\.fcs$",
         multistain_columns = c(
             "FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A",
             "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A"
@@ -50,10 +50,10 @@ test_that("Extract mixed tube MFI", {
     extracted_mfis_multi_AND_singlestain <- extract_mfi(
 
         "data-raw/MX.compensated-manual.navios.s050/",
-        regex_singlestain = "-(CD3-.*)|(none)\\.fcs",
+        regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
         gating_set_file = "data-raw/MX.compensated-manual.navios.s050/gatingset.s050/MX_p048_s050_raw_ungated_none_Inf_navios_01-CD3-FITC-single_CD3_compensation_navios.flowWorkspace_gatingset",
         multistaining = TRUE,
-        regex_multistain = "(_15-MasterMix)\\.fcs",
+        regex_multistain = "(_15-MasterMix)\\.fcs$",
         multistain_columns = c(
             "FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A",
             "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A"

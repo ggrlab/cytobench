@@ -6,26 +6,36 @@
 \usage{
 extract_mfi(
   fcs_dir = "data-raw/s001",
-  regex_singlestain = "-(CD3-.*)|(none)\\\\.fcs",
+  regex_singlestain = "(-(CD3-.*)|(none))\\\\.fcs$",
   transform_fun = function(x) {
      asinh(x/1000)
  },
-  multistaining = FALSE,
   regex_multistain = "(_15-MasterMix)\\\\.fcs",
   multistain_columns = c("FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A", "APC-A",
     "AF700-A", "AA750-A", "PB-A", "KrO-A"),
   gating_set_file = NULL,
-  gate_extract = NULL
+  gate_extract = NULL,
+  ...
 )
 }
 \arguments{
 \item{fcs_dir}{A character string specifying the directory containing the FCS files. Default is "data-raw/s001".}
 
-\item{regex_singlestain}{A regular expression pattern to identify single-stain FCS files. Default is "-(CD3-.*)|(none)\\.fcs".}
+\item{regex_singlestain}{A regular expression pattern to identify single-stain FCS files. Default is "(-(CD3-.*)|(none))\\.fcs$".}
 
 \item{transform_fun}{A function to transform the fluorescence values. Default is \code{function(x) { asinh(x / 1e3) }}.
 The reported MFIs are calculated as the median of the UNtransformed values. Transformation is
 only used to cluster the negative and positive populations.}
+
+\item{regex_multistain}{A regular expression pattern to identify multi-stain FCS files. Default is "(_15-MasterMix)\\.fcs$".}
+
+\item{multistain_columns}{A character vector specifying the relevant columns for multi-staining. Default is c("FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A", "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A").}
+
+\item{gating_set_file}{A gating set file or object to apply to the FCS files. Default is NULL.
+Usually you want to gate lymphocytes before extracting the MFIs. If a character string is provided,
+the gating set is loaded from the file. If a (GatingSet) object is provided, it is used directly.}
+
+\item{gate_extract}{A specific gate to extract from the gating set. Default is NULL.}
 
 \item{multistaining}{A logical indicating whether to extract multi-stained samples. Default is FALSE.
 Note that if TRUE, the function will return a dataframe as following:
@@ -48,16 +58,6 @@ Note that if TRUE, the function will return a dataframe as following:
 
 If there have been NO single-stained samples (except for the unstained samples),
 "negative" and "positive" will be filled with the values from the multi-stained samples.}
-
-\item{regex_multistain}{A regular expression pattern to identify multi-stain FCS files. Default is "(_15-MasterMix)\\.fcs".}
-
-\item{multistain_columns}{A character vector specifying the relevant columns for multi-staining. Default is c("FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A", "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A").}
-
-\item{gating_set_file}{A gating set file or object to apply to the FCS files. Default is NULL.
-Usually you want to gate lymphocytes before extracting the MFIs. If a character string is provided,
-the gating set is loaded from the file. If a (GatingSet) object is provided, it is used directly.}
-
-\item{gate_extract}{A specific gate to extract from the gating set. Default is NULL.}
 }
 \value{
 A data frame with the extracted MFIs. E.g.:

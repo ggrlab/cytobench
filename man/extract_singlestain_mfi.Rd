@@ -6,7 +6,7 @@
 \usage{
 extract_singlestain_mfi(
   fcs_dir = "data-raw/s001",
-  regex_singlestain = "-(CD3-.*)|(none)\\\\.fcs",
+  regex_singlestain = "(-(CD3-.*)|(none))\\\\.fcs$",
   transform = function(x) {
      asinh(x/1000)
  },
@@ -17,7 +17,7 @@ extract_singlestain_mfi(
 \arguments{
 \item{fcs_dir}{A character string specifying the directory containing the FCS files. Default is "data-raw/s001".}
 
-\item{regex_singlestain}{A regular expression pattern to identify single-stain FCS files. Default is "-(CD3-.*)|(none)\\.fcs".}
+\item{regex_singlestain}{A regular expression pattern to identify single-stain FCS files. Default is "(-(CD3-.*)|(none))\\.fcs$".}
 
 \item{gating_set_file}{A gating set file or object to apply to the FCS files. Default is NULL.
 Usually you want to gate lymphocytes before extracting the MFIs. If a character string is provided,
