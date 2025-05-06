@@ -125,7 +125,7 @@ extract_mfi <- function(fcs_dir = "data-raw/s001",
             )
         },
         error = function(e) {
-            list(tibble::tibble(
+            return(tibble::tibble(
                 "sample" = NA,
                 "feature" = NA,
                 "negative" = NA,
@@ -137,13 +137,17 @@ extract_mfi <- function(fcs_dir = "data-raw/s001",
             ))
         }
     )
-    #  Merge single and multi stainings
-    joint_df <- dplyr::left_join(
-        joint_df,
-        relevant_mfis_multi,
-        by = "feature",
-        suffix = c("", ".multi")
-    )
+    if (nrow(relevant_mfis_multi) > 0) {
+        #  Merge single and multi stainings
+        joint_df <- dplyr::left_join(
+            joint_df,
+            relevant_mfis_multi[[1]],
+            by = "feature",
+            suffix = c("", ".multi")
+        )
+    }
+    # The following replaces the values of the respective columns
+    # by their multi-stained counterparts if they are NA.
     for (x in c("positive", "negative", "positive.sd", "negative.sd")) {
         if (all(is.na(joint_df[[x]]))) {
             joint_df[[x]] <- joint_df[[paste0(x, ".multi")]]
