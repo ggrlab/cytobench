@@ -287,7 +287,7 @@ extract_singlestain_mfi_wrapper <- function(loaded_fcs,
     # Check if there is only one unstained sample
     if (length(relevant_unstained) == 1) {
         names(relevant_unstained) <- "unstained"
-    } else {
+    } else if (length(relevant_unstained) > 1) {
         warning("More than one unstained sample found, returning each MFI by filename")
     }
     # Join all unstained samples
@@ -434,7 +434,7 @@ extract_relevant_mfis_multistain <- function(loaded_fcs_multistain,
                                              },
                                              relevant_columns,
                                              seed = 42) {
-    if (length(loaded_fcs_multistain) != 1) {
+    if (length(loaded_fcs_multistain) > 1) {
         warning("More than one multistain sample found, returning the MFI of each multistain_column by filename. This is NOT intended!")
     }
     multistain_mfis <- lapply(loaded_fcs_multistain, function(ff_x) {
