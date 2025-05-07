@@ -97,7 +97,7 @@ extract_mfi <- function(fcs_dir = "data-raw/s001",
             extract_singlestain_mfi_wrapper(loaded_fcs, transform_fun = transform_fun, relevant_columns = multistain_columns)
         },
         error = function(e) {
-            list(tibble::tibble(
+            tibble::tibble(
                 "feature" = NA,
                 "negative" = NA,
                 "positive" = NA,
@@ -105,7 +105,7 @@ extract_mfi <- function(fcs_dir = "data-raw/s001",
                 "negative.sd" = NA,
                 "positive.sd" = NA,
                 "unstained.sd" = NA
-            ))
+            )
         }
     )
 
@@ -137,6 +137,7 @@ extract_mfi <- function(fcs_dir = "data-raw/s001",
             ))
         }
     )
+    browser()
     if (nrow(relevant_mfis_multi) > 0) {
         #  Merge single and multi stainings
         joint_df <- dplyr::left_join(
@@ -301,13 +302,13 @@ extract_singlestain_mfi_wrapper <- function(loaded_fcs,
         if (any(is.na(single_stainings[["feature"]]))) {
             stop("There are NA values in the feature column of single_stainings, joining with unstained will fail.")
         }
-        joint_df <- dplyr::left_join(
+        single_stainings <- dplyr::left_join(
             single_stainings,
             all_unstained_joint,
             by = "feature"
         )
     }
-    return(joint_df)
+    return(single_stainings)
 }
 
 clustering_seeded_mfi <- function(values, seed, transform_fun, featurename) {
