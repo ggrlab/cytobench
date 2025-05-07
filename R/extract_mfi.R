@@ -141,7 +141,7 @@ extract_mfi <- function(fcs_dir = "data-raw/s001",
         #  Merge single and multi stainings
         joint_df <- dplyr::left_join(
             joint_df,
-            relevant_mfis_multi[[1]],
+            relevant_mfis_multi,
             by = "feature",
             suffix = c("", ".multi")
         )
