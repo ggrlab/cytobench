@@ -309,35 +309,38 @@ wrapper_count_models <- function(df_list,
             lrn_x_hparam_optimized_train$train(task_data$task, row_ids = which(task_data[["tvt"]] == "train"))
             lrn_x_hparam_optimized_final$train(task_data$task, row_ids = which(task_data[["tvt"]] %in% hpoptimized_final_trainsets))
 
-            task_data$task$col_info
+            final_model <- lrn_x_hparam_optimized_final$clone()
+
             data_validation <- data.table::as.data.table(task_data[["task"]])[task_data[["tvt"]] == "validation"]
             pred_fromtrain_toval <- lrn_x_hparam_optimized_train$predict_newdata(data_validation) |>
                 data.table::as.data.table()
-            tasklabels <- names(pred_fromtrain_toval)[4:5]
-            names(tasklabels) <- c("positive", "negative") # MLR3 convention
-            tasklabels <- sub("prob.", "", tasklabels)
-            res_roc <- pROC::roc(
-                response = pred_fromtrain_toval[["truth"]],
-                predictor = pred_fromtrain_toval[[4]],
-                levels = tasklabels[c("negative", "positive")], # pROC convention
-                # If I change the direction here, I have to change it in the predictions as well!!
-                direction = "<"
-            ) |>
-                # get the best threshold:
-                pROC::coords("best", ret = "all", best.method = "closest.topleft")
-            res_roc_first <- res_roc[1, ]
+            if ("LearnerClassif" %in% class(lrn_x_hparam_optimized_final)) {
+                tasklabels <- names(pred_fromtrain_toval)[4:5]
+                names(tasklabels) <- c("positive", "negative") # MLR3 convention
+                tasklabels <- sub("prob.", "", tasklabels)
+                res_roc <- pROC::roc(
+                    response = pred_fromtrain_toval[["truth"]],
+                    predictor = pred_fromtrain_toval[[4]],
+                    levels = tasklabels[c("negative", "positive")], # pROC convention
+                    # If I change the direction here, I have to change it in the predictions as well!!
+                    direction = "<"
+                ) |>
+                    # get the best threshold:
+                    pROC::coords("best", ret = "all", best.method = "closest.topleft")
+                res_roc_first <- res_roc[1, ]
 
 
-            # n_glmnet <- lrn_x_hparam_optimized$model$glmnet.fit$nobs
-            # n_ranger <- lrn_x_hparam_optimized$model$num.samples
-            # n_samples <- max(n_glmnet, n_ranger)
-            # if (n_samples > 100 || n_samples < 75) {
-            #     stop("I expected to use most of the samples in the training and validation set TOGETHER. This must be less or equal to 100, potentially less, but also probably more than 75.")
-            # }
-            final_model <- lrn_x_hparam_optimized_final$clone()
-            # I cannot change "final_model" directly (R6 class)
-            # but I can change the underlying model. This is a bit hacky, but it works.
-            final_model[["model"]][["threshold_proc_closest.topleft"]] <- res_roc_first[["threshold"]]
+                # # n_glmnet <- lrn_x_hparam_optimized$model$glmnet.fit$nobs
+                # # n_ranger <- lrn_x_hparam_optimized$model$num.samples
+                # # n_samples <- max(n_glmnet, n_ranger)
+                # # if (n_samples > 100 || n_samples < 75) {
+                # #     stop("I expected to use most of the samples in the training and validation set TOGETHER. This must be less or equal to 100, potentially less, but also probably more than 75.")
+                # # }
+                # final_model <- lrn_x_hparam_optimized_final$clone()
+                # I cannot change "final_model" directly (R6 class)
+                # but I can change the underlying model. This is a bit hacky, but it works.
+                final_model[["model"]][["threshold_proc_closest.topleft"]] <- res_roc_first[["threshold"]]
+            }
             models[[task_XX]][[final_model$id]] <- list(final_model)
             names(models[[task_XX]][[final_model$id]]) <- clustering_x
         }
@@ -356,25 +359,27 @@ wrapper_count_models <- function(df_list,
                 current_task <- tasklist[[outcome_xx]][[cluster_xx]][["task"]]
                 dt_pred <- current_model$predict(current_task) |>
                     data.table::as.data.table()
-                # Set the predicted response according to the threshold identified through
-                # the ROC curve on the validation set.
-                # dt_pred[[4]] is the positive class
-                predicted_negative <- dt_pred[[4]] < current_model[["model"]][["threshold_proc_closest.topleft"]]
-                ll_pred <- levels(dt_pred[["response"]])
-                dt_pred[["response"]] <- factor(
-                    ifelse(predicted_negative, ll_pred[2], ll_pred[1]),
-                    levels = ll_pred
-                )
-                orig_cn <- colnames(dt_pred)
-                which_probs <- grepl("prob", orig_cn)
-                prob_names <- paste0(sub("prob.", "", orig_cn[which_probs]), collapse = "__,__")
+                if ("TaskClassif" %in% class(current_task)) {
+                    # Set the predicted response according to the threshold identified through
+                    # the ROC curve on the validation set.
+                    # dt_pred[[4]] is the positive class
+                    predicted_negative <- dt_pred[[4]] < current_model[["model"]][["threshold_proc_closest.topleft"]]
+                    ll_pred <- levels(dt_pred[["response"]])
+                    dt_pred[["response"]] <- factor(
+                        ifelse(predicted_negative, ll_pred[2], ll_pred[1]),
+                        levels = ll_pred
+                    )
+                    orig_cn <- colnames(dt_pred)
+                    which_probs <- grepl("prob", orig_cn)
+                    prob_names <- paste0(sub("prob.", "", orig_cn[which_probs]), collapse = "__,__")
 
-                new_cn <- sub("prob.*", "prob", colnames(dt_pred))
-                new_cn[grepl("prob", new_cn)] <- paste0("prob.level_", 1:sum(grepl("prob", new_cn)))
-                colnames(dt_pred) <- new_cn
-                dt_pred[["tvt"]] <- tasklist[[outcome_xx]][[cluster_xx]][["tvt"]]
-                dt_pred[["task_type"]] <- current_model$task_type
-                dt_pred[["outcome_levels"]] <- prob_names
+                    new_cn <- sub("prob.*", "prob", colnames(dt_pred))
+                    new_cn[grepl("prob", new_cn)] <- paste0("prob.level_", 1:sum(grepl("prob", new_cn)))
+                    colnames(dt_pred) <- new_cn
+                    dt_pred[["tvt"]] <- tasklist[[outcome_xx]][[cluster_xx]][["tvt"]]
+                    dt_pred[["task_type"]] <- current_model$task_type
+                    dt_pred[["outcome_levels"]] <- prob_names
+                }
                 return(dt_pred)
             }, simplify = FALSE) |> data.table::rbindlist(idcol = "cluster")
         }, simplify = FALSE) |> data.table::rbindlist(idcol = "model")
