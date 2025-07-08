@@ -178,7 +178,15 @@ wrapper_count_models <- function(df_list,
                         ivs <- grep(ivs_regex, colnames(counts_x), value = TRUE)
                     }
                     counts_x <- counts_x[, c(tvt_col, x, ivs)]
-                    counts_x <- na.omit(counts_x)
+                    if (all(is.null(rownames(counts_x)))) {
+                        counts_x[["rowname_original"]] <- seq_len(nrow(counts_x))
+                    } else {
+                        counts_x <- tibble::rownames_to_column(counts_x, var = "rowname_original")
+                    }
+                    counts_x_noNA <- na.omit(counts_x)
+                    if (nrow(counts_x_noNA) < nrow(counts_x)) {
+                        warnings("Removed ", nrow(counts_x) - nrow(counts_x_noNA), " rows with NAs from the data")
+                    }
                     if (outcome_types[[x]] != "continuous") {
                         positive_label <- NULL
                         if (!all(is.null(dv_class_positive))) {
@@ -186,18 +194,19 @@ wrapper_count_models <- function(df_list,
                             positive_label <- dv_class_positive[[x]]
                         }
                         new_task <- mlr3::as_task_classif(
-                            counts_x[, c(x, ivs)],
+                            counts_x_noNA[, c("rowname_original", x, ivs)],
                             target = x,
                             positive = positive_label
                         )
                     } else {
                         new_task <- mlr3::as_task_regr(
-                            counts_x[, c(x, ivs)],
+                            counts_x_noNA[, c("rowname_original", x, ivs)],
                             target = x
                         )
                     }
                     new_task$id <- x
-                    return(list("task" = new_task, "tvt" = counts_x[[tvt_col]]))
+                    new_task$set_col_roles("rowname_original", roles = "name")
+                    return(list("task" = new_task, "tvt" = counts_x_noNA[[tvt_col]]))
                 },
                 simplify = FALSE
             )
@@ -359,16 +368,26 @@ wrapper_count_models <- function(df_list,
                 current_task <- tasklist[[outcome_xx]][[cluster_xx]][["task"]]
                 dt_pred <- current_model$predict(current_task) |>
                     data.table::as.data.table()
+                # Because of the potential na.omit() when creating the task, the
+                # row_ids do NOT match the actual samples, shown in rowname_original
+                dt_pred[, sample := c(current_task$data(cols = "rowname_original"))]
+                dt_pred[, row_ids:=NULL]
                 if ("TaskClassif" %in% class(current_task)) {
+                    dt_pred[["class_truth"]] <- dt_pred[["truth"]]
+                    dt_pred[["class_response"]] <- dt_pred[["response"]]
                     # Set the predicted response according to the threshold identified through
                     # the ROC curve on the validation set.
                     # dt_pred[[4]] is the positive class
-                    predicted_negative <- dt_pred[[4]] < current_model[["model"]][["threshold_proc_closest.topleft"]]
-                    ll_pred <- levels(dt_pred[["response"]])
-                    dt_pred[["response"]] <- factor(
-                        ifelse(predicted_negative, ll_pred[2], ll_pred[1]),
-                        levels = ll_pred
-                    )
+                    if (!"multiclass" %in% current_task$properties) {
+                        predicted_negative <- dt_pred[[4]] < current_model[["model"]][["threshold_proc_closest.topleft"]]
+                        ll_pred <- levels(dt_pred[["response"]])
+                        dt_pred[["class_response"]] <- factor(
+                            ifelse(predicted_negative, ll_pred[2], ll_pred[1]),
+                            levels = ll_pred
+                        )
+                    }
+                    dt_pred[, c("truth", "response") := NULL]
+                    # I do the following label substitution to allow for the same column names after data.table::rbindlist
                     orig_cn <- colnames(dt_pred)
                     which_probs <- grepl("prob", orig_cn)
                     prob_names <- paste0(sub("prob.", "", orig_cn[which_probs]), collapse = "__,__")
@@ -376,10 +395,10 @@ wrapper_count_models <- function(df_list,
                     new_cn <- sub("prob.*", "prob", colnames(dt_pred))
                     new_cn[grepl("prob", new_cn)] <- paste0("prob.level_", 1:sum(grepl("prob", new_cn)))
                     colnames(dt_pred) <- new_cn
-                    dt_pred[["tvt"]] <- tasklist[[outcome_xx]][[cluster_xx]][["tvt"]]
-                    dt_pred[["task_type"]] <- current_model$task_type
                     dt_pred[["outcome_levels"]] <- prob_names
                 }
+                dt_pred[["tvt"]] <- tasklist[[outcome_xx]][[cluster_xx]][["tvt"]]
+                dt_pred[["task_type"]] <- current_model$task_type
                 return(dt_pred)
             }, simplify = FALSE) |> data.table::rbindlist(idcol = "cluster")
         }, simplify = FALSE) |> data.table::rbindlist(idcol = "model")
@@ -387,6 +406,7 @@ wrapper_count_models <- function(df_list,
     if (!is.null(outdir)) {
         data.table::fwrite(predictions, file = file.path(outdir, "predictions.csv"))
     }
+
     return(
         list(
             final_models = final_models,
