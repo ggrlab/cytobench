@@ -137,7 +137,6 @@ extract_mfi <- function(fcs_dir = "data-raw/s001",
             ))
         }
     )
-    browser()
     if (nrow(relevant_mfis_multi) > 0) {
         #  Merge single and multi stainings
         joint_df <- dplyr::left_join(
