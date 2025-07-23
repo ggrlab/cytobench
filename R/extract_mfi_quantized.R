@@ -24,15 +24,7 @@ extract_mfi_quantized <- function(fcs_dir = "data-raw/s001",
             extract_singlestain_quantilefun(loaded_fcs, transform_fun = transform_fun, relevant_columns = multistain_columns)
         },
         error = function(e) {
-            tibble::tibble(
-                "feature" = NA,
-                "negative" = NA,
-                "positive" = NA,
-                "unstained" = NA,
-                "negative.sd" = NA,
-                "positive.sd" = NA,
-                "unstained.sd" = NA
-            )
+            return(NULL)
         }
     )
 
@@ -45,6 +37,7 @@ extract_mfi_quantized <- function(fcs_dir = "data-raw/s001",
                 gating_set_file = gating_set_file,
                 gate_extract = gate_extract
             )
+            stop("Not implemented")
             extract_relevant_mfis_multistain(
                 loaded_fcs_multistain,
                 transform_fun = transform_fun,
@@ -52,18 +45,10 @@ extract_mfi_quantized <- function(fcs_dir = "data-raw/s001",
             )
         },
         error = function(e) {
-            return(tibble::tibble(
-                "sample" = NA,
-                "feature" = NA,
-                "negative" = NA,
-                "positive" = NA,
-                "unstained" = NA,
-                "negative.sd" = NA,
-                "positive.sd" = NA,
-                "unstained.sd" = NA
-            ))
+            return(NULL)
         }
     )
+    browser()
     if (nrow(relevant_mfis_multi) > 0) {
         #  Merge single and multi stainings
         joint_df <- dplyr::left_join(
@@ -94,7 +79,7 @@ extract_mfi_quantized <- function(fcs_dir = "data-raw/s001",
 #'
 #' @param loaded_fcs
 #' A named list of loaded FCS objects, where each element is a cytoset. Usually created by
-#' \code{cytobench:::load_mfi_files}. 
+#' \code{cytobench:::load_mfi_files}.
 #' @param n_quantiles Integer.
 #' Number of quantiles to use if \code{quantiles} is not provided. Default is 100.
 #' @param quantiles Numeric vector.
@@ -131,7 +116,10 @@ extract_singlestain_quantilefun <- function(
     n_quantiles = 100,
     quantiles = NULL,
     transform_fun = function(x) asinh(x / 1e3),
-    approxmethod = approxfun,
+    approxmethod = function(...) {
+        # rule = 2 ensures that the function can extrapolate outside the range of the data
+        approxfun(..., rule = 2)
+    },
     relevant_columns,
     ...) {
     # Create default quantiles if not provided
@@ -162,7 +150,8 @@ extract_singlestain_quantilefun <- function(
             target_channel <- nonempty_names
 
             # Extract and transform expression values
-            expr_vals <- flowCore::exprs(ff)[, target_channel]
+            ff_exprs <- flowCore::exprs(ff)
+            expr_vals <- ff_exprs[, target_channel]
             transformed_vals <- transform_fun(expr_vals)
 
             # Perform k-means clustering to separate positive and negative populations
@@ -175,10 +164,10 @@ extract_singlestain_quantilefun <- function(
                 relevant_columns,
                 simplify = FALSE,
                 function(marker) {
-                    if (!marker %in% colnames(ff)) {
+                    if (!marker %in% colnames(ff_exprs)) {
                         return(NULL)
                     }
-                    y_vals <- flowCore::exprs(ff)[cluster_labels == "positive", marker]
+                    y_vals <- ff_exprs[cluster_labels == "positive", marker]
                     # Note: Do NOT use ff completely here to also get the negative populations.
                     # You should _probably_ calculate the values corresponding to the quantiles of "THE" positive population,
                     # not based on the NEW quantiles from each negative population
