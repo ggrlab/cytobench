@@ -46,7 +46,7 @@ plot_markers_pairwise <- function(ff,
                                   axis_full_labels = TRUE,
                                   n_cells = Inf,
                                   count_transform = function(x) {
-                                      x
+                                      log10(x + 1)
                                   },
                                   add_ggplot_elements = list()) {
     xy_plots <- list()
@@ -108,7 +108,7 @@ plot_markers_pairwise <- function(ff,
                         ) +
                         # geom_density_2d_filled() +
                         ggpubr::theme_pubr() +
-                        ggplot2::scale_fill_continuous(type = "viridis", trans = "log10") +
+                        ggplot2::scale_fill_continuous(type = "viridis") +
                         ggplot2::theme(
                             legend.position = "none",
                             axis.title = ggplot2::element_text(size = 25)
