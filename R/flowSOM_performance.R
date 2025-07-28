@@ -27,6 +27,7 @@
 #' @return data.table
 #'   A data.table with silhouette scores for each clustering solution,
 #'   including subsampled row indices.
+#' @export
 flowSOM_performance <- function(
     dt_clustered,
     flowsom_result,
