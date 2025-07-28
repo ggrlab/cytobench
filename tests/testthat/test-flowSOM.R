@@ -137,7 +137,6 @@ test_that("FlowSOM wrapper_count_model", {
 })
 
 
-
 test_that("FlowSOM new Metaclusters, with/out new clustering", {
     ff_example <- example_processed()
     fsom <- do_flowsom(ff_example)

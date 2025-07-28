@@ -31,24 +31,30 @@ flowSOM_newMetacluster <- function(flowsom_result,
             stop("n_metacluster must be greater than 2, otherwise FlowSOM fails.")
         }
         if (!"ConsensusClusterPlus" %in% names(flowsom_result) || length(flowsom_result[["ConsensusClusterPlus"]]) < n_metacluster) {
-
             # metaClustering_consensus() is a function from FlowSOM, only
             # calling ConsensusClusterPlus::ConsensusClusterPlus() and then returning the consensusClass
             # See the function here:
             # https://github.com/SofieVG/FlowSOM/blob/56892b583a0dbae5535665e45290ffce355bd503/R/4_metaClustering.R#L123
             # cl <- as.factor(FlowSOM::metaClustering_consensus(flowsom_result$map$codes,2 n_metacluster, seed = seed))
             cl_ccp <- suppressMessages(
-                ConsensusClusterPlus::ConsensusClusterPlus(t(flowsom_result$map$codes),
+                ConsensusClusterPlus::ConsensusClusterPlus(
+                    t(flowsom_result$map$codes),
                     maxK = n_metacluster, reps = 100, pItem = 0.9, pFeature = 1, title = tempdir(),
                     plot = "pdf", verbose = FALSE, clusterAlg = "hc", distance = "euclidean",
                     seed = seed
                 )
             )
             flowsom_result[["ConsensusClusterPlus"]] <- cl_ccp
+            flowsom_result[["ConsensusClusterPlus_MAP"]] <- tibble::as_tibble(sapply(cl_ccp[-1], function(x) {
+                x$consensusClass
+            }))
+            colnames(flowsom_result[["ConsensusClusterPlus_MAP"]]) <- paste0("metaCluster_", 2:n_metacluster)
+            flowsom_result[["ConsensusClusterPlus_MAP"]][, "cluster"] <- 1:nrow(flowsom_result[["ConsensusClusterPlus_MAP"]])
+            flowsom_result[["ConsensusClusterPlus_MAP"]] <- flowsom_result[["ConsensusClusterPlus_MAP"]] |>
+                dplyr::relocate(cluster)
         }
         # The as.factor comes from FlowSOM.
-        cl <- as.factor(flowsom_result[["ConsensusClusterPlus"]][[n_metacluster]]$consensusClass)
-
+        cl <- as.factor(flowsom_result[["ConsensusClusterPlus_MAP"]][[n_metacluster]])
         if (update_flowsom) {
             # Update the flowSOM object
             flowsom_result$map$nMetaclusters <- length(levels(cl))
@@ -88,10 +94,9 @@ flowSOM_newMetacluster <- function(flowsom_result,
                 cluster_numeric = as.numeric(stringr::str_remove(cluster, "cluster_"))
             )
 
-        map_cluster_metacluster <- data.frame(
-            cluster = 1:flowsom_result$map$nNodes,
-            metaCluster = flowsom_result$metaclustering[1:flowsom_result$map$nNodes]
-        )
+        map_cluster_metacluster <- flowsom_result[["ConsensusClusterPlus_MAP"]][, c(1, n_metacluster)]
+        colnames(map_cluster_metacluster) <- c("cluster", "metaCluster")
+
 
         clustered_df_long <- dplyr::left_join(
             clustered_df_long,
