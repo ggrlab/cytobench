@@ -10,13 +10,14 @@ plot_markers_pairwise(
   special_cofactor_list,
   transform_fun = asinh,
   transform_fun_name = "asinh",
+  geom = c("hex", "points", "pointdensity"),
   bins = 50,
   diag_plot = FALSE,
   debugplots = FALSE,
   axis_full_labels = TRUE,
   n_cells = Inf,
   count_transform = function(x) {
-     x
+     log10(x + 1)
  },
   add_ggplot_elements = list()
 )

@@ -1,4 +1,4 @@
-devtools::load_all()
+# devtools::load_all()
 test_that("Extract mixed tube MFI", {
     extracted_mfis_singlestain <- extract_mfi(
         "data-raw/MX.compensated-manual.navios.s050/",
