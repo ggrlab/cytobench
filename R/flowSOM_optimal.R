@@ -56,6 +56,11 @@ flowSOM_optimal <- function(fs_train,
         ...
     )
     fs_res_train[["seed"]] <- seed
+    # The following creates the metacluster dataframe for ALL metaclusterings
+    #  fs_res_train$ConsensusClusterPlus_MAP
+    fs_res_train_allmeta <- flowSOM_newMetacluster(fs_res_train, n_metacluster = max(maxMeta, list(...)[["nClus"]]), update_flowsom = FALSE)
+    fs_res_train <- fs_res_train_allmeta[["flowsom_newdata"]]
+
     ### 2. Plot and save FlowSOM results into outdir
     if (!is.null(outdir)) {
         dir.create(outdir, showWarnings = FALSE, recursive = TRUE)

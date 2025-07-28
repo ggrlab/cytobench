@@ -17,7 +17,7 @@
 #' 2) "ncells_per_x": A data.frame in wide format with the counts of cells per specified grouping.
 #' @export
 flowSOM_newMetacluster <- function(flowsom_result,
-                                   clustered_df,
+                                   clustered_df = NULL,
                                    n_metacluster = NULL,
                                    update_flowsom = TRUE) {
     if (!all(is.null(n_metacluster))) {
@@ -69,66 +69,69 @@ flowSOM_newMetacluster <- function(flowsom_result,
         }
     }
 
-    # Either there must be a column called "cluster", then it is probably an already clustered (and previously exported)
-    # data.frame of n cells and p channels, plus "cluster" and "metaCluster" columns.
-    if ("cluster" %in% colnames(clustered_df)) {
-        clustered_df[["metaCluster"]] <- flowsom_result$metaclustering[clustered_df[["cluster"]]]
-        ncells_per_x <- n_cells_per_x(
-            dt = clustered_df,
-            which = c("cluster", "metaCluster"),
-            id_cols = c("sample"),
-            which_levels = list(
-                "cluster" = as.character(1:flowsom_result$map$nNodes),
-                "metaCluster" = levels(flowsom_result$metaclustering)
-            )
-        )
-    } else {
-        # Then the clusters must be in the columns of the data.frame like "cluster_1", "cluster_2", ..., "cluster_n"
-        clustered_df_long <- tidyr::pivot_longer(
-            clustered_df,
-            cols = tidyr::starts_with("cluster_"),
-            names_to = "cluster",
-            values_to = "value"
-        ) |>
-            dplyr::mutate(
-                cluster_numeric = as.numeric(stringr::str_remove(cluster, "cluster_"))
-            )
-
-        map_cluster_metacluster <- flowsom_result[["ConsensusClusterPlus_MAP"]][, c(1, n_metacluster)]
-        colnames(map_cluster_metacluster) <- c("cluster", "metaCluster")
-
-
-        clustered_df_long <- dplyr::left_join(
-            clustered_df_long,
-            map_cluster_metacluster,
-            by = c("cluster_numeric" = "cluster")
-        ) |>
-            dplyr::select(-cluster_numeric) |>
-            dplyr::summarise(
-                ncells = sum(value),
-                .by = c("sample", "metaCluster")
-            ) |>
-            dplyr::mutate(
-                metaCluster = paste0("metaCluster_", metaCluster)
-            )
-
-        metaclustered_df <- tidyr::pivot_wider(
-            clustered_df_long,
-            names_from = metaCluster,
-            values_from = ncells,
-            values_fill = 0
-        )
-        ncells_per_x <- list(
-            "cluster" = clustered_df,
-            "metaCluster" = clustered_df |>
-                dplyr::select(-tidyr::starts_with("cluster_")) |>
-                dplyr::left_join(
-                    metaclustered_df,
-                    by = "sample"
+    
+    ncells_per_x <- NULL
+    if (!is.null(clustered_df)) {
+        # Either there must be a column called "cluster", then it is probably an already clustered (and previously exported)
+        # data.frame of n cells and p channels, plus "cluster" and "metaCluster" columns.
+        if ("cluster" %in% colnames(clustered_df)) {
+            clustered_df[["metaCluster"]] <- flowsom_result$metaclustering[clustered_df[["cluster"]]]
+            ncells_per_x <- n_cells_per_x(
+                dt = clustered_df,
+                which = c("cluster", "metaCluster"),
+                id_cols = c("sample"),
+                which_levels = list(
+                    "cluster" = as.character(1:flowsom_result$map$nNodes),
+                    "metaCluster" = levels(flowsom_result$metaclustering)
                 )
-        )
-    }
+            )
+        } else {
+            # Then the clusters must be in the columns of the data.frame like "cluster_1", "cluster_2", ..., "cluster_n"
+            clustered_df_long <- tidyr::pivot_longer(
+                clustered_df,
+                cols = tidyr::starts_with("cluster_"),
+                names_to = "cluster",
+                values_to = "value"
+            ) |>
+                dplyr::mutate(
+                    cluster_numeric = as.numeric(stringr::str_remove(cluster, "cluster_"))
+                )
 
+            map_cluster_metacluster <- flowsom_result[["ConsensusClusterPlus_MAP"]][, c(1, n_metacluster)]
+            colnames(map_cluster_metacluster) <- c("cluster", "metaCluster")
+
+
+            clustered_df_long <- dplyr::left_join(
+                clustered_df_long,
+                map_cluster_metacluster,
+                by = c("cluster_numeric" = "cluster")
+            ) |>
+                dplyr::select(-cluster_numeric) |>
+                dplyr::summarise(
+                    ncells = sum(value),
+                    .by = c("sample", "metaCluster")
+                ) |>
+                dplyr::mutate(
+                    metaCluster = paste0("metaCluster_", metaCluster)
+                )
+
+            metaclustered_df <- tidyr::pivot_wider(
+                clustered_df_long,
+                names_from = metaCluster,
+                values_from = ncells,
+                values_fill = 0
+            )
+            ncells_per_x <- list(
+                "cluster" = clustered_df,
+                "metaCluster" = clustered_df |>
+                    dplyr::select(-tidyr::starts_with("cluster_")) |>
+                    dplyr::left_join(
+                        metaclustered_df,
+                        by = "sample"
+                    )
+            )
+        }
+    }
     return(
         list(
             "flowsom_newdata" = flowsom_result, # Potentially updated to have the specified number of metaClusters

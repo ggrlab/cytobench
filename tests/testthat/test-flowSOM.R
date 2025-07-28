@@ -136,7 +136,6 @@ test_that("FlowSOM wrapper_count_model", {
     testthat::expect_true(TRUE)
 })
 
-
 test_that("FlowSOM new Metaclusters, with/out new clustering", {
     ff_example <- example_processed()
     fsom <- do_flowsom(ff_example)
@@ -176,4 +175,21 @@ test_that("FlowSOM new Metaclusters, with/out new clustering", {
             testthat::expect_identical(res_norecluster[[relevant_value]], res[[relevant_value]])
         }
     }
+})
+
+test_that("FlowSOM optimal", {
+    ff_example <- example_processed()
+    fsom <- flowSOM_optimal(
+        flowCore::flowSet(ff_example),
+        # Input options:
+        compensate = FALSE,
+        transform = FALSE,
+        scale = FALSE,
+        # SOM options:
+        colsToUse = c(9, 12, 14:18), xdim = 7, ydim = 7,
+        # Metaclustering options:
+        nClus = 10
+    )
+    testthat::expect_true(fsom$fs_res_train$map$nMetaclusters == 10)
+    testthat::expect_equal(dim(fsom$fs_res_train$ConsensusClusterPlus_MAP), c(49, 10))
 })
