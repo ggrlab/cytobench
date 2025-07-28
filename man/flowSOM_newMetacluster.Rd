@@ -6,7 +6,7 @@
 \usage{
 flowSOM_newMetacluster(
   flowsom_result,
-  clustered_df,
+  clustered_df = NULL,
   n_metacluster = NULL,
   update_flowsom = TRUE
 )

@@ -45,7 +45,7 @@ flowSOM_newMetacluster <- function(flowsom_result,
                 )
             )
             flowsom_result[["ConsensusClusterPlus"]] <- cl_ccp
-            flowsom_result[["ConsensusClusterPlus_MAP"]] <- tibble::as_tibble(sapply(cl_ccp[-1], function(x) {
+            flowsom_result[["ConsensusClusterPlus_MAP"]] <- as.data.frame(sapply(cl_ccp[-1], function(x) {
                 x$consensusClass
             }))
             colnames(flowsom_result[["ConsensusClusterPlus_MAP"]]) <- paste0("metaCluster_", 2:n_metacluster)
@@ -69,7 +69,7 @@ flowSOM_newMetacluster <- function(flowsom_result,
         }
     }
 
-    
+
     ncells_per_x <- NULL
     if (!is.null(clustered_df)) {
         # Either there must be a column called "cluster", then it is probably an already clustered (and previously exported)

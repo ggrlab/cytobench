@@ -94,10 +94,11 @@ flowSOM_optimal <- function(fs_train,
         flowsom_result = fs_res_train,
         flowset = fs_train
     )
-
-    return(c(
+    res <-c(
         list(
             fs_res_train = fs_res_train
         ), predicted_fs
-    ))
+    )
+    class(res) <- c("flowSOM_optimal")
+    return(res)
 }
