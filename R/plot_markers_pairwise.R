@@ -40,6 +40,7 @@ plot_markers_pairwise <- function(ff,
                                   special_cofactor_list,
                                   transform_fun = asinh,
                                   transform_fun_name = "asinh",
+                                  geom = c("hex", "points", "pointdensity"),
                                   bins = 50,
                                   diag_plot = FALSE,
                                   debugplots = FALSE,
@@ -75,19 +76,22 @@ plot_markers_pairwise <- function(ff,
     gated_exprs <- data.table::as.data.table(flowCore::exprs(ff))
     if (!is.infinite(n_cells)) {
         # https://stackoverflow.com/questions/24685421/how-do-you-extract-a-few-random-rows-from-a-data-table-on-the-fly
-        gated_exprs <- gated_exprs[sample(.N, n_cells)]
+        gated_exprs <- gated_exprs[sample(.N, min(n_cells, .N))]
     }
     for (marker_y in names(xy_plots)) {
         plots_all_patchwork <- c(plots_all_patchwork, xy_plots_rotated[marker_y])
         for (marker_x in names(xy_plots)) {
             xy_str <- paste0(marker_x, "_", marker_y)
             which_matching <- which(unlist(all_marker_combinations_str) == xy_str)
-            # if(xy_str == "PE-A_ECD-A"){stop()}
-            # if(xy_str == "PE-A_FITC-A"){stop()}
             if (xy_str %in% all_marker_combinations_str) {
-                cofactor_x <- cofactor_namedvec[[marker_x]]
-                cofactor_y <- cofactor_namedvec[[marker_y]]
-                if (xy_str %in% names(special_cofactor_list)) {
+                if (!missing(cofactor_namedvec)) {
+                    cofactor_x <- cofactor_namedvec[[marker_x]]
+                    cofactor_y <- cofactor_namedvec[[marker_y]]
+                } else {
+                    cofactor_x <- 1
+                    cofactor_y <- 1
+                }
+                if (!missing(special_cofactor_list) && xy_str %in% names(special_cofactor_list)) {
                     cofactor_x <- special_cofactor_list[[xy_str]][1]
                     cofactor_y <- special_cofactor_list[[xy_str]][2]
                 }
@@ -101,12 +105,27 @@ plot_markers_pairwise <- function(ff,
                         x = transform_fun(gated_exprs[[marker_x]] / cofactor_x),
                         y = transform_fun(gated_exprs[[marker_y]] / cofactor_y)
                     )
-                    p_markers <- ggplot2::ggplot(dt_transformed, ggplot2::aes(x = x, y = y)) +
-                        ggplot2::geom_hex(
+                    p_markers <- ggplot2::ggplot(dt_transformed, ggplot2::aes(x = x, y = y))
+                    if (geom[1] == "hex") {
+                        p_markers <- p_markers + ggplot2::geom_hex(
                             bins = bins,
                             ggplot2::aes(fill = ggplot2::stat(count_transform(ggplot2::after_stat(count))))
-                        ) +
-                        # geom_density_2d_filled() +
+                        )
+                    } else if (geom[1] == "points") {
+                        p_markers <- p_markers + scattermore::geom_scattermore(
+                            alpha = 0.3, pointsize = 1, pixels = c(bins, bins)
+                        )
+                    } else if (geom[1] == "pointdensity") {
+                        p_markers <- p_markers +
+                            ggpointdensity::stat_pointdensity(
+                                geom = scattermore:::GeomScattermore,
+                                ggplot2::aes(color = ggplot2::stat(count_transform(ggplot2::after_stat(density)))),
+                                pointsize = 1.2,
+                                pixels = c(bins, bins)
+                            ) +
+                            ggplot2::scale_color_continuous(type = "viridis")
+                    }
+                    p_markers <- p_markers +
                         ggpubr::theme_pubr() +
                         ggplot2::scale_fill_continuous(type = "viridis") +
                         ggplot2::theme(
