@@ -11,7 +11,8 @@ flowSOM_performance(
   include_clusters = TRUE,
   ncells = 1000,
   seed = 42,
-  relevant_cols = NULL
+  relevant_cols = NULL,
+  clustering_map = NULL
 )
 }
 \arguments{
@@ -39,6 +40,11 @@ Random seed for reproducible subsampling.}
 \item{relevant_cols}{character vector
 Column names used for distance calculation. If NULL, inferred from
 \code{flowsom_result}.}
+
+\item{clustering_map}{data.table
+A mapping of clusters to metaclusters. If NULL, inferred from
+\code{flowsom_result}. Must contain the column "cluster". Each row is the mapping from one cluster
+to other meta-clusters (or other groupings).}
 }
 \value{
 data.table

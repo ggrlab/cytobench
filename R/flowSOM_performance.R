@@ -23,6 +23,10 @@
 #' @param relevant_cols character vector
 #'   Column names used for distance calculation. If NULL, inferred from
 #'   `flowsom_result`.
+#' @param clustering_map data.table
+#'   A mapping of clusters to metaclusters. If NULL, inferred from
+#'   `flowsom_result`. Must contain the column "cluster". Each row is the mapping from one cluster
+#'   to other meta-clusters (or other groupings).
 #'
 #' @return data.table
 #'   A data.table with silhouette scores for each clustering solution,
@@ -35,7 +39,8 @@ flowSOM_performance <- function(
     include_clusters = TRUE,
     ncells = 1e3,
     seed = 42,
-    relevant_cols = NULL) {
+    relevant_cols = NULL,
+    clustering_map = NULL) {
     # Support direct call: flowSOM_performance(flowsom_result)
     if ("flowSOM_optimal" %in% class(dt_clustered)) {
         flowsom_result <- dt_clustered
@@ -55,18 +60,24 @@ flowSOM_performance <- function(
         }
     }
 
-    # Determine metacluster mappings to evaluate
-    n_metaclusters <- tryCatch(
-        seq_len(flowsom_result$fs_res_train$map$nMetaclusters),
-        error = function(e) NULL
-    )
-
-    # Prepare cluster-to-metacluster mapping
-    if (!is.null(n_metaclusters)) {
-        clustering_map <- flowsom_result$fs_res_train$ConsensusClusterPlus_MAP[, n_metaclusters, drop = FALSE]
+    if (!all(is.null(clustering_map))) {
+        if (!"cluster" %in% colnames(clustering_map)) {
+            stop("clustering_map must contain a 'cluster' column.")
+        }
     } else {
-        # Fall back to unique cluster–metaCluster pairs
-        clustering_map <- unique(dt_clustered[, .(cluster, metaCluster)])[, metaCluster := as.numeric(as.character(metaCluster))]
+        # Determine metacluster mappings to evaluate
+        n_metaclusters <- tryCatch(
+            seq_len(flowsom_result$fs_res_train$map$nMetaclusters),
+            error = function(e) NULL
+        )
+
+        # Prepare cluster-to-metacluster mapping
+        if (!is.null(n_metaclusters)) {
+            clustering_map <- flowsom_result$fs_res_train$ConsensusClusterPlus_MAP[, n_metaclusters, drop = FALSE]
+        } else {
+            # Fall back to unique cluster–metaCluster pairs
+            clustering_map <- unique(dt_clustered[, .(cluster, metaCluster)])[, metaCluster := as.numeric(as.character(metaCluster))]
+        }
     }
 
     # Optional subsampling of cells for efficiency
@@ -78,7 +89,7 @@ flowSOM_performance <- function(
     }
 
     # Select appropriate mapping(s) to evaluate
-    test_clustermap <- if (include_clusters) clustering_map else clustering_map[, -1, with = FALSE]
+    test_clustermap <- if (include_clusters) clustering_map else clustering_map[, -which(colnames(clustering_map) == "cluster"), with = FALSE]
 
     # Compute distance matrix from selected features
     distmat <- distances::distances(
@@ -86,14 +97,16 @@ flowSOM_performance <- function(
     )
 
     # Apply silhouette calculation for each clustering solution
-    counter <- 0
     score_sil <- apply(test_clustermap, 2, function(clusters) {
-        counter <<- counter + 1
         # Remap cluster to metacluster using current mapping
         current_map <- data.table(cluster = clustering_map$cluster, metaCluster = clusters)
 
         # Join metaCluster labels to dt_clustered
         meta_labels <- current_map[dt_clustered[, .(cluster)], on = "cluster"][["metaCluster"]]
+        if (length(unique(meta_labels)) == 1) {
+            warning("Only one metacluster found in the current mapping. Silhouette score cannot be computed.")
+            return(data.table(rownum = dt_clustered[["rownum"]], metacluster = meta_labels, neighbor = NA, sil_width = NA))
+        }
         # Compute silhouette scores
         sil <- cluster::silhouette(meta_labels, dist = distmat) |>
             data.table::as.data.table()
