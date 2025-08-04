@@ -1,102 +1,103 @@
+devtools::load_all()
+
 test_that("Export fcs files, new colnames into description", {
-    # Read in the example data
-    csv_paths <- list.files(
-        system.file("extdata", "raw_csv", package = "cytobench"),
-        full.names = TRUE, recursive = TRUE,
-        pattern = "*.csv$"
+    # Create the example data
+    original_cn <- c(
+        "FITC-A",
+        "PE-A",
+        "ECD-A",
+        "PC5.5-A",
+        "PC7-A",
+        "APC-A",
+        "AF700-A",
+        "AA750-A",
+        "PB-A",
+        "KrO-A"
     )
-    csv_read <- lapply(csv_paths, data.table::fread)
-    names(csv_read) <- sub(".*raw_csv/", "", csv_paths)
+    dt_simulated <- simulate_fs(5, flowcore = FALSE, columns = original_cn)
+    new_cn <- c(
+        "FL1 CD45RA FITC", "FL2 CCR7 PE",
+        "FL3 CD28 ECD", "FL4 PD1 PC5.5", "FL5 CD27 PC7", "FL6 CD4 APC",
+        "FL7 CD8 AF700", "FL8 CD3 AA750", "FL9 CD57 PB", "FL10 CD45 KrO"
+    )
+    dt_simulated_newcolnames <- simulate_fs(5, flowcore = FALSE, columns = new_cn)
+    # I actively test if spaces work here.
+    names(dt_simulated_newcolnames) <- paste0("newcol - ", names(dt_simulated_newcolnames))
+    both <- c(
+        dt_simulated,
+        dt_simulated_newcolnames
+    )
 
     tmpdir <- tempdir()
     # Write the fcs files
     extreme_fcs <- export_fcs(
-        csv_read,
+        both,
         outdir = file.path(tmpdir, "fcs_noshift"),
         safety_scaling = 1.25,
         safety_shift = 0,
         use.names = FALSE,
         new_colnames_to = "description",
-        new_colnames = "verify/Lot01/Align_02 Navios Verify Lot 270622_01 023 LC.csv"
+        new_colnames = "simsample_1"
     )
 
     # validate the fcs
-    ## read all fcs
-    fcs_paths <- list.files(
-        file.path(tmpdir, "fcs_noshift"),
-        full.names = TRUE, recursive = TRUE,
-        pattern = "*.fcs$"
-    )
-    fcs_read <- lapply(fcs_paths, flowCore::read.FCS)
-    marker_names <- lapply(fcs_read, flowCore::markernames)
-    for (sample_x_colnames in marker_names) {
-        expect_identical(
-            names(sample_x_colnames),
-            c(
-                "FS INT", "FS TOF", "SS INT", "FL1 CD45RA FITC", "FL2 CCR7 PE",
-                "FL3 CD28 ECD", "FL4 PD1 PC5.5", "FL5 CD27 PC7", "FL6 CD4 APC",
-                "FL7 CD8 AF700", "FL8 CD3 AA750", "FL9 CD57 PB", "FL10 CD45 KrO"
-            )
+    validate <- function(expected_cn = original_cn) {
+        ## read all fcs
+        fcs_paths <- list.files(
+            file.path(tmpdir, "fcs_noshift"),
+            full.names = TRUE, recursive = TRUE,
+            pattern = "*.fcs$"
         )
+        fcs_read <- lapply(fcs_paths, flowCore::read.FCS)
+        marker_names <- lapply(fcs_read, flowCore::markernames)
+        for (sample_x_colnames in marker_names) {
+            expect_identical(
+                names(sample_x_colnames),
+                expected_cn
+            )
+        }
     }
-})
-test_that("Export fcs files, new colnames into colnames", {
-    # Read in the example data
-    csv_paths <- list.files(
-        system.file("extdata", "raw_csv", package = "cytobench"),
-        full.names = TRUE, recursive = TRUE,
-        pattern = "*.csv$"
-    )
-    csv_read <- lapply(csv_paths, data.table::fread)
-    names(csv_read) <- sub(".*raw_csv/", "", csv_paths)
-
-    tmpdir <- tempdir()
-    # Write the fcs files
-    extreme_fcs <- export_fcs(
-        csv_read,
-        outdir = file.path(tmpdir, "fcs_noshift_CN"),
+    validate()
+    unlink(file.path(tmpdir, "fcs_noshift"), recursive = TRUE)
+    extreme_fcs_both <- export_fcs(
+        both,
+        outdir = file.path(tmpdir, "fcs_noshift"),
         safety_scaling = 1.25,
         safety_shift = 0,
         use.names = FALSE,
-        new_colnames_to = "colnames",
-        new_colnames = "verify/Lot01/Align_02 Navios Verify Lot 270622_01 023 LC.csv"
+        new_colnames_to = "description",
+        new_colnames = "newcol - simsample_5"
     )
+    validate(expected_cn = new_cn)
+    extreme_fcs_both_v2 <- export_fcs(
+        both,
+        outdir = file.path(tmpdir, "fcs_noshift"),
+        safety_scaling = 1.25,
+        safety_shift = 0,
+        use.names = FALSE,
+        new_colnames_to = "description"
+    )
+    validate(expected_cn = original_cn)
 
-    # validate the fcs
-    ## read all fcs
-    fcs_paths <- list.files(
-        file.path(tmpdir, "fcs_noshift_CN"),
-        full.names = TRUE, recursive = TRUE,
-        pattern = "*.fcs$"
+    extreme_fcs_both_v3 <- export_fcs(
+        both,
+        outdir = file.path(tmpdir, "fcs_noshift"),
+        safety_scaling = 1.25,
+        safety_shift = 0,
+        use.names = FALSE,
+        new_colnames_to = "description",
+        new_colnames = 1
     )
-    fcs_read <- lapply(fcs_paths, flowCore::read.FCS)
-    marker_names <- lapply(fcs_read, flowCore::markernames)
-    for (sample_x_colnames in marker_names) {
-        names(sample_x_colnames) <- NULL
-        expect_identical(
-            sample_x_colnames,
-            c(
-                "FS INT", "FS TOF", "SS INT", "FL1 CD45RA FITC", "FL2 CCR7 PE",
-                "FL3 CD28 ECD", "FL4 PD1 PC5.5", "FL5 CD27 PC7", "FL6 CD4 APC",
-                "FL7 CD8 AF700", "FL8 CD3 AA750", "FL9 CD57 PB", "FL10 CD45 KrO"
-            )
-        )
-    }
+    validate(expected_cn = original_cn)
 })
+
 test_that("Export fcs files, shifts", {
-    # Read in the example data
-    csv_paths <- list.files(
-        system.file("extdata", "raw_csv", package = "cytobench"),
-        full.names = TRUE, recursive = TRUE,
-        pattern = "*.csv$"
-    )
-    csv_read <- lapply(csv_paths, data.table::fread)
-    names(csv_read) <- sub(".*raw_csv/", "", csv_paths)
+    dt_simulated <- simulate_fs(3, flowcore = FALSE)
 
     tmpdir <- tempdir()
     # Write the fcs files
     extreme_fcs <- export_fcs(
-        csv_read[1:3],
+        dt_simulated,
         outdir = file.path(tmpdir, "fcs_noshift_shift_0"),
         safety_scaling = 1.25,
         safety_shift = 0,
@@ -104,7 +105,7 @@ test_that("Export fcs files, shifts", {
         new_colnames = 1
     )
     extreme_fcs <- export_fcs(
-        csv_read[1:3],
+        dt_simulated,
         outdir = file.path(tmpdir, "fcs_noshift_shift_10"),
         safety_scaling = 10.25,
         safety_shift = 10,
@@ -112,7 +113,7 @@ test_that("Export fcs files, shifts", {
         new_colnames = 1
     )
     extreme_fcs <- export_fcs(
-        csv_read[1:3],
+        dt_simulated,
         outdir = file.path(tmpdir, "fcs_noshift_shift_neg10"),
         safety_scaling = 0.25,
         safety_shift = -10,
@@ -161,19 +162,12 @@ test_that("Export fcs files, shifts", {
 })
 
 test_that("Export fcs files, existing template", {
-    # Read in the example data
-    csv_paths <- list.files(
-        system.file("extdata", "raw_csv", package = "cytobench"),
-        full.names = TRUE, recursive = TRUE,
-        pattern = "*.csv$"
-    )
-    csv_read <- lapply(csv_paths, data.table::fread)
-    names(csv_read) <- sub(".*raw_csv/", "", csv_paths)
+    dt_simulated <- simulate_fs(3, flowcore = FALSE)
 
     tmpdir <- tempdir()
     # Write the fcs files
     extreme_fcs <- export_fcs(
-        csv_read[1:3],
+        dt_simulated,
         outdir = file.path(tmpdir, "extreme_fcs_original"),
         safety_scaling = 1.25,
         safety_shift = 0,
@@ -181,7 +175,7 @@ test_that("Export fcs files, existing template", {
         new_colnames = 1
     )
     extreme_fcs_v2 <- export_fcs(
-        csv_read[1:3],
+        dt_simulated,
         outdir = file.path(tmpdir, "extreme_fcs_template"),
         safety_scaling = 10.25,
         safety_shift = 0,
