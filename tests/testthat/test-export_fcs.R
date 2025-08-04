@@ -26,7 +26,7 @@ test_that("Export fcs files, new colnames into description", {
         dt_simulated_newcolnames
     )
 
-    tmpdir <- withr::with_tempdir()
+    tmpdir <- withr::local_tempdir()
     # Write the fcs files
     extreme_fcs <- export_fcs(
         both,
@@ -92,7 +92,7 @@ test_that("Export fcs files, new colnames into description", {
 test_that("Export fcs files, shifts", {
     dt_simulated <- simulate_fs(3, flowcore = FALSE)
 
-    tmpdir <- withr::with_tempdir()
+    tmpdir <- withr::local_tempdir()
     # Write the fcs files
     extreme_fcs <- export_fcs(
         dt_simulated,
@@ -162,7 +162,7 @@ test_that("Export fcs files, shifts", {
 test_that("Export fcs files, existing template", {
     dt_simulated <- simulate_fs(3, flowcore = FALSE)
 
-    tmpdir <- withr::with_tempdir()
+    tmpdir <- withr::local_tempdir()
     # Write the fcs files
     extreme_fcs <- export_fcs(
         dt_simulated,

@@ -1,7 +1,7 @@
 test_that("Export files as csv", {
     dt_simulated <- simulate_fs(5, flowcore = FALSE)
 
-    exported_files <- export_csv(dt_simulated, outdir = withr::with_tempdir())
+    exported_files <- export_csv(dt_simulated, outdir = withr::local_tempdir())
     testthat::expect_equal(names(exported_files), names(dt_simulated))
 
     read_exported_files <- lapply(exported_files, data.table::fread)
@@ -16,7 +16,7 @@ test_that("Export files as csv", {
 test_that("Export files as feather", {
     dt_simulated <- simulate_fs(5, flowcore = FALSE)
 
-    exported_files <- export_feather(dt_simulated, outdir = withr::with_tempdir())
+    exported_files <- export_feather(dt_simulated, outdir = withr::local_tempdir())
     testthat::expect_equal(names(exported_files), names(dt_simulated))
 
 

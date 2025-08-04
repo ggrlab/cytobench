@@ -1,4 +1,4 @@
-devtools::load_all()
+# devtools::load_all()
 
 test_that("Plot markers pairwise", {
     example_ff <- flowCore::flowFrame(
