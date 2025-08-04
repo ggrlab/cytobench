@@ -1,4 +1,3 @@
-
 #' Extract Single Stain Median Fluorescence Intensity (MFI)
 #'
 #' This function extracts the median fluorescence intensity (MFI) from single-stain FCS files.
@@ -250,7 +249,7 @@ extract_singlestain_mfi_wrapper <- function(loaded_fcs,
                                             transform_fun = function(x) {
                                                 asinh(x / 1e3)
                                             },
-                                            relevant_columns,
+                                            relevant_columns = NA,
                                             ...) {
     # Extract median fluorescence intensities (MFIs) from the loaded FCS files
     relevant_mfis_single <- tryCatch(
@@ -263,7 +262,7 @@ extract_singlestain_mfi_wrapper <- function(loaded_fcs,
     )
     # Combine single stainings into a single data frame
     single_stainings <- do.call(rbind, relevant_mfis_single[!sapply(relevant_mfis_single, function(x) nrow(x) > 1)])
-    if (!missing(relevant_columns)) {
+    if (!all(is.na(relevant_columns))) {
         for (relevant_x in relevant_columns) {
             if (!relevant_x %in% single_stainings$feature) {
                 single_stainings <- rbind(single_stainings, tibble::tibble(
@@ -412,37 +411,66 @@ extract_relevant_mfis_singlestain <- function(loaded_fcs_singlestain,
 }
 
 #' Extract Multi-Stain Median Fluorescence Intensity (MFI)
-#' This function extracts the median fluorescence intensity (MFI) from multi-stained FCS files.
-#' @param loaded_fcs_multistain A list of cytosets containing the loaded FCS files.
-#' @param transform_fun A function to transform the fluorescence values. Default is `function(x) { asinh(x / 1e3) }`.
-#' The reported MFIs are calculated as the median of the UNtransformed values. Transformation is only used to cluster the negative and positive populations.
-#' @param relevant_columns A character vector specifying the relevant columns for multi-staining. Default is c("FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A", "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A").
-#' @return A data frame with the extracted MFIs. E.g.:
-#' \preformatted{
-#'  feature negative positive negative.sd positive.sd
-#' <chr>      <dbl>    <dbl>     <dbl>      <dbl>
-#' 1 FITC-A      530.   58567.     576.      576.
-#' 2 PE-A        526.  149506.     511.      511.
+#'
+#' Extracts median fluorescence intensities (MFIs) and associated standard deviations
+#' for multiple markers from multi-stained flow cytometry FCS files. This is done by
+#' applying k-means clustering (k = 2) on transformed marker intensities to separate
+#' negative and positive populations. The MFIs are reported on the original (untransformed) scale.
+#'
+#' @param loaded_fcs_multistain A list of cytosets containing the loaded multi-stained FCS files.
+#' @param transform_fun A transformation function applied prior to clustering. The transformation
+#'   helps separate populations. Default is `function(x) asinh(x / 1e3)`. Does not affect reported MFIs.
+#' @param relevant_columns A character vector specifying the marker channels to extract
+#'   from the multi-stained files. If missing, all columns are used
+#' @param seed Integer seed for reproducible k-means clustering. Default is `42`.
+#'
+#' @return A `tibble` with one row per sample and feature, containing columns:
+#' \describe{
+#'   \item{`sample`}{File name or sample ID.}
+#'   \item{`feature`}{Marker/channel name (e.g., `"FITC-A"`).}
+#'   \item{`negative`, `positive`}{Clustered MFI values on original scale.}
+#'   \item{`negative.sd`, `positive.sd`}{Standard deviations within clusters.}
+#'   \item{`negative.iqr`, `positive.iqr`}{(Optional) Interquartile ranges if computed.}
+#' }
+#'
+#' @examples
+#' \dontrun{
+#' mfis_multi <- extract_relevant_mfis_multistain(
+#'     loaded_fcs_multistain = multistain_list,
+#'     relevant_columns = c("FITC-A", "PE-A", "APC-A")
+#' )
 #' }
 #' @export
 extract_relevant_mfis_multistain <- function(loaded_fcs_multistain,
                                              transform_fun = function(x) {
                                                  asinh(x / 1e3)
                                              },
-                                             relevant_columns,
+                                             relevant_columns = NA,
                                              seed = 42) {
+    # Warn if multiple multistained samples were passed (usually only one is expected)
     if (length(loaded_fcs_multistain) > 1) {
-        warning("More than one multistain sample found, returning the MFI of each multistain_column by filename. This is NOT intended!")
+        warning("More than one multistain sample found; returning MFIs per sample. This is NOT intended!")
     }
+
+    # Process each multistain sample individually
     multistain_mfis <- lapply(loaded_fcs_multistain, function(ff_x) {
-        values_relevantcols <- flowCore::exprs(flowWorkspace::cytoframe_to_flowFrame(ff_x[, relevant_columns][[1]]))
+        if (!all(is.na(relevant_columns))) {
+            relevant_columns <- flowCore::colnames(ff_x[[1]])
+        }
+        # Extract expression values for relevant columns
+        values_relevantcols <- flowCore::exprs(
+            flowWorkspace::cytoframe_to_flowFrame(ff_x[, relevant_columns][[1]])
+        )
+
+        # Cluster and extract MFIs using k-means
         clustering_seeded_mfi_multicolor(
             values = values_relevantcols,
             seed = seed,
             transform_fun = transform_fun
         )
     }) |>
-        data.table::rbindlist(idcol = "sample") |>
+        data.table::rbindlist(idcol = "sample") |> # Add sample ID column
         tibble::as_tibble()
+
     return(multistain_mfis)
 }
