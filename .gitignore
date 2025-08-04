@@ -5,6 +5,7 @@
 .DS_Store
 .quarto
 data-raw/PRE_ARCSINH_CSV
+data-raw/
 inst/
 example_flowcyto.csv
 inst/doc
