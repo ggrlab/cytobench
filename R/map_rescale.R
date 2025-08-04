@@ -122,8 +122,8 @@ create_mapping <- function(named_mfis,
 
     samples_mapped <- lapply(sample_names, FUN.sample_names_to_mapping_df)
     mapping_sample <- do.call(rbind, samples_mapped)
-    mapped_single <- mapping_sample %>%
-        dplyr::filter(sample_type %in% types_single_staining) %>%
+    mapped_single <- mapping_sample |>
+        dplyr::filter(sample_type %in% types_single_staining) |>
         dplyr::left_join(mapping_mfi, by = c("sample", "lot", "device"), relationship = "many-to-many")
     mapped_single[["lot_verify"]] <- NA
 
@@ -132,10 +132,10 @@ create_mapping <- function(named_mfis,
         stop("No MFI file found for the samples shown above in the terminal.")
     }
 
-    mapped_verify <- mapping_sample %>%
-        dplyr::filter(!sample_type %in% types_single_staining) %>%
-        dplyr::mutate(lot_verify = lot) %>%
-        dplyr::select(-lot) %>%
+    mapped_verify <- mapping_sample |>
+        dplyr::filter(!sample_type %in% types_single_staining) |>
+        dplyr::mutate(lot_verify = lot) |>
+        dplyr::select(-lot) |>
         dplyr::left_join(mapping_mfi, by = c("sample", "device"), relationship = "many-to-many")
 
     mapped_all <- rbind(mapped_single, mapped_verify)
