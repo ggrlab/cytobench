@@ -341,40 +341,74 @@ clustering_seeded_mfi <- function(values, seed, transform_fun, featurename) {
     return(mfis_tib)
 }
 
-clustering_seeded_mfi_multicolor <- function(values, seed = 42, transform_fun, featurename) {
+
+#' Clustered MFI Extraction for Multiple Marker Channels
+#'
+#' This function performs seeded k-means clustering (k = 2) on transformed multi-channel
+#' fluorescence values to separate negative and positive cell populations. It computes
+#' median, standard deviation, and interquartile range (IQR) of the untransformed
+#' values for each marker, returning a tidy `tibble` with one row per marker.
+#'
+#' The cluster with the lower total median signal across all markers is considered
+#' the negative population.
+#'
+#' @param values A numeric matrix or data.frame of untransformed expression values.
+#'   Columns represent marker channels; rows are cells.
+#' @param seed Integer. Random seed to ensure reproducibility. Default is `42`.
+#' @param transform_fun Function. Transformation to apply prior to clustering
+#'   (e.g., `asinh(x / 1e3)`).
+#' @param featurename (Unused) Optional character label; retained for compatibility. Ignored.
+#'
+#' @return A `tibble` with columns:
+#' \describe{
+#'   \item{`feature`}{Channel name (from `colnames(values)`)}
+#'   \item{`negative`, `positive`}{Clustered median intensities (original scale)}
+#'   \item{`negative.sd`, `positive.sd`}{Standard deviations within clusters}
+#'   \item{`negative.iqr`, `positive.iqr`}{Interquartile ranges within clusters}
+#' }
+#'
+clustering_seeded_mfi_multicolor <- function(values,
+                                             seed = 42,
+                                             transform_fun,
+                                             featurename = NULL) {
     set.seed(seed)
+
+    # Cluster cells (rows) using transformed data
     clustering <- stats::kmeans(transform_fun(values), centers = 2)
+
+    # Add cluster assignments to original data
     values_copy <- data.table::data.table(values)
     values_copy[, cluster := clustering$cluster]
-    # calculate median per column grouped by cluster with data.table
+
+    # calculate median per column (marker) grouped by cluster with data.table
     medians <- values_copy[, lapply(.SD, median), by = cluster]
+
+    # Define the "negative" cluster as the one with the lowest sum of medians
     index_negative_median <- which.min(apply(medians, 1, sum))
     clusternumber_negative_median <- medians[["cluster"]][index_negative_median]
 
+    # Format medians
     melted_medians <- data.table::melt(medians, id.vars = "cluster")
     melted_medians[, cluster := ifelse(cluster == clusternumber_negative_median, "negative", "positive")]
     cast_medians <- data.table::dcast(melted_medians, variable ~ cluster)
 
+    # Format standard deviations
     sds <- values_copy[, lapply(.SD, sd), by = cluster]
     melted_sds <- data.table::melt(sds, id.vars = "cluster")
     melted_sds[, cluster := ifelse(cluster == clusternumber_negative_median, "negative.sd", "positive.sd")]
     cast_sds <- data.table::dcast(melted_sds, variable ~ cluster)
 
+    # Format IQRs
     iqrs <- values_copy[, lapply(.SD, IQR), by = cluster]
     melted_iqrs <- data.table::melt(iqrs, id.vars = "cluster")
     melted_iqrs[, cluster := ifelse(cluster == clusternumber_negative_median, "negative.iqr", "positive.iqr")]
     cast_iqrs <- data.table::dcast(melted_iqrs, variable ~ cluster)
 
-    joint <- dplyr::left_join(
-        cast_medians,
-        cast_sds,
-        by = "variable"
-    ) |>
-        dplyr::left_join(
-            cast_iqrs,
-            by = "variable"
-        ) |>
+    # Join all summaries
+    joint <- dplyr::left_join(cast_medians, cast_sds, by = "variable") |>
+        dplyr::left_join(cast_iqrs, by = "variable") |>
         tibble::as_tibble()
+
     colnames(joint)[1] <- "feature"
     # # A tibble: 10 × 5
     #    variable     negative positive negative.sd positive.sd
@@ -393,7 +427,7 @@ clustering_seeded_mfi_multicolor <- function(values, seed = 42, transform_fun, f
 #' unstained samples (i.e., samples with no non-empty channels) and records their median values.
 #'
 #' @param loaded_fcs_singlestain A named list of cytosets or cytoframes containing single-stain FCS data.
-#'   Each element should contain a single sample with one non-empty marker channel, or none (for unstained). The channels must have "empty" as their description if not filled. 
+#'   Each element should contain a single sample with one non-empty marker channel, or none (for unstained). The channels must have "empty" as their description if not filled.
 #' @param transform_fun Function applied to the data before clustering. Default: `function(x) asinh(x / 1e3)`. Does not affect reported MFIs, only through the clustering.
 #' @param seed Integer random seed for reproducible k-means clustering. Default is `42`.
 #'
@@ -410,11 +444,13 @@ clustering_seeded_mfi_multicolor <- function(values, seed = 42, transform_fun, f
 #' }
 #' @export
 extract_relevant_mfis_singlestain <- function(loaded_fcs_singlestain,
-                                              transform_fun = function(x) { x },
+                                              transform_fun = function(x) {
+                                                  x
+                                              },
                                               seed = 42) {
     sapply(names(loaded_fcs_singlestain), function(f_x) {
         ff_x <- flowWorkspace::cytoframe_to_flowFrame(loaded_fcs_singlestain[[f_x]][[1]])
-        
+
         # Identify non-empty marker channels (all empty channels are named "empty")
         nonempty_channel <- which(flowCore::markernames(ff_x) != "empty")
 
