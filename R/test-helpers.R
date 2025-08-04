@@ -14,7 +14,7 @@
 #' ff <- simulate_ff(100)
 #' flowCore::exprs(ff)[1:5, ]
 simulate_ff <- function(
-    ncells,
+    ncells = 250,
     columns = c(
         "FITC-A",
         "PE-A",
