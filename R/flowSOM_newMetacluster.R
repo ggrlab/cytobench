@@ -1,20 +1,29 @@
-#' @title Predict new cells using a flowsom result
-#' @description
-#' Predict the (meta-) clusters for all cells using a flowsom result.
-#' @param flowsom_result Result of flowSOM_optimal() or flowSOM()
-#' @param clustered_df
-#'  1) The data.frame including the clustered cells. The column "cluster" must be present and
-#'  should be the cluster assignment from the FlowSOM ("flowsom_result").
+#' Predict and Reassign MetaClusters Based on a FlowSOM Result
 #'
-#' 2) Alternatively: The data.frame including the number of clustered cells. The columns "cluster_1", "cluster_2", ..., "cluster_n".
-#' The function will then calculate the metaClusters for each of the clusters and return the number of cells per metaCluster.
-#' @param n_metacluster
-#' If not NULL, the number of metaclusters will be changed to this number in flowsom_result.
-#' @return
-#' A list with two elements:
-#' 1) "cells_clusters_from_train": The data.frame with the new metaClusters. If the input was a data.frame with the number of cells per cluster,
-#' the output will be a data.frame with the number of cells per metaCluster. (Identical to 2))
-#' 2) "ncells_per_x": A data.frame in wide format with the counts of cells per specified grouping.
+#' This function reassigns or updates meta-cluster labels for either:
+#' (1) individual cells with known cluster assignments, or
+#' (2) pre-aggregated cluster-level counts across samples.
+#'
+#' Optionally, a new number of meta-clusters can be specified, triggering recomputation via
+#' `ConsensusClusterPlus`. The function also optionally updates the `FlowSOM` object to reflect
+#' the new meta-clustering.
+#'
+#' @param flowsom_result A `FlowSOM` result object, as returned by `flowSOM()` or `flowSOM_optimal()`.
+#' @param clustered_df A `data.frame` that either:
+#'   \itemize{
+#'     \item Contains a `"cluster"` column mapping each cell to a cluster (e.g., from a previous FlowSOM run), or
+#'     \item Contains wide-format columns `"cluster_1"`, `"cluster_2"`, ..., representing counts of cells per cluster.
+#'   }
+#'   If provided, the function returns an updated version with newly assigned meta-clusters.
+#' @param n_metacluster Optional. If provided, the FlowSOM result is updated to use this number of meta-clusters.
+#' @param update_flowsom Logical. If `TRUE`, the `flowsom_result` will be updated in place with the new meta-clustering.
+#'
+#' @return A named list with:
+#' \describe{
+#'   \item{`flowsom_newdata`}{The (optionally updated) `flowsom_result` with meta-clusters.}
+#'   \item{`cells_clusters_from_train`}{Input `clustered_df` with meta-cluster annotations (if `clustered_df` was provided).}
+#'   \item{`ncells_per_x`}{A summary `data.frame` (or list of `data.frame`s) with counts per meta-cluster (and cluster if applicable).}
+#' }
 #' @export
 flowSOM_newMetacluster <- function(flowsom_result,
                                    clustered_df = NULL,
@@ -27,10 +36,13 @@ flowSOM_newMetacluster <- function(flowsom_result,
         } else {
             seed <- missing_seed
         }
+
         if (n_metacluster <= 2) {
             stop("n_metacluster must be greater than 2, otherwise FlowSOM fails.")
         }
-        if (!"ConsensusClusterPlus" %in% names(flowsom_result) || length(flowsom_result[["ConsensusClusterPlus"]]) < n_metacluster) {
+
+        if (!"ConsensusClusterPlus" %in% names(flowsom_result) ||
+            length(flowsom_result[["ConsensusClusterPlus"]]) < n_metacluster) {
             # metaClustering_consensus() is a function from FlowSOM, only
             # calling ConsensusClusterPlus::ConsensusClusterPlus() and then returning the consensusClass
             # See the function here:
@@ -39,11 +51,14 @@ flowSOM_newMetacluster <- function(flowsom_result,
             cl_ccp <- suppressMessages(
                 ConsensusClusterPlus::ConsensusClusterPlus(
                     t(flowsom_result$map$codes),
-                    maxK = n_metacluster, reps = 100, pItem = 0.9, pFeature = 1, title = tempdir(),
-                    plot = "pdf", verbose = FALSE, clusterAlg = "hc", distance = "euclidean",
-                    seed = seed
+                    maxK = n_metacluster, reps = 100,
+                    pItem = 0.9, pFeature = 1,
+                    title = tempdir(), plot = "pdf", verbose = FALSE,
+                    clusterAlg = "hc", distance = "euclidean", seed = seed
                 )
             )
+
+            # Store consensus class assignments in flowsom_result
             flowsom_result[["ConsensusClusterPlus"]] <- cl_ccp
             flowsom_result[["ConsensusClusterPlus_MAP"]] <- as.data.frame(sapply(cl_ccp[-1], function(x) {
                 x$consensusClass
@@ -53,10 +68,13 @@ flowSOM_newMetacluster <- function(flowsom_result,
             flowsom_result[["ConsensusClusterPlus_MAP"]] <- flowsom_result[["ConsensusClusterPlus_MAP"]] |>
                 dplyr::relocate(cluster)
         }
+
         # The as.factor comes from FlowSOM.
+        # Assign meta-clusters (as factors) from stored mapping
         cl <- as.factor(flowsom_result[["ConsensusClusterPlus_MAP"]][[n_metacluster]])
+
         if (update_flowsom) {
-            # Update the flowSOM object
+            # Update FlowSOM object to reflect new meta-clustering
             flowsom_result$map$nMetaclusters <- length(levels(cl))
             flowsom_result$metaclustering <- cl
             # See what happens in the FlowSOM:::UpdateDerivedValues function:
@@ -69,13 +87,15 @@ flowSOM_newMetacluster <- function(flowsom_result,
         }
     }
 
-
     ncells_per_x <- NULL
+
     if (!is.null(clustered_df)) {
         # Either there must be a column called "cluster", then it is probably an already clustered (and previously exported)
         # data.frame of n cells and p channels, plus "cluster" and "metaCluster" columns.
         if ("cluster" %in% colnames(clustered_df)) {
+            # Case 1: data.frame contains cluster assignments per cell
             clustered_df[["metaCluster"]] <- flowsom_result$metaclustering[clustered_df[["cluster"]]]
+
             ncells_per_x <- n_cells_per_x(
                 dt = clustered_df,
                 which = c("cluster", "metaCluster"),
@@ -86,7 +106,7 @@ flowSOM_newMetacluster <- function(flowsom_result,
                 )
             )
         } else {
-            # Then the clusters must be in the columns of the data.frame like "cluster_1", "cluster_2", ..., "cluster_n"
+            # Case 2: clustered_df contains wide-format cluster columns (e.g., cluster_1, cluster_2, ...)
             clustered_df_long <- tidyr::pivot_longer(
                 clustered_df,
                 cols = tidyr::starts_with("cluster_"),
@@ -99,7 +119,6 @@ flowSOM_newMetacluster <- function(flowsom_result,
 
             map_cluster_metacluster <- flowsom_result[["ConsensusClusterPlus_MAP"]][, c(1, n_metacluster)]
             colnames(map_cluster_metacluster) <- c("cluster", "metaCluster")
-
 
             clustered_df_long <- dplyr::left_join(
                 clustered_df_long,
@@ -121,17 +140,16 @@ flowSOM_newMetacluster <- function(flowsom_result,
                 values_from = ncells,
                 values_fill = 0
             )
+
             ncells_per_x <- list(
                 "cluster" = clustered_df,
                 "metaCluster" = clustered_df |>
                     dplyr::select(-tidyr::starts_with("cluster_")) |>
-                    dplyr::left_join(
-                        metaclustered_df,
-                        by = "sample"
-                    )
+                    dplyr::left_join(metaclustered_df, by = "sample")
             )
         }
     }
+
     return(
         list(
             "flowsom_newdata" = flowsom_result, # Potentially updated to have the specified number of metaClusters
