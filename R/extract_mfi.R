@@ -172,6 +172,23 @@ extract_singlestain_mfi <- function(fcs_dir = "data-raw/s001",
     )
 }
 
+
+#' Load and Optionally Gate FCS Files for MFI Extraction
+#'
+#' This function loads FCS files from a directory that match a specified pattern
+#' (typically single-stain or multi-stain), and optionally applies a `GatingSet`
+#' to restrict analysis to a specific gated population.
+#'
+#' @param fcs_dir Character. Directory containing FCS files. Default: `"data-raw/s001"`.
+#' @param regex_singlestain Character. Regular expression used to filter FCS filenames.
+#'   Only matching files will be loaded. Default: `"(-(CD3-.*)|(none))\\.fcs$"`.
+#' @param gating_set_file Optional. A path to a `GatingSet` folder (as a string) or an in-memory `GatingSet` object.
+#'   If provided, the gating set will be applied to all loaded FCS samples.
+#' @param gate_extract Optional. Name of the population to extract from the gating set.
+#'   If `NULL`, the first non-root gate will be used automatically.
+#'
+#' @return A named list of cytosets or gated cytosets, ready for MFI computation.
+#'   Each entry corresponds to one FCS file.
 load_mfi_files <- function(fcs_dir = "data-raw/s001",
                            regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
                            gating_set_file = NULL,
