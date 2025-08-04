@@ -22,27 +22,32 @@
 #'   \item{`autofluorescence_proportional`}{A named numeric vector with autofluorescence contributions per channel.}
 #' }
 #' @export
-read.FCS_custom_spillover <- function(fcs, custom_spillover_keyword = "spillover.manual", original_spillover_keyword = "$SPILLOVER") {
+read.FCS_custom_spillover <- function(fcs,
+                                      custom_spillover_keyword = "spillover.manual",
+                                      original_spillover_keyword = "$SPILLOVER") {
     if (is.character(fcs)) {
-        # Reading the stored spillover matrices:
+        # If input is a file path, read only the FCS header to access metadata
         fs_keywords <- flowCore::read.FCSheader(fcs)[[1]]
-        # By reading only the header, the spillover matrix is not transformed into a
-        # matrix. So we have to do it manually.
+
+        # Convert the original spillover matrix from string to matrix form
         fs_keywords[original_spillover_keyword] <- list(
             flowCore:::string_to_spill(fs_keywords[[original_spillover_keyword]])
         )
     } else {
+        # If input is a flowFrame, extract metadata directly
         fs_keywords <- flowCore::keyword(fcs)
     }
 
+    # Ensure the custom keyword is properly prefixed
     if (!startsWith(custom_spillover_keyword, "spillover.")) {
         custom_spillover_keyword <- paste0("spillover.", custom_spillover_keyword)
     }
 
-    # Kaluza uses the following function to read the spillover matrix:
+    # flowCore uses the following function to read the spillover matrix:
     # read_spillover <- flowCore:::string_to_spill(fs_keywords[[original_spillover_keyword]])
-
     spillovermat <- flowCore:::string_to_spill(fs_keywords[[custom_spillover_keyword]])
+
+    # Handle autofluorescence: zero vector for original, or read from paired keyword
     if (custom_spillover_keyword == "spillover.original") {
         autofluorescence_proportional <- spillovermat[1, ]
         autofluorescence_proportional[TRUE] <- 0
@@ -50,16 +55,20 @@ read.FCS_custom_spillover <- function(fcs, custom_spillover_keyword = "spillover
         autofluorescence_proportional <- as.numeric(
             read.table(text = fs_keywords[[sub(
                 "spillover",
-                "spillover_autofluorescence", custom_spillover_keyword
+                "spillover_autofluorescence",
+                custom_spillover_keyword
             )]])
         )
         names(autofluorescence_proportional) <- colnames(spillovermat)
     }
+
+    # Ensure the output spillover matrix matches the ordering of the original
     current_spillover <- fs_keywords[[original_spillover_keyword]]
     # Order the spillover matrix according to the current spillover matrix
     spillover_reordered <- spillovermat
     rownames(spillover_reordered) <- colnames(spillover_reordered)
     spillover_reordered <- spillover_reordered[colnames(current_spillover), colnames(current_spillover)]
+
     return(
         list(
             spillover = spillover_reordered,
