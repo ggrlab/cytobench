@@ -1,22 +1,30 @@
-#' CMV compensation helper function
+#' Apply Compensation to CMV Flow Cytometry Data
 #'
-#' This function is a helper function to apply the compensation to the CMV data from
-#' Glehr et al. [TO BE SUBMITTED]. It reads the spillover matrix and autofluorescence vector from
-#' the FCS file and applies the compensation to the data. Different compensation options are stored
-#' within the FCS files and can hereby be selected and applied easily.
+#' This helper function applies a compensation matrix and autofluorescence correction
+#' to CMV flow cytometry data as described in Glehr et al. [TO BE SUBMITTED].
+#' It retrieves compensation parameters from the FCS file metadata using a custom keyword.
+#' Multiple compensation types can be selected depending on how the compensation
+#' was estimated (manual, auto, or auto_singlestain).
+#'
 #' @param ff_unapplied_compensations
-#' A flowFrame object with the unapplied compensations, generated for the CMV data from Glehr et al. [TO BE SUBMITTED]
+#' A `flowFrame` object containing uncompensated data and
+#'   embedded compensation parameters (spillover matrix and autofluorescence vector) in the metadata.
 #' @param compensation_type
-#' What compensation to use. Default is "manual". Other options are "auto" and "auto_singlestain".
-#' "auto" calculated the spillover matrix and autofluorescence vector  based on the DuraClone
-#' Compensation TUBES from Beckman Coulter. "auto_singlestain" calculates the spillover matrix and
-#' autofluorescence vector  based on the single stain controls from the CMV data.
-#' "manual" is the default option, which uses the manually curated spillover matrix and autofluorescence vector.
+#' Character. Specifies the type of compensation to apply.
+#'   Options are:
+#'   \describe{
+#'     \item{"manual"}{Use a manually curated spillover matrix and autofluorescence vector (default).}
+#'     \item{"auto"}{Use values computed from DuraClone compensation tubes (Beckman Coulter).}
+#'     \item{"auto_singlestain"}{Use values derived from single stain controls within the CMV dataset.}
+#'   }
 #' @param expected_max_proportion_value
-#' The expected maximum value for the spillover matrix and autofluorescence vector. Default is 1 which corresponds to 100%. However, technically nothing speaks against spillover values above 100%.
-#' Within Kaluza, the spillover values can be a maximum of +/- 500% (+/-5). Thus the default value of 5. This is a safety measure to avoid using the already calculated absolute autofluorescence values.
+#' Numeric. Upper bound for expected spillover and autofluorescence values.
+#'   This prevents interpreting absolute values as proportions. Defaults to 5 (corresponding to 500%).
 #' @param original_spillover_keyword
-#' The keyword to use for the original spillover matrix. Default is "$SPILLOVER".
+#' Character. The keyword in the FCS file that stores the original spillover matrix.
+#'   Defaults to `"$SPILLOVER"`.
+#'
+#' @return A `flowFrame` with compensation and autofluorescence correction applied.
 #' @export
 cmv_helper_compensation <- function(ff_unapplied_compensations,
                                     compensation_type = c(
@@ -25,11 +33,14 @@ cmv_helper_compensation <- function(ff_unapplied_compensations,
                                     ),
                                     expected_max_proportion_value = 5,
                                     original_spillover_keyword = "$SPILLOVER") {
+    # Read the spillover matrix and autofluorescence vector from FCS file using selected compensation type
     params_spillover_autofluorescence <- read.FCS_custom_spillover(
         fcs = ff_unapplied_compensations,
         custom_spillover_keyword = compensation_type[1],
         original_spillover_keyword = original_spillover_keyword
     )
+
+    # Sanity check: ensure values are in expected proportional range (e.g., 0–1 or 0–5)
     if (any(
         sapply(params_spillover_autofluorescence, function(x) any(x > expected_max_proportion_value))
     )) {
@@ -37,21 +48,22 @@ cmv_helper_compensation <- function(ff_unapplied_compensations,
             paste0(
                 "Spillover matrix or autofluorescence vector contains values > ",
                 expected_max_proportion_value,
-                ". This would mean that these are most probably not percentages."
+                ". This likely indicates that values are absolute, not proportions."
             )
         )
     }
+
+    # Apply spillover and autofluorescence compensation
     ff_compensated <- cytoKal::compensation_autofluorescence_kaluza(
         ff_unapplied_compensations,
         spillmat = params_spillover_autofluorescence[["spillover"]],
         autofluorescence_vector = params_spillover_autofluorescence[["autofluorescence_proportional"]],
-        add_suffix = "",
+        add_suffix = "", # Keep channel names unchanged
         calculate_absolute_values_from_ff = TRUE,
         remove_spillover_keywords = TRUE
     )
-    # I checked that the compensation is NOT applied to ff, so I can reuse it
-    # head(flowCore::exprs(ff_compensated))
-    # head(flowCore::exprs(ff))
+
+    # Note: Original ff is not compensated — safe to reuse
     return(ff_compensated)
 }
 
