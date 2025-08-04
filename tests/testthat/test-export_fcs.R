@@ -1,5 +1,3 @@
-devtools::load_all()
-
 test_that("Export fcs files, new colnames into description", {
     # Create the example data
     original_cn <- c(
