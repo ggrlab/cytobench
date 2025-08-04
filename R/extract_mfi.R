@@ -360,44 +360,59 @@ clustering_seeded_mfi_multicolor <- function(values, seed = 42, transform_fun, f
     #  3 Blue - 610-A     39.2     449.        94.6       172.
     return(joint)
 }
-#' Extract Single Stain Median Fluorescence Intensity (MFI)
-#' This function extracts the median fluorescence intensity (MFI) from single-stain FCS files.
-#' @param loaded_fcs_singlestain A list of cytosets containing the loaded FCS files.
-#' @param transform_fun A function to transform the fluorescence values. Default is `function(x) { asinh(x / 1e3) }`.
-#' The reported MFIs are calculated as the median of the UNtransformed values. Transformation is only used to cluster the negative and positive populations.
-#' @return A data frame with the extracted MFIs. E.g.:
-#' \preformatted{
-#'   feature negative positive unstained
-#'  <chr>      <dbl>    <dbl>     <dbl>
-#' 1 FITC-A      530.   58567.     576.
-#' 2 PE-A        526.  149506.     511.
+
+
+#' Extract MFIs from Single-Stain Cytometry Samples
+#'
+#' This function extracts the median fluorescence intensity (MFI) for each single-stain sample
+#' using seeded k-means clustering (k=2) to separate positive and negative populations. It also identifies
+#' unstained samples (i.e., samples with no non-empty channels) and records their median values.
+#'
+#' @param loaded_fcs_singlestain A named list of cytosets or cytoframes containing single-stain FCS data.
+#'   Each element should contain a single sample with one non-empty marker channel, or none (for unstained). The channels must have "empty" as their description if not filled. 
+#' @param transform_fun Function applied to the data before clustering. Default: `function(x) asinh(x / 1e3)`. Does not affect reported MFIs, only through the clustering.
+#' @param seed Integer random seed for reproducible k-means clustering. Default is `42`.
+#'
+#' @return A named list of `tibble`s, one per input file, each with columns:
+#' \describe{
+#'   \item{`feature`}{The marker channel name (e.g., `"FITC-A"`).}
+#'   \item{`negative`, `positive`}{MFI values per cluster, if applicable.}
+#'   \item{`unstained`}{Median intensity if the sample is unstained (no non-empty channels).}
+#' }
+#'
+#' @examples
+#' \dontrun{
+#' mfis <- extract_relevant_mfis_singlestain(loaded_fcs)
 #' }
 #' @export
 extract_relevant_mfis_singlestain <- function(loaded_fcs_singlestain,
-                                              transform_fun = function(x) {
-                                                  x
-                                              },
+                                              transform_fun = function(x) { x },
                                               seed = 42) {
     sapply(names(loaded_fcs_singlestain), function(f_x) {
         ff_x <- flowWorkspace::cytoframe_to_flowFrame(loaded_fcs_singlestain[[f_x]][[1]])
+        
+        # Identify non-empty marker channels (all empty channels are named "empty")
         nonempty_channel <- which(flowCore::markernames(ff_x) != "empty")
 
-        # Check if there is more than one non-empty channel
+        # Sanity check: more than one non-empty channel is unexpected for single-stain data
         if (length(nonempty_channel) > 1) {
             warning("More than one non-empty channel in ", f_x)
             return(empty_tibble())
         }
 
-        # If no non-empty channel, it is the unstained sample
+        # Handle unstained sample (no active marker channel)
         if (length(nonempty_channel) == 0) {
             mfis <- apply(flowCore::exprs(ff_x), 2, median)
             mfis_tib <- tibble::tibble(
                 "feature" = names(mfis),
-                "unstained" = mfis,
+                "unstained" = mfis
             )
         } else {
             # Cluster the relevant channel into two populations and return the median of both
+            # Extract expression values from the single stained channel
             values_nonempty <- flowCore::exprs(ff_x)[, names(nonempty_channel)]
+
+            # Apply seeded k-means to separate negative and positive
             mfis_tib <- clustering_seeded_mfi(
                 values = values_nonempty,
                 seed = seed,
@@ -409,6 +424,7 @@ extract_relevant_mfis_singlestain <- function(loaded_fcs_singlestain,
         return(mfis_tib)
     }, simplify = FALSE)
 }
+
 
 #' Extract Multi-Stain Median Fluorescence Intensity (MFI)
 #'
