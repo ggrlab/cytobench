@@ -12,23 +12,28 @@ extract_marker_mfi_list(
 )
 }
 \arguments{
-\item{sample_to_rescale}{A \code{flowFrame} or similar object with marker columns to rescale.}
+\item{sample_to_rescale}{A \code{flowFrame} or other object with marker (column) names to be rescaled.}
 
-\item{extracted_mfi}{A tibble with columns: \code{feature}, \code{negative}, \code{positive} (or custom).}
+\item{extracted_mfi}{A \code{tibble} (or coercible to one) with at least three columns:
+\describe{
+\item{\code{feature}}{Character. Names of the features (e.g., \code{"FITC-A"}).}
+\item{\code{negative}}{Numeric. MFI values for negative/unlabeled control.}
+\item{\code{positive}}{Numeric. MFI values for positive/labeled control.}
+}}
 
-\item{column_negative}{Character vector of acceptable column names for the negative control.
-Defaults to \code{c("negative", "unstained")}.}
+\item{column_negative}{Character vector. Column name as  negative control.
+Defaults to \code{c("negative", "unstained")}. First element is used.}
 
-\item{column_positive}{Name of the column for the positive control. Defaults to \code{"positive"}.}
+\item{column_positive}{Character. Column name used as positive control. Defaults to \code{"positive"}. First element is used.}
 }
 \value{
-A named list where each element corresponds to a marker (column) in \code{sample_to_rescale}.
-Each list element is a numeric vector of length 2 with names \code{negative} and \code{positive}.
-If a column in \code{sample_to_rescale} has no entry in \code{extracted_mfi}, it is filled with \code{NA}.
+A named list. Each entry corresponds to a marker (column) in \code{sample_to_rescale},
+containing a numeric vector of length two with names \code{"negative"} and \code{"positive"}.
+Missing markers are filled with \code{NA}.
 }
 \description{
 This function extracts median fluorescence intensities (MFIs) for specified features
 from a tibble, returning a named list that maps each feature (e.g., "FITC-A") to a
-named numeric vector of its negative and positive control values. If a feature
-present in the sample is missing from the MFI table, it is added with \code{NA}.
+named numeric vector of its negative and positive control values. Features present
+in \code{sample_to_rescale} but missing from \code{extracted_mfi} are included with \code{NA}.
 }
