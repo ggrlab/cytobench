@@ -1,5 +1,5 @@
-devtools::load_all()
-library(testthat)
+# devtools::load_all()
+# library(testthat)
 test_that("Export files as csv", {
     # Read in the example data
     csv_paths <- list.files(

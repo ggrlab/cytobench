@@ -16,20 +16,17 @@
 #'
 #' @return Invisibly returns the modified `sample_to_rescale`, with the column `colX` scaled.
 #' @export
-scale_column_minmaxQ <- function(sample_to_rescale,
-                                 scaling_values,
-                                 colX,
-                                 subtract_bg = TRUE) {
-    # saved_sample_to_rescale <- data.table::data.table(sample_to_rescale)
-    # sample_to_rescale <- data.table::data.table(saved_sample_to_rescale)
-
+scale_column_relativeQ <- function(sample_to_rescale,
+                                   scaling_values,
+                                   colX,
+                                   subtract_bg = TRUE) {
     # Flatten input in case it's a list with single numeric vector
     scaling_values <- unlist(scaling_values)
 
     # Case 1: Standard min-max scaling (numeric vector input)
     if (!is.list(scaling_values)) {
         # Use default relativisation logic with static min and max values
-        sample_to_rescale <- scale_column_minmax(
+        sample_to_rescale <- scale_column_relative(
             sample_to_rescale = sample_to_rescale,
             scaling_values = scaling_values,
             colX = colX,
@@ -61,21 +58,8 @@ scale_column_minmaxQ <- function(sample_to_rescale,
     # The scaling function should take a quantile value and return the corresponding high value.
     sample_to_rescale[, correction_high := scaling_values_funs[["positive"]](reference_quantiles)]
 
-    library(ggplot2)
-    # pdf("removeme3.pdf")
-    print(
-        ggplot(sample_to_rescale, aes(x = !!rlang::sym(colX), y = correction_high)) +
-            # geom_point(alpha=.3, size=) +
-            scattermore::geom_scattermore(alpha = .5) +
-            geom_abline(slope = 1, intercept = 0, color = "red") +
-            ggpubr::theme_pubr() +
-            ggplot2::scale_x_log10() +
-            ggplot2::scale_y_log10() +
-            ggpubr::stat_cor() 
-    )
-    # dev.off()
     # Rescale target column using dynamic low and high corrections
-    sample_to_rescale[, (colX) := (get(colX) - correction_low) / (correction_high - correction_low)]
+    sample_to_rescale[, (colX) := (get(colX) - correction_low) / (correction_high)]
 
     # Clean up helper columns
     sample_to_rescale[, c("correction_low", "correction_high") := NULL]

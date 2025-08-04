@@ -1,4 +1,4 @@
-extract_mfi_quantized <- function(fcs_dir = "data-raw/s001",
+extract_quantile <- function(fcs_dir = "data-raw/s001",
                                   regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
                                   transform_fun = function(x) {
                                       asinh(x / 1e3)
@@ -11,7 +11,6 @@ extract_mfi_quantized <- function(fcs_dir = "data-raw/s001",
                                   gating_set_file = NULL,
                                   gate_extract = NULL,
                                   ...) {
-    browser()
     joint_df <- tryCatch(
         {
             loaded_fcs <- cytobench:::load_mfi_files(
@@ -48,26 +47,13 @@ extract_mfi_quantized <- function(fcs_dir = "data-raw/s001",
             return(NULL)
         }
     )
-    browser()
-    if (nrow(relevant_mfis_multi) > 0) {
-        #  Merge single and multi stainings
-        joint_df <- dplyr::left_join(
-            joint_df,
-            relevant_mfis_multi,
-            by = "feature",
-            suffix = c("", ".multi")
-        )
-    }
-    # The following replaces the values of the respective columns
-    # by their multi-stained counterparts if they are NA.
-    for (x in c("positive", "negative", "positive.sd", "negative.sd")) {
-        if (all(is.na(joint_df[[x]]))) {
-            joint_df[[x]] <- joint_df[[paste0(x, ".multi")]]
-        }
-    }
-
     # Unname each column
-    return(dplyr::mutate(joint_df, dplyr::across(tidyr::everything(), ~ unname(.))))
+    return(
+        list(
+            "single" = joint_df,
+            "multi" = relevant_mfis_multi
+        )
+    )
 }
 
 #' Extract Quantile Approximation Functions for Single-Stain Flow Cytometry Data
