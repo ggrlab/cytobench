@@ -1,11 +1,10 @@
-
 #' Export Flow Cytometry Data as FCS Files
 #'
 #' This function exports a list of matrices or `data.table`s as `.fcs` files using
 #' `flowCore::flowFrame()` and `flowCore::write.FCS()`. It ensures FCS-compatible formatting,
 #' adds optional safety scaling and shifting, handles marker names, and builds a shared
 #' extreme template sample to define channel ranges for all files.
-#' 
+#'
 #' This is particularly useful for exporting flow cytometry data for use in software like Kaluza,
 #' which reads the metadata to set up the plots. Especially the maximum and minimum channel
 #' values are important for Kaluza to visualize the data correctly.
@@ -13,8 +12,8 @@
 #' @param matrix_list A named list of matrices or `data.table`s, all with the same number of columns.
 #' @param safety_scaling Numeric. A scaling factor applied to the max/min range template. Does not modify actual data.
 #'   Default is `1.20` (20% safety buffer).
-#' @param safety_shift Numeric. CAREFUL - MODIFIES DATA AT SAVE! 
-#'  An additive shift applied to all cell values before export. 
+#' @param safety_shift Numeric. CAREFUL - MODIFIES DATA AT SAVE!
+#'  An additive shift applied to all cell values before export.
 #'  Necessary to avoid negative values in linear scale visualizations in tools like Kaluza. Default is `0`.
 #' @param outdir Character. Output directory for the `.fcs` files. Filenames are derived from `names(matrix_list)`.
 #' @param use.names Logical. If `TRUE`, retains column names during the concatenation of extreme samples.
@@ -59,20 +58,20 @@
 #' flowCore::markernames() IN ORDER! The other values are ignored.
 #'
 #' @param extreme_template A matrix or `flowFrame` to use as a shared max/min template across all samples.
-#' 
+#'
 #' If you have an extreme sample which you want to use as a template for all other samples,
 #' you can provide it here. Usually, this would be the returned fcs_extreme_copy from a
 #' previous run of this function.
 #' Essentially, it needs at least 2 cells (high and low) as "extreme" values.
 #' The cells are replaced by the actual cells given in the matrix_list.
-#' @param cytname Character. 
+#' @param cytname Character.
 #' The name of the cytometer. Stored in the `$CYT` keyword, used by Kaluza for default instrument settings.
-#' You can use this to 1) track the source of the data and 2) have one cytname for each extreme template you used. 
-#' 
+#' You can use this to 1) track the source of the data and 2) have one cytname for each extreme template you used.
+#'
 #' @return A `flowFrame` (`fcs_extreme_copy`) representing the extreme template.
 #' A copy of the extreme_template which was used to save all samples. The fcs-file
 #' ranges for all samples come from this extreme sample.
-#' 
+#'
 #' @export
 export_fcs <- function(matrix_list,
                        safety_scaling = 1.20,
@@ -84,13 +83,12 @@ export_fcs <- function(matrix_list,
                        new_colnames = 1,
                        extreme_template = NULL,
                        cytname = "cytobench_exportedFCS") {
-
     matrix_list_dt <- lapply(matrix_list, data.table::as.data.table)
-    
+
     if (verbose) {
         cat("Concattenating extreme values of all samples with data.table\n")
     }
-    
+
     # Build extreme template if not provided
     if (is.null(extreme_template)) {
         matrix_list_dt_extremes <- lapply(matrix_list_dt, function(x) {

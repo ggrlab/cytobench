@@ -18,17 +18,15 @@ export_feather <- function(matrix_list,
                            verbose = TRUE,
                            feature_unified_dict = NA,
                            add_feather_ending = TRUE) {
-    
     # Convert all list elements to data.tables
     matrix_list_dt <- lapply(matrix_list, data.table::as.data.table)
-    
+
     # Ensure the output directory exists
     dir.create(outdir, recursive = TRUE)
-    
+
     all_outpaths <- c()
-    
+
     invisible(lapply(names(matrix_list_dt), function(x) {
-        
         # The following lines are only such that the .csv files have
         # always the same unified column names, regardless if it
         # was empty (--> single staining sample) or not
@@ -44,32 +42,32 @@ export_feather <- function(matrix_list,
         } else {
             cp_dt <- matrix_list_dt[[x]]
         }
-        
+
         # Construct output path
         outpath <- file.path(outdir, x)
         dir.create(dirname(outpath), showWarnings = FALSE, recursive = TRUE)
-        
+
         # Add ".feather" file ending if specified
         if (add_feather_ending) {
             outpath <- paste0(outpath, ".feather")
         }
-        
+
         # Write data to feather format
         feather::write_feather(cp_dt, outpath)
-        
+
         # Optionally print status
         if (verbose) {
             cat("\nWrote ", outpath)
         }
-        
+
         # Save the output path in a named vector
         all_outpaths <<- c(all_outpaths, outpath)
         names(all_outpaths)[length(all_outpaths)] <<- x
     }))
-    
+
     if (verbose) {
         cat("\n")
     }
-    
+
     invisible(all_outpaths)
 }
