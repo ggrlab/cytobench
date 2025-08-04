@@ -67,3 +67,53 @@ simulate_fs <- function(n_samples, flowcore = TRUE, ...) {
         return(tmp)
     }
 }
+
+setup_multistain <- function(x, columns = c(
+                                 "FITC-A",
+                                 "PE-A",
+                                 "ECD-A",
+                                 "PC5.5-A",
+                                 "PC7-A",
+                                 "APC-A",
+                                 "AF700-A",
+                                 "AA750-A",
+                                 "PB-A",
+                                 "KrO-A"
+                             )) {
+    fs_singlestain <- simulate_fs(length(columns) + 3, flowcore = FALSE)
+    samplenames_singlestain <- paste0("sample0_", sprintf("%02d-CD3-%s.fcs", seq_len(length(columns)), sub("-A$", "", columns)))
+    names(samplenames_singlestain) <- columns
+    names(fs_singlestain) <- c(
+        samplenames_singlestain,
+        paste0("sample0_", c(
+            "11-none",
+            "12-panel",
+            "15-MasterMix"
+        ))
+    )
+    samplefun <- function(n, sample_from = c(1, 1e4)) {
+        sample(
+            sample_from,
+            size = n,
+            replace = TRUE
+        ) * rnorm(n, mean = 10, sd = 1)
+    }
+    for (marker_x in columns) {
+        sample_x <- samplenames_singlestain[[marker_x]]
+        fs_singlestain[["sample0_12-panel"]][, marker_x] <- samplefun(nrow(fs_singlestain[[sample_x]]), sample_from = 5e3)
+        fs_singlestain[[sample_x]][, marker_x] <- samplefun(nrow(fs_singlestain[[sample_x]]))
+        fs_singlestain[["sample0_15-MasterMix"]][, marker_x] <- samplefun(nrow(fs_singlestain[[sample_x]]))
+    }
+
+    ff_list <- lapply(fs_singlestain, function(x) {
+        flowCore::flowFrame(as.matrix(x))
+    })
+    for (marker_x in columns) {
+        sample_x <- samplenames_singlestain[[marker_x]]
+        flowCore::markernames(ff_list[[sample_x]])[TRUE] <- "empty"
+        flowCore::markernames(ff_list[[sample_x]])[marker_x] <- marker_x
+    }
+    flowCore::markernames(ff_list[["sample0_11-none"]])[TRUE] <- "empty"
+
+    return(flowCore::flowSet(ff_list))
+}
