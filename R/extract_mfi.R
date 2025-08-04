@@ -1,10 +1,3 @@
-empty_tibble <- tibble::tibble(
-    "feature" = NA,
-    "negative" = NA,
-    "positive" = NA,
-    "positive.sd" = NA,
-    "negative.sd" = NA
-)
 
 #' Extract Single Stain Median Fluorescence Intensity (MFI)
 #'
@@ -265,7 +258,7 @@ extract_singlestain_mfi_wrapper <- function(loaded_fcs,
             extract_relevant_mfis_singlestain(loaded_fcs, transform_fun = transform_fun, ...)
         },
         error = function(e) {
-            list(empty_tibble)
+            list(empty_tibble())
         }
     )
     # Combine single stainings into a single data frame
@@ -393,7 +386,7 @@ extract_relevant_mfis_singlestain <- function(loaded_fcs_singlestain,
         # Check if there is more than one non-empty channel
         if (length(nonempty_channel) > 1) {
             warning("More than one non-empty channel in ", f_x)
-            return(empty_tibble)
+            return(empty_tibble())
         }
 
         # If no non-empty channel, it is the unstained sample
