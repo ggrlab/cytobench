@@ -26,22 +26,23 @@
 #'
 #' @return If `outdir` is `NA`, returns the updated `flowFrame`. Otherwise, writes the modified FCS file and returns invisible.
 #' @export
-cmv_helper_insert_compensations <- function(fcs_filename,
-                                            named_compensation_files = list(
-                                                # 1. Manual compensation, separately for single-stain and panel samples
-                                                # The manual compensation used  "DCtubes_auto" compensation as basis
-                                                "manual" = NULL,
-                                                # 2. Autocompensation, calculated on regular Duraclone Compensation tubes
-                                                "DCtubes_auto" = NULL,
-                                                # 3. Autocompensation, calculated on a sample-by-sample basis using single-stain samples
-                                                "singlestain_auto" = NULL,
-                                                # 4. Manual compensation, done on a sample-by-sample basis using concattenated single-stain samples
-                                                # The manual compensation used "singlestain_auto" compensation as basis
-                                                "singlestain_manual" = NULL
-                                            ), outdir = file.path("res", "CT_UnappliedCompensations"),
-                                            sub_filename = c("intermediate/CT", ""),
-                                            spillover_keyword = "$SPILLOVER",
-                                            verbose = TRUE) {
+cmv_helper_insert_compensations <- function(
+    fcs_filename,
+    named_compensation_files = list(
+        # 1. Manual compensation, separately for single-stain and panel samples
+        # The manual compensation used  "DCtubes_auto" compensation as basis
+        "manual" = NULL,
+        # 2. Autocompensation, calculated on regular Duraclone Compensation tubes
+        "DCtubes_auto" = NULL,
+        # 3. Autocompensation, calculated on a sample-by-sample basis using single-stain samples
+        "singlestain_auto" = NULL,
+        # 4. Manual compensation, done on a sample-by-sample basis using concattenated single-stain samples
+        # The manual compensation used "singlestain_auto" compensation as basis
+        "singlestain_manual" = NULL
+    ), outdir = file.path("res", "CT_UnappliedCompensations"),
+    sub_filename = c("intermediate/CT", ""),
+    spillover_keyword = "$SPILLOVER",
+    verbose = TRUE) {
     # Read original FCS file and extract original spillover matrix
     ff <- flowCore::read.FCS(fcs_filename)
     original_spillover <- flowCore::keyword(ff)[[spillover_keyword]]
