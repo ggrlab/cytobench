@@ -301,12 +301,35 @@ extract_singlestain_mfi_wrapper <- function(loaded_fcs,
     }
     return(single_stainings)
 }
-
+#' Clustered MFI Extraction for Single Marker Channel
+#'
+#' This function performs seeded k-means clustering (with two clusters) on transformed
+#' fluorescence values from a single marker channel. It returns the median and standard
+#' deviation of the original (untransformed) values per cluster, labeled as negative and positive.
+#'
+#' @param values Numeric vector. Raw fluorescence values from a single marker channel.
+#' @param seed Integer. Random seed to make clustering reproducible.
+#' @param transform_fun Function. Transformation to apply before clustering (e.g., `asinh(x / 1e3)`).
+#' @param featurename Character. Name of the feature/marker (e.g., `"FITC-A"`), used for labeling output.
+#'
+#' @return A one-row `tibble` with columns:
+#' \describe{
+#'   \item{`feature`}{The marker name.}
+#'   \item{`negative`, `positive`}{Clustered median intensities (original scale).}
+#'   \item{`negative.sd`, `positive.sd`}{Standard deviations within each cluster.}
+#' }
+#'
 clustering_seeded_mfi <- function(values, seed, transform_fun, featurename) {
     set.seed(seed)
+
+    # Apply transformation before clustering
     clustering <- stats::kmeans(transform_fun(values), centers = 2)
+
+    # Compute median and standard deviation per cluster on original scale
     mfis <- sort(tapply(values, clustering$cluster, median))
     mfis_sd <- sort(tapply(values, clustering$cluster, sd))
+
+    # Format output as a single-row tibble
     mfis_tib <- tibble::tibble(
         "feature" = featurename,
         "negative" = mfis[1],
@@ -317,6 +340,7 @@ clustering_seeded_mfi <- function(values, seed, transform_fun, featurename) {
 
     return(mfis_tib)
 }
+
 clustering_seeded_mfi_multicolor <- function(values, seed = 42, transform_fun, featurename) {
     set.seed(seed)
     clustering <- stats::kmeans(transform_fun(values), centers = 2)
