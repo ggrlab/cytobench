@@ -132,9 +132,9 @@ test_that("FlowSOM wrapper_count_model", {
             measures = mlr3::msr("classif.logloss")
         )
     )
-    testthat::expect_match(w, "already exists", all = FALSE)
+    testthat::expect_match(w[1], "already exists", all = TRUE)
     # I think the following is not on me, therefore I will not fix it
-    testthat::expect_match(w, "Task\\$weights' is deprecated\\.\\\\nUse 'Task\\$weights_learner", all = FALSE)
+    testthat::expect_match(w[-1], "weights' is deprecated.*Use.*weights_learner", all = TRUE)
     testthat::expect_true(TRUE)
 })
 
