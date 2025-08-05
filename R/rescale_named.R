@@ -1,27 +1,37 @@
-#' Rescale a sample using a named list of extracted MFIs
+#' Rescale a sample using a named list of MFIs
 #'
-#' This function rescales all columns of a sample using a named list of extracted MFIs.
-#' @param sample_to_rescale data.table of the sample to rescale
-#' @param extracted_mfi_namedlist
-#'    The extracted MFIs as list.
-#'    In contrast to rescale(), this is a named list of positive and negative MFIs
-#'    where the names are the columns of the sample_to_rescale.
-#'    If a column should be rescaled as "missing feature",
-#'    the corresponding list element should be NA.
-#'    By default, if a column of sample_to_rescale is not found in the extracted_mfi_namedlist,
-#'    the column is rescaled using the minmax method.
-#' @param missing_feature
-#' How should missing features (NA) be handled?
-#' @param inplace_datatable Should the data.table be modified in place?
-#' @param scale_column_fun Function to scale a column
-#' @param ...
-#' Additional arguments passed to the scale_column_fun
+#' This function rescales each column in a sample data table using a named list of extracted marker intensities (MFIs).
+#' Each column is matched to its corresponding MFI vector (e.g., with named elements `"negative"` and `"positive"`).
+#'
+#' @param sample_to_rescale A `data.table` representing a single sample. Each column corresponds to a marker/channel.
+#'
+#' @inheritParams extract_marker_mfi_list
+#'
+#' @param missing_feature Character. How to handle missing MFI entries (i.e., where list entry is `NA`).
+#' Options are:
+#' \itemize{
+#'   \item `"minmax"` (default): Rescale using column-wise min/max.
+#'   \item `"center_median"`: Shift column so that median is centered.
+#'   \item `NA`: Do not rescale columns with missing MFI values.
+#' }
+#'
+#' @param inplace_datatable Logical. If `TRUE`, modifies `sample_to_rescale` in place. If `FALSE`, returns a new copy. Default is `FALSE`.
+#'
+#' @param scale_column_fun Function. The scaling function to apply per column. Default is `scale_column_minmax()`.
+#' This function must accept at least `sample_to_rescale` (data.table), `scaling_values` (vector of numbers), and `colX` (character, a column of `sample_to_rescale`).
+#'
+#' @param ... Additional arguments passed to `scale_column_fun`.
+#'
+#' @return A `data.table` with rescaled columns. If `inplace_datatable = TRUE`, the same object is modified and returned invisibly.
+#'
 #' @export
 rescale_named <- function(sample_to_rescale,
                           extracted_mfi_namedlist,
                           missing_feature = c("minmax", "center_median"),
                           inplace_datatable = FALSE,
-                          scale_column_fun = scale_column_relative, ...) {
+                          scale_column_fun = scale_column_minmax,
+                          ...) {
+    # Ensure we work with a data.table (copy if needed)
     if (!inplace_datatable || !data.table::is.data.table(sample_to_rescale)) {
         # That here effectively generates a new datatable
         # If the matrix _IS_ already a datatable, effectively a copy is created.
@@ -29,22 +39,29 @@ rescale_named <- function(sample_to_rescale,
         sample_to_rescale <- data.table::as.data.table(sample_to_rescale)
     }
 
+    # Identify columns missing in the MFI list and append NA entries
     missing_mfis <- colnames(sample_to_rescale)[!colnames(sample_to_rescale) %in% names(extracted_mfi_namedlist)]
     if (length(missing_mfis) > 0) {
         missing_mfis_list <- rep(list(NA), length(missing_mfis))
         names(missing_mfis_list) <- missing_mfis
         extracted_mfi_namedlist <- c(extracted_mfi_namedlist, missing_mfis_list)
-    }
-    if (length(missing_mfis) > 0 && !is.na(missing_feature[1])) {
-        warning(paste0(
-            "No MFI feature values for \'", missing_mfis, "\', added NA to the extracted_mfi_namedlist\n"
-        ))
+
+        if (length(missing_mfis) > 0 && !is.na(missing_feature[1])) {
+            warning(paste0(
+                "No MFI feature values for: ", paste(missing_mfis, collapse = ", "),
+                "; added NA to extracted_mfi_namedlist."
+            ))
+        }
     }
 
+    # Save original scaling function to allow fallback override
     given_scale_column_fun <- scale_column_fun
 
+    # Iterate over each column to apply scaling
     for (colX in colnames(sample_to_rescale)) {
         scale_column_fun <- given_scale_column_fun
+
+        # Determine how to obtain or approximate scaling values
         if (all(is.na(extracted_mfi_namedlist[[colX]]))) {
             if (is.na(missing_feature[1])) {
                 # Then do not rescale this column
@@ -59,7 +76,7 @@ rescale_named <- function(sample_to_rescale,
                 )
                 scale_column_fun <- scale_column_minmax
             } else {
-                stop("Missing '", colX, "' rescaling")
+                stop("Unknown missing_feature strategy for column: ", colX)
             }
         } else {
             extracted_values <- extracted_mfi_namedlist[[colX]]
@@ -69,8 +86,11 @@ rescale_named <- function(sample_to_rescale,
             # Then do not rescale this column
             next
         }
+
+        # Convert to unlisted numeric vector if needed
         extracted_values <- unlist(extracted_values)
 
+        # Apply scaling function
         scale_column_fun(
             sample_to_rescale = sample_to_rescale,
             scaling_values = extracted_values,
@@ -78,5 +98,6 @@ rescale_named <- function(sample_to_rescale,
             ...
         )
     }
+
     return(sample_to_rescale)
 }
