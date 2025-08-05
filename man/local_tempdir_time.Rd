@@ -9,6 +9,8 @@ local_tempdir_time(showWarnings = FALSE, ...)
 \arguments{
 \item{showWarnings}{Logical. If \code{TRUE}, shows warnings when creating the directory.
 From \code{base::dir.create()}.}
+
+\item{...}{Additional arguments passed to \code{tempdir_time()}.}
 }
 \value{
 A character string containing the path to the created timestamped subdirectory.

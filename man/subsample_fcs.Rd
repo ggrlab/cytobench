@@ -35,7 +35,14 @@ and writes the subsampled data to a new file.
 }
 \examples{
 \dontrun{
-subsample_fcs("path/to/input.fcs", n_cells = 5000, seed = 12345, outdir = "output/directory", indir = "input/directory", verbose = TRUE)
+subsample_fcs(
+    "path/to/input.fcs",
+    n_cells = 5000,
+    seed = 12345,
+    outdir = "output/directory",
+    indir = "input/directory",
+    verbose = TRUE
+)
 }
 
 }

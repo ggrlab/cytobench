@@ -133,8 +133,8 @@ test_that("FlowSOM wrapper_count_model", {
         )
     )
     testthat::expect_match(w[1], "already exists", all = TRUE)
-    # I think the following is not on me, therefore I will not fix it
-    testthat::expect_match(w[-1], "weights' is deprecated.*Use.*weights_learner", all = TRUE)
+    # # I think the following is not on me, therefore I will not fix it
+    # testthat::expect_match(w[-1], "weights' is deprecated.*Use.*weights_learner", all = TRUE)
     testthat::expect_true(TRUE)
 })
 

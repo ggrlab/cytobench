@@ -8,7 +8,8 @@ flowSOM_newMetacluster(
   flowsom_result,
   clustered_df = NULL,
   n_metacluster = NULL,
-  update_flowsom = TRUE
+  update_flowsom = TRUE,
+  missing_seed = 3711283
 )
 }
 \arguments{
@@ -24,6 +25,9 @@ If provided, the function returns an updated version with newly assigned meta-cl
 \item{n_metacluster}{Optional. If provided, the FlowSOM result is updated to use this number of meta-clusters.}
 
 \item{update_flowsom}{Logical. If \code{TRUE}, the \code{flowsom_result} will be updated in place with the new meta-clustering.}
+
+\item{missing_seed}{Numeric.
+If \code{flowsom_result} does not contain a "seed" element, this seed will be used for re-metaclustering.}
 }
 \value{
 A named list with:

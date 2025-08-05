@@ -100,7 +100,7 @@ gate_cells <- function(flowset,
         # Temporarily treat all columns as marker names for full MFI extraction
         # Set all columns as markernames such that pop.MFI applies to all of them
         all_cn_as_markernames <- c(
-            setNames(
+            stats::setNames(
                 flowCore::colnames(applied_gates),
                 flowCore::colnames(applied_gates)
             )

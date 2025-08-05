@@ -29,7 +29,7 @@ simulate_ff <- function(
         "KrO-A"
     ),
     flowcore = TRUE) {
-    data <- matrix(rnorm(ncells * length(columns)), ncol = length(columns))
+    data <- matrix(stats::rnorm(ncells * length(columns)), ncol = length(columns))
     colnames(data) <- columns
     if (flowcore) {
         flowCore::flowFrame(data)
@@ -108,7 +108,7 @@ simulate_cd3 <- function(columns = c(
     )
 
     samplefun <- function(n, sample_from = c(1, 1e4)) {
-        sample(sample_from, size = n, replace = TRUE) * rnorm(n, mean = 10, sd = 1)
+        sample(sample_from, size = n, replace = TRUE) * stats::rnorm(n, mean = 10, sd = 1)
     }
 
     for (marker_x in columns) {

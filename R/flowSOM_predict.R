@@ -17,6 +17,7 @@ flowSOM_predict <- function(flowsom_result,
                             madAllowed = 4,
                             n_metacluster = NULL,
                             missing_seed = 3711283) {
+    cluster <- metaCluster <-  NULL # to avoid R CMD check note about undefined global variable (data.table function)
     if ("fs_res_train" %in% names(flowsom_result)) {
         flowsom_result <- flowsom_result[["fs_res_train"]]
     }
@@ -38,13 +39,13 @@ flowSOM_predict <- function(flowsom_result,
         if (n_metacluster <= 2) {
             stop("n_metacluster must be greater than 2, otherwise FlowSOM fails.")
         }
-        # The as.factor comes from FlowSOM. 
+        # The as.factor comes from FlowSOM.
         cl <- as.factor(FlowSOM::metaClustering_consensus(flowsom_result$map$codes, n_metacluster, seed = seed))
         flowsom_result$map$nMetaclusters <- length(levels(cl))
         flowsom_result$metaclustering <- cl
-        # See what happens in the FlowSOM:::UpdateDerivedValues function:
+        # See what happens in the UpdateDerivedValues function:
         # https://github.com/SofieVG/FlowSOM/blob/56892b583a0dbae5535665e45290ffce355bd503/R/2_buildSOM.R#L116
-        flowsom_result <- FlowSOM:::UpdateDerivedValues(flowsom_result)
+        flowsom_result <- UpdateDerivedValues(flowsom_result)
     }
     # 3.2 Predict the clusters for all cells
     predicted_fs_train_allcells <- FlowSOM::NewData(

@@ -57,7 +57,7 @@ plot_markers_pairwise <- function(ff,
                                   n_cells = Inf,
                                   count_transform = function(x) log10(x + 1),
                                   add_ggplot_elements = list()) {
-    x <- y <- count <- NULL # LINTR
+    x <- y <- density <- count <- NULL # LINTR
     # Generate blank diagonal marker name plots
     marker_names <- names(flowCore::markernames(ff))
     xy_plots <- list()
@@ -72,7 +72,7 @@ plot_markers_pairwise <- function(ff,
     }
 
     # All pairwise combinations of markers
-    all_combos <- combn(marker_names, 2, simplify = FALSE)
+    all_combos <- utils::combn(marker_names, 2, simplify = FALSE)
     all_combos_str <- lapply(all_combos, paste0, collapse = "_")
 
     # Extract data and optionally downsample
@@ -129,7 +129,7 @@ plot_markers_pairwise <- function(ff,
                     } else if (geom[1] == "pointdensity") {
                         p <- p +
                             ggpointdensity::stat_pointdensity(
-                                geom = scattermore:::GeomScattermore,
+                                geom = GeomScattermore(),
                                 ggplot2::aes(color = ggplot2::stat(count_transform(ggplot2::after_stat(density)))),
                                 pointsize = 1.2,
                                 pixels = c(bins, bins)

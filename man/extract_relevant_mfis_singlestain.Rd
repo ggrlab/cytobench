@@ -14,9 +14,11 @@ extract_relevant_mfis_singlestain(
 }
 \arguments{
 \item{loaded_fcs_singlestain}{A named list of cytosets or cytoframes containing single-stain FCS data.
-Each element should contain a single sample with one non-empty marker channel, or none (for unstained). The channels must have "empty" as their description if not filled.}
+Each element should contain a single sample with one non-empty marker channel, or none (for unstained).
+The channels must have "empty" as their description if not filled.}
 
-\item{transform_fun}{Function applied to the data before clustering. Default: \code{function(x) asinh(x / 1e3)}. Does not affect reported MFIs, only through the clustering.}
+\item{transform_fun}{Function applied to the data before clustering.
+Default: \code{function(x) asinh(x / 1e3)}. Does not affect reported MFIs, only through the clustering.}
 
 \item{seed}{Integer random seed for reproducible k-means clustering. Default is \code{42}.}
 }

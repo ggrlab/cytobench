@@ -20,7 +20,7 @@
 #' @param multistain_columns
 #' A character vector specifying the relevant columns for multi-staining.
 #'  Default is c("FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A", "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A").
-#'
+#' @param ... Additional arguments which are not used here.
 #' @return A data frame with the extracted MFIs. E.g.:
 #' \preformatted{
 #' # A tibble: 10 x 4
@@ -82,7 +82,7 @@ extract_mfi <- function(fcs_dir = "data-raw/s001",
                         ...) {
     joint_df <- tryCatch(
         {
-            loaded_fcs <- cytobench:::load_mfi_files(
+            loaded_fcs <- load_mfi_files(
                 fcs_dir = fcs_dir,
                 regex_singlestain = regex_singlestain,
                 gating_set_file = gating_set_file,
@@ -253,6 +253,7 @@ load_mfi_files <- function(fcs_dir = "data-raw/s001",
 #' only used to cluster the negative and positive populations.
 #' @param relevant_columns A character vector specifying the relevant columns for MFI extraction.
 #' Default is `NA`, which means all columns will be used.
+#' @param ... Additional arguments passed to the clustering function.
 #' @return A data frame with the extracted MFIs. E.g.:
 #' \preformatted{
 #' # A tibble: 10 x 4
@@ -350,8 +351,8 @@ clustering_seeded_mfi <- function(values, seed, transform_fun, featurename) {
     clustering <- stats::kmeans(transform_fun(values), centers = 2)
 
     # Compute median and standard deviation per cluster on original scale
-    mfis <- sort(tapply(values, clustering$cluster, median))
-    mfis_sd <- sort(tapply(values, clustering$cluster, sd))
+    mfis <- sort(tapply(values, clustering$cluster, stats::median))
+    mfis_sd <- sort(tapply(values, clustering$cluster, stats::sd))
 
     # Format output as a single-row tibble
     mfis_tib <- tibble::tibble(
@@ -395,6 +396,7 @@ clustering_seeded_mfi_multicolor <- function(values,
                                              seed = 42,
                                              transform_fun,
                                              featurename = NULL) {
+    cluster <- NULL # linting
     set.seed(seed)
 
     # Cluster cells (rows) using transformed data
@@ -417,13 +419,13 @@ clustering_seeded_mfi_multicolor <- function(values,
     cast_medians <- data.table::dcast(melted_medians, variable ~ cluster)
 
     # Format standard deviations
-    sds <- values_copy[, lapply(.SD, sd), by = cluster]
+    sds <- values_copy[, lapply(.SD, stats::sd), by = cluster]
     melted_sds <- data.table::melt(sds, id.vars = "cluster")
     melted_sds[, cluster := ifelse(cluster == clusternumber_negative_median, "negative.sd", "positive.sd")]
     cast_sds <- data.table::dcast(melted_sds, variable ~ cluster)
 
     # Format IQRs
-    iqrs <- values_copy[, lapply(.SD, IQR), by = cluster]
+    iqrs <- values_copy[, lapply(.SD, stats::IQR), by = cluster]
     melted_iqrs <- data.table::melt(iqrs, id.vars = "cluster")
     melted_iqrs[, cluster := ifelse(cluster == clusternumber_negative_median, "negative.iqr", "positive.iqr")]
     cast_iqrs <- data.table::dcast(melted_iqrs, variable ~ cluster)
@@ -451,8 +453,10 @@ clustering_seeded_mfi_multicolor <- function(values,
 #' unstained samples (i.e., samples with no non-empty channels) and records their median values.
 #'
 #' @param loaded_fcs_singlestain A named list of cytosets or cytoframes containing single-stain FCS data.
-#'   Each element should contain a single sample with one non-empty marker channel, or none (for unstained). The channels must have "empty" as their description if not filled.
-#' @param transform_fun Function applied to the data before clustering. Default: `function(x) asinh(x / 1e3)`. Does not affect reported MFIs, only through the clustering.
+#'   Each element should contain a single sample with one non-empty marker channel, or none (for unstained).
+#' The channels must have "empty" as their description if not filled.
+#' @param transform_fun Function applied to the data before clustering.
+#' Default: `function(x) asinh(x / 1e3)`. Does not affect reported MFIs, only through the clustering.
 #' @param seed Integer random seed for reproducible k-means clustering. Default is `42`.
 #'
 #' @return A named list of `tibble`s, one per input file, each with columns:

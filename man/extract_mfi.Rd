@@ -37,6 +37,8 @@ Usually you want to gate lymphocytes before extracting the MFIs. If a character 
 the gating set is loaded from the file. If a (GatingSet) object is provided, it is used directly.}
 
 \item{gate_extract}{A specific gate to extract from the gating set. Default is NULL.}
+
+\item{...}{Additional arguments which are not used here.}
 }
 \value{
 A data frame with the extracted MFIs. E.g.:

@@ -83,7 +83,7 @@ flowSOM_optimal <- function(fs_train,
         dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
         qs::qsave(fs_res_train, file.path(outdir, "r1-FlowSOM_result_train.qs"))
 
-        pdf(file.path(outdir, "p1-FlowSOM.pdf"), width = 10, height = 10)
+        grDevices::pdf(file.path(outdir, "p1-FlowSOM.pdf"), width = 10, height = 10)
         FlowSOM::PlotStars(
             fs_res_train,
             backgroundValues = fs_res_train$metaclustering
@@ -100,7 +100,7 @@ flowSOM_optimal <- function(fs_train,
                 )
             )
         }
-        dev.off()
+        grDevices::dev.off()
     }
 
     # 4. Predict the per-cell cluster and metacluster assignment

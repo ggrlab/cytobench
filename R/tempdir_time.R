@@ -6,7 +6,6 @@
 #' Base directory to append the timestamp to. Defaults to [tempdir()]. You might want
 #' to use `withr::local_tempdir()` to create a temporary directory that is automatically
 #' cleaned up after the session ends (Useful for testing).
-#' @inheritParams base::dir.create
 #' @param ... Additional arguments passed to `dir.create()`, such as `showWarnings` or `recursive`.
 #' @return A character string containing the full path to the newly created timestamped directory.
 #' The directory is created immediately on disk.
@@ -29,6 +28,7 @@ tempdir_time <- function(dir = tempdir(), ...) {
 #' This is useful for managing temporary file outputs in isolated, reproducible sessions.
 #' @param showWarnings Logical. If `TRUE`, shows warnings when creating the directory.
 #' From `base::dir.create()`.
+#' @param ... Additional arguments passed to `tempdir_time()`.
 #'
 #' @return A character string containing the path to the created timestamped subdirectory.
 #'

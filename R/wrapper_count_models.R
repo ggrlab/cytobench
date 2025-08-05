@@ -105,6 +105,7 @@ wrapper_count_models <- function(df_list,
                                  dv_class_positive = NULL,
                                  measures = NULL,
                                  hpoptimized_final_trainsets = c("train", "validation")) {
+    row_ids <- NULL # to avoid R CMD check note about undefined global variable
     pacman::p_load("mlr3learners")
     pacman::p_load("glmnet")
     pacman::p_load("ranger")
@@ -186,7 +187,7 @@ wrapper_count_models <- function(df_list,
                     } else {
                         counts_x <- tibble::rownames_to_column(counts_x, var = "rowname_original")
                     }
-                    counts_x_noNA <- na.omit(counts_x)
+                    counts_x_noNA <- stats::na.omit(counts_x)
                     if (nrow(counts_x_noNA) < nrow(counts_x)) {
                         warnings("Removed ", nrow(counts_x) - nrow(counts_x_noNA), " rows with NAs from the data")
                     }

@@ -33,9 +33,9 @@ Imports:
     pROC, 
     qs, 
     scattermore, 
-    stringr
+    stringr, 
+    feather
 Suggests: 
-    feather,
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),

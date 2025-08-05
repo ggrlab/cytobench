@@ -48,7 +48,7 @@ extract_marker_mfi_list <- function(
     # Fill missing markers with NA
     mfis_namedlist <- c(
         extracted_mfi_namedlist,
-        setNames(rep(list(NA), length(cn_sample_missing)), cn_sample_missing)
+        stats::setNames(rep(list(NA), length(cn_sample_missing)), cn_sample_missing)
     )
 
     return(mfis_namedlist)

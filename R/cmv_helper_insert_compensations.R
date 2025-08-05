@@ -90,12 +90,12 @@ cmv_helper_insert_compensations <- function(
     })
 
     # Save the original spillover matrix as a separate metadata keyword
-    flowCore::keyword(ff)[["spillover.original"]] <- flowCore:::spill2txt(original_spillover)
+    flowCore::keyword(ff)[["spillover.original"]] <- spill2txt(original_spillover)
 
     # Insert all loaded compensations into metadata
     for (compensation_keyword in names(loaded_comps)) {
         flowCore::keyword(ff)[[paste0("spillover.", compensation_keyword)]] <-
-            flowCore:::spill2txt(loaded_comps[[compensation_keyword]]$spillover)
+            spill2txt(loaded_comps[[compensation_keyword]]$spillover)
         flowCore::keyword(ff)[[paste0("spillover_autofluorescence.", compensation_keyword)]] <-
             loaded_comps[[compensation_keyword]]$autofluorescence_proportion
     }

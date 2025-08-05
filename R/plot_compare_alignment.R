@@ -34,6 +34,7 @@ plot_compare_alignment <- function(
     ),
     ylim = c(0, .4),
     faceting = c("horizontal", "vertical")) {
+    . <- feature <- x <- y <- device <- scale_column_fun <- NULL # to avoid R CMD check note about undefined global variable
     # Combine each method-device list into one data.table, add 'device' column
     rs_sn_long <- lapply(dt_listlist, data.table::rbindlist, idcol = "device", fill = TRUE)
     # Combine all scaling methods into one long data.table, add 'scale_column_fun'
@@ -57,7 +58,7 @@ plot_compare_alignment <- function(
 
             # Safely construct an approximated density function
             resfun <- function(x) NA
-            try(resfun <- approxfun(density(value, na.rm = TRUE)), silent = TRUE)
+            try(resfun <- stats::approxfun(stats::density(value, na.rm = TRUE)), silent = TRUE)
 
             .(
                 dens_approxfun = list(list(resfun)),

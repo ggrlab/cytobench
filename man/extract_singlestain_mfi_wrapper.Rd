@@ -23,6 +23,8 @@ only used to cluster the negative and positive populations.}
 
 \item{relevant_columns}{A character vector specifying the relevant columns for MFI extraction.
 Default is \code{NA}, which means all columns will be used.}
+
+\item{...}{Additional arguments passed to the clustering function.}
 }
 \value{
 A data frame with the extracted MFIs. E.g.:

@@ -11,8 +11,6 @@
 #' If a column is missing in this list, it will be handled according to `missing_feature`.
 #' See also extracted_mfi in `extract_marker_mfi_list()`.
 #'
-#' @inheritParams extract_marker_mfi_list
-#'
 #' @param missing_feature Character. How to handle missing MFI entries (i.e., where list entry is `NA`).
 #' Options are:
 #' \itemize{

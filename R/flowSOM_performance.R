@@ -41,6 +41,8 @@ flowSOM_performance <- function(
     seed = 42,
     relevant_cols = NULL,
     clustering_map = NULL) {
+    # to avoid R CMD check note about undefined global variable (data.table function)
+    . <- cluster <- metaCluster <- ..relevant_cols <- NULL
     # Support direct call: flowSOM_performance(flowsom_result)
     if ("flowSOM_optimal" %in% class(dt_clustered)) {
         flowsom_result <- dt_clustered

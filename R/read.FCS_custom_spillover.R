@@ -31,7 +31,7 @@ read.FCS_custom_spillover <- function(fcs,
 
         # Convert the original spillover matrix from string to matrix form
         fs_keywords[original_spillover_keyword] <- list(
-            flowCore:::string_to_spill(fs_keywords[[original_spillover_keyword]])
+            string_to_spill(fs_keywords[[original_spillover_keyword]])
         )
     } else {
         # If input is a flowFrame, extract metadata directly
@@ -44,8 +44,8 @@ read.FCS_custom_spillover <- function(fcs,
     }
 
     # flowCore uses the following function to read the spillover matrix:
-    # read_spillover <- flowCore:::string_to_spill(fs_keywords[[original_spillover_keyword]])
-    spillovermat <- flowCore:::string_to_spill(fs_keywords[[custom_spillover_keyword]])
+    # read_spillover <- string_to_spill(fs_keywords[[original_spillover_keyword]])
+    spillovermat <- string_to_spill(fs_keywords[[custom_spillover_keyword]])
 
     # Handle autofluorescence: zero vector for original, or read from paired keyword
     if (custom_spillover_keyword == "spillover.original") {
@@ -53,7 +53,7 @@ read.FCS_custom_spillover <- function(fcs,
         autofluorescence_proportional[TRUE] <- 0
     } else {
         autofluorescence_proportional <- as.numeric(
-            read.table(text = fs_keywords[[sub(
+            utils::read.table(text = fs_keywords[[sub(
                 "spillover",
                 "spillover_autofluorescence",
                 custom_spillover_keyword

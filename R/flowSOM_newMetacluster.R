@@ -17,6 +17,8 @@
 #'   If provided, the function returns an updated version with newly assigned meta-clusters.
 #' @param n_metacluster Optional. If provided, the FlowSOM result is updated to use this number of meta-clusters.
 #' @param update_flowsom Logical. If `TRUE`, the `flowsom_result` will be updated in place with the new meta-clustering.
+#' @param missing_seed Numeric.
+#' If `flowsom_result` does not contain a "seed" element, this seed will be used for re-metaclustering.
 #'
 #' @return A named list with:
 #' \describe{
@@ -28,7 +30,9 @@
 flowSOM_newMetacluster <- function(flowsom_result,
                                    clustered_df = NULL,
                                    n_metacluster = NULL,
-                                   update_flowsom = TRUE) {
+                                   update_flowsom = TRUE,
+                                   missing_seed = 3711283) {
+    cluster_numeric <- cluster <- value <- metaCluster <- ncells <- NULL # to avoid R CMD check note about undefined global variable
     if (!all(is.null(n_metacluster))) {
         # If the number of metaclusters is given, CHANGE the metaclusters to the new number
         if ("seed" %in% names(flowsom_result)) {
@@ -77,9 +81,9 @@ flowSOM_newMetacluster <- function(flowsom_result,
             # Update FlowSOM object to reflect new meta-clustering
             flowsom_result$map$nMetaclusters <- length(levels(cl))
             flowsom_result$metaclustering <- cl
-            # See what happens in the FlowSOM:::UpdateDerivedValues function:
+            # See what happens in the UpdateDerivedValues function:
             # https://github.com/SofieVG/FlowSOM/blob/56892b583a0dbae5535665e45290ffce355bd503/R/2_buildSOM.R#L116
-            flowsom_result <- FlowSOM:::UpdateDerivedValues(flowsom_result)
+            flowsom_result <- UpdateDerivedValues(flowsom_result)
             # Essentially, to assign metaClusters to (original) clusters, the following is done:
             #   flowsom_result$metaclustering[flowsom_result$map$mapping[, 1]]
             # So, flowsom_result$metaclustering is the metaCluster for each of the length(flowsom_result$metaclustering)

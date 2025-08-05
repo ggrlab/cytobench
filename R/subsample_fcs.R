@@ -6,7 +6,8 @@
 #' @param file_x Character. Path to the input FCS file.
 #' @param n_cells Integer. Number of cells to subsample. Default is 10,000.
 #' @param seed Integer. Seed for random number generation to ensure reproducibility. Default is 427764.
-#' @param outdir Character. Directory where the subsampled FCS file will be saved. Default is "res/a01/02_subsampled/random_<n_cells>".
+#' @param outdir
+#' Character. Directory where the subsampled FCS file will be saved. Default is "res/a01/02_subsampled/random_<n_cells>".
 #' @param indir Character. Directory where the original FCS file is located. Default is "res/a04/01_gated".
 #' @param verbose Logical. If TRUE, prints progress messages. Default is TRUE.
 #'
@@ -14,7 +15,14 @@
 #'
 #' @examples
 #' \dontrun{
-#' subsample_fcs("path/to/input.fcs", n_cells = 5000, seed = 12345, outdir = "output/directory", indir = "input/directory", verbose = TRUE)
+#' subsample_fcs(
+#'     "path/to/input.fcs",
+#'     n_cells = 5000,
+#'     seed = 12345,
+#'     outdir = "output/directory",
+#'     indir = "input/directory",
+#'     verbose = TRUE
+#' )
 #' }
 #'
 #' @export
