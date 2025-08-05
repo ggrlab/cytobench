@@ -1,28 +1,30 @@
-#' Gate Cells Based on Compensated FCS and Gating Set Files
+#' Gate Cells Using Predefined Gating Sets
 #'
-#' This function processes compensated FCS files and their corresponding gating set files to gate cells based on specified criteria.
+#' This function applies existing `GatingSet` objects to a `flowSet` (usually of compensated FCS files),
+#' extracts gated populations (e.g., CD3+ cells), and optionally computes population statistics
+#' such as counts, frequencies, and median fluorescence intensities (MFIs).
 #'
-#' @param dir_fcs_compensated Character. Directory containing compensated FCS files. Note that any compensation in these files is NOT applied.
-#' @param dir_gatingsets_compensated Character. Directory containing compensated gating set files.
-#' The gating set files are matched to each FCS file based on the sID (sampleID) from FCS and Gating *directory* name.
-#' @param pattern_files Character. Pattern to match FCS files. Default is "panel".
-#' @param outdir Character. Output directory to save results. Default is NA, then no output is saved.
-#' @param verbose Logical. If TRUE, prints progress messages. Default is TRUE.
-#' @param gatename Character or Numeric. Name or index of the gate to extract data from. Default is "/Singlets/CD45+/CD3+".
-#' @param filename_ungated_into Character. String to replace "_ungated_" in the filename. Default is "_cd3_".
-#' @param exclude_pops Character vector. Populations to exclude from the final counts. Default is "/Singlets/Lymphocytes", "/Singlets/Monocytes", "/Singlets/Granulocytes".
+#' @param flowset A `flowSet` or list of `flowFrame` objects representing compensated samples.
+#'        These FCS files are expected to contain the compensation matrix, but not have compensation applied.
+#' @param gatingset A named list of `GatingSet` objects, one per sample, or a single global `GatingSet`.
+#' @param gatename Character or numeric. Name or index of the population to extract.
+#'        Default is `"/Singlets/CD45+/CD3+"`. If numeric, the nth gate will be selected.
+#' @param verbose Logical. Print progress information? Default: `TRUE`.
+#' @param inplace Logical. If `TRUE`, modifies the `flowset` in place. Otherwise, a new `flowSet` is created.
 #'
-#' @return A data.table containing the counts and percentages of gated populations. Usually you would use "outdir" as a side effect to save the data.
-#' @export
-#'
-#' @examples
-#' \dontrun{
-#' gate_cells(
-#'     dir_fcs_compensated = "path/to/compensated/fcs",
-#'     dir_gatingsets_compensated = "path/to/gatingsets",
-#'     outdir = "path/to/output"
-#' )
+#' @return A list with two elements:
+#' \describe{
+#'   \item{`counts`}{A `data.table` of per-population counts, frequencies, and MFIs across all samples.}
+#'   \item{`flowset_gated`}{The updated `flowSet`, with each sample replaced by its gated `flowFrame`.}
 #' }
+#'
+#' @details
+#' - Assumes FCS filenames and gating set names match by sample ID (`sampleNames()`).
+#' - If only one gating set is given, it is applied to all samples (useful for batch gating).
+#' - Compensation is NOT applied again, assuming it's already been handled.
+#' - All columns are temporarily treated as marker names to enable MFI extraction across the full feature set.
+#'
+#' @export
 gate_cells <- function(flowset,
                        gatingset,
                        gatename = "/Singlets/CD45+/CD3+",
@@ -33,35 +35,41 @@ gate_cells <- function(flowset,
         global_gating <- gatingset
     }
 
+    # Ensure sample IDs in gating list match those in flowset
     if (is.null(global_gating)) {
-        # 3. Check if the panel files and gating files match
-        # 3.1 Get the sample IDs from the directory names of the panel files
+        # Check if the panel files and gating files match
+        ### Get the sample IDs from the directory names of the panel files
         fcs_panel_ids <- flowCore::sampleNames(flowset)
         gates_panel_ids <- names(gatingset)
-        if (anyDuplicated(gates_panel_ids) != 0) {
-            stop("There are duplicated sample IDs in the gating files, cannot assign them uniquely to the to-be-gated FCS files")
-        }
 
-        # 3.2 Check if all panel files have a corresponding gating file
+        if (anyDuplicated(gates_panel_ids) != 0) {
+            stop("There are duplicated sample IDs in the gating files, cannot assign them uniquely to the to-be-gated FCS files.")
+        }
+        ### Check if all panel files have a corresponding gating file
         if (!all(fcs_panel_ids %in% gates_panel_ids)) {
-            # In the case of CT and MX data, each sample was measured on NAVIOS and Cytoflex,
+            # In the case of R1 and R2 data, each sample was measured on NAVIOS and Cytoflex,
             # thus it could be that the gating file of NAVIOS is missing.
             # However, this would then stop with an error in the following for-loop
             stop("Not all panel files have a corresponding gating file")
         }
     }
+
+    # Work on a copy of the flowset unless inplace modification is requested
     if (!inplace) {
         flowset <- flowCore::flowSet(flowCore::flowSet_to_list(flowset))
     }
-    # Initialize an empty variable to store complete counts
+
     counts_complete <- NA
-    # Loop through each compensated FCS panel file
+
+    # Process each (compensated) FCS sample
     for (fcs_i in seq_along(flowset)) {
         fcs_x <- flowset[[fcs_i]]
         fcs_x_sID <- flowCore::sampleNames(flowset)[fcs_i]
         if (verbose) {
-            cat("Processing ", fcs_x_sID, "\n")
+            cat("Processing", fcs_x_sID, "\n")
         }
+
+        # Select appropriate gating set
         if (is.null(global_gating)) {
             gating_x <- gatingset[fcs_x_sID]
             if (length(gating_x) != 1) {
@@ -70,11 +78,14 @@ gate_cells <- function(flowset,
         } else {
             gating_x <- global_gating
         }
+
         # Write the current fcs into a temporary directory
         ff_path_tmp <- write_memory_FCS(fcs_x)
         # Load the cytoset from the FCS file
         cs <- flowWorkspace::load_cytoset_from_fcs(ff_path_tmp)
-        # Apply the gating set to the cytoset and suppress messages
+
+        # Apply the gating set (compensation assumed applied already)
+        # and suppress messages
         applied_gates <- suppressMessages(flowWorkspace::gh_apply_to_cs(
             gating_x,
             cs,
@@ -86,6 +97,7 @@ gate_cells <- function(flowset,
         ))
         suppressMessages(flowWorkspace::recompute(applied_gates))
 
+        # Temporarily treat all columns as marker names for full MFI extraction
         # Set all columns as markernames such that pop.MFI applies to all of them
         all_cn_as_markernames <- c(
             setNames(
@@ -116,10 +128,11 @@ gate_cells <- function(flowset,
 
         # Rename the percentage column
         colnames(counts_dt)[4] <- "percent_from_parent"
+
         # Extract the population MFIs
         # This only extracts for the columns in flowCore::markernames()
         pop_mfis <- flowWorkspace::gh_pop_get_stats(tmp_gates, type = flowWorkspace::pop.MFI)
-        counts_dt_MFI <- dplyr::left_join(counts_dt, pop_mfis, by = c("pop"))
+        counts_dt_MFI <- dplyr::left_join(counts_dt, pop_mfis, by = "pop")
         counts_dt_MFI[["sample"]] <- fcs_x_sID
 
         # Combine the counts with the complete counts
@@ -133,7 +146,7 @@ gate_cells <- function(flowset,
         if (is.numeric(gatename)) {
             gatename <- flowWorkspace::gs_get_pop_paths(gating_x)[[gatename]]
         }
-        # Extract the CD3+ population data
+        # Extract the gatename (e.g. CD3+) population data
         extracted <- flowWorkspace::gh_pop_get_data(applied_gates, gatename)
         extracted <- flowWorkspace::realize_view(extracted)
         extracted_ff <- flowWorkspace::cytoframe_to_flowFrame(extracted)
