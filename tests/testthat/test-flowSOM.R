@@ -34,7 +34,6 @@ test_that("FlowSOM outliers", {
 })
 
 
-devtools::load_all()
 test_that("FlowSOM outliers 2", {
     ff_example <- example_processed()
     fsom <- do_flowsom(ff_example)
@@ -109,28 +108,33 @@ test_that("FlowSOM wrapper_count_model", {
         }) |> do.call(what = rbind)
     })
     allowed_clusterings <- c("cluster", "metaCluster")
-    finalmodels_predictions <- wrapper_count_models(
-        df_list = fake_clusterings[allowed_clusterings],
-        tvt_col = "tvt",
-        # outdir = file.path(outdir_base, basename(metaclustering_dir), training_device),
-        outdir = withr::local_tempdir(new = TRUE),
-        dvs_potential = c("sample"),
-        dvs_multiclass = c(),
-        ivs_regex = "[cC]luster",
-        hparam_n_evaluations = 3,
-        seed = 1372873,
-        learners_classification = list(
-            mlr3::lrn(
-                "classif.ranger",
-                predict_type = "prob", predict_sets = c("train", "test"),
-                max.depth = paradox::to_tune(2, 20), # minimum and maximum depth
-                num.trees = paradox::to_tune(c(500, 1000, 1500, 2000)),
-                importance = "impurity"
-            )
-        ),
-        dv_class_positive = c("sample" = "B"),
-        measures = mlr3::msr("classif.logloss")
+    w <- testthat::capture_warnings(
+        finalmodels_predictions <- wrapper_count_models(
+            df_list = fake_clusterings[allowed_clusterings],
+            tvt_col = "tvt",
+            # outdir = file.path(outdir_base, basename(metaclustering_dir), training_device),
+            outdir = local_tempdir_time(),
+            dvs_potential = c("sample"),
+            dvs_multiclass = c(),
+            ivs_regex = "[cC]luster",
+            hparam_n_evaluations = 3,
+            seed = 1372873,
+            learners_classification = list(
+                mlr3::lrn(
+                    "classif.ranger",
+                    predict_type = "prob", predict_sets = c("train", "test"),
+                    max.depth = paradox::to_tune(2, 20), # minimum and maximum depth
+                    num.trees = paradox::to_tune(c(500, 1000, 1500, 2000)),
+                    importance = "impurity"
+                )
+            ),
+            dv_class_positive = c("sample" = "B"),
+            measures = mlr3::msr("classif.logloss")
+        )
     )
+    testthat::expect_match(w, "already exists", all = FALSE)
+    # I think the following is not on me, therefore I will not fix it
+    testthat::expect_match(w, "Task\\$weights' is deprecated\\.\\\\nUse 'Task\\$weights_learner", all = FALSE)
     testthat::expect_true(TRUE)
 })
 

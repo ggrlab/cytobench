@@ -6,7 +6,7 @@
 #' Base directory to append the timestamp to. Defaults to [tempdir()]. You might want
 #' to use `withr::local_tempdir()` to create a temporary directory that is automatically
 #' cleaned up after the session ends (Useful for testing).
-#'
+#' @inheritParams base::dir.create
 #' @return A character string containing the full path to the newly created timestamped directory.
 #' The directory is created immediately on disk.
 #'
@@ -15,9 +15,9 @@
 #' list.files(tmp) # should be empty
 #'
 #' @export
-tempdir_time <- function(dir = tempdir()) {
-    tmpdir_time <- paste0(dir, "_", format(Sys.time(), "%F_%H_%M_%OS2"))
-    dir.create(tmpdir_time, recursive = TRUE)
+tempdir_time <- function(dir = tempdir(), ...) {
+    tmpdir_time <- paste0(dir, "_", format(Sys.time(), "%F_%H_%M_%OS3"))
+    dir.create(tmpdir_time, ...)
     return(tmpdir_time)
 }
 
@@ -45,10 +45,10 @@ tempdir_time <- function(dir = tempdir()) {
 #' }
 #'
 #' @export
-local_tempdir_time <- function() {
+local_tempdir_time <- function(showWarnings = FALSE, ...) {
     # Create an environment-scoped temporary base directory
-    tmpdir <- withr::local_tempdir()
-
+    tmpdir <- withr::local_tempdir(.local_envir = parent.frame(2))
+    
     # Create a timestamped subdirectory inside the base temp dir
-    tempdir_time(file.path(tmpdir, "dirAutoremove"))
+    tempdir_time(file.path(tmpdir, "dirAutoremove"), showWarnings = showWarnings, ...)
 }

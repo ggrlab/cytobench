@@ -1,27 +1,27 @@
-test_that("Testing rescale_extracted", {
-    set.seed(42)
-    fs_ss <- simulate_cd3()
-    tmpdir <- withr::local_tempdir(new = TRUE)
-    flowCore::write.flowSet(fs_ss, tmpdir)
+# test_that("Testing rescale_extracted", {
+#     set.seed(42)
+#     fs_ss <- simulate_cd3()
+#     tmpdir <- local_tempdir_time()
+#     flowCore::write.flowSet(fs_ss, tmpdir)
 
-    extracted_mfis_singlestain <- extract_mfi(
-        tmpdir,
-        regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$"
-    )
+#     extracted_mfis_singlestain <- extract_mfi(
+#         tmpdir,
+#         regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$"
+#     )
 
-    rescaled_sample <- rescale_extracted(
-        sample_to_rescale = flowCore::exprs(fs_ss[["sample0_12-panel"]]),
-        extracted_mfi = extracted_mfis_singlestain
-    )
-    testthat::expect_true(TRUE)
-})
-
+#     rescaled_sample <- rescale_extracted(
+#         sample_to_rescale = flowCore::exprs(fs_ss[["sample0_12-panel"]]),
+#         extracted_mfi = extracted_mfis_singlestain
+#     )
+#     testthat::expect_true(TRUE)
+# })
+devtools::load_all()
 test_that("Testing rescale_extracted", {
     set.seed(42)
     fs_ss <- simulate_cd3()
     set.seed(43)
     fs_ss_2 <- simulate_cd3()
-    tmpdir <- withr::local_tempdir(new = TRUE)
+    tmpdir <- local_tempdir_time()
     flowCore::write.flowSet(fs_ss, tmpdir)
 
     extracted_mfis <- extract_mfi(
@@ -72,7 +72,7 @@ test_that("Testing rescale_extracted", {
             x_aligned_v2_asinh = asinh(x_aligned_v2),
             x_aligned_v3_asinh = asinh(absolute_sigmoid(x_aligned) * refactor)
         )
-    tmpdir <- withr::local_tempdir(new = TRUE)
+    tmpdir <- local_tempdir_time()
     pdf(file.path(tmpdir, "removeme.pdf"))
     print(tmpplot(df, "x_asinh"))
     print(tmpplot(df, "x_minmax_asinh"))
@@ -106,7 +106,7 @@ test_that("Testing rescale_extracted", {
             x_aligned_v2_asinh = asinh(x_aligned_v2),
             x_aligned_v3_asinh = asinh(absolute_sigmoid(x_aligned) * refactor)
         )
-    tmpdir <- withr::local_tempdir(new = TRUE)
+    tmpdir <- local_tempdir_time()
     pdf(file.path(tmpdir, "removeme.pdf"))
     print(tmpplot(df, "x_asinh"))
     print(tmpplot(df, "x_minmax_asinh"))

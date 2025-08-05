@@ -77,7 +77,8 @@ wrapper_count_models <- function(df_list,
                                          "classif.ranger",
                                          predict_type = "prob", predict_sets = c("train", "test"),
                                          max.depth = paradox::to_tune(2, 20), # minimum and maximum depth
-                                         num.trees = paradox::to_tune(c(500, 1000, 1500, 2000))
+                                         num.trees = paradox::to_tune(c(500, 1000, 1500, 2000)),
+                                         use_weights = "error"
                                      )
                                      # Glmnet fails with too little samples in each group. I will skip for this reason
                                      # ,mlr3::lrn(
@@ -91,7 +92,8 @@ wrapper_count_models <- function(df_list,
                                          "regr.ranger",
                                          predict_sets = c("train", "test"),
                                          max.depth = paradox::to_tune(2, 20), # minimum and maximum depth
-                                         num.trees = paradox::to_tune(c(500, 1000, 1500, 2000))
+                                         num.trees = paradox::to_tune(c(500, 1000, 1500, 2000)),
+                                         use_weights = "error"
                                      )
                                      # ,mlr3::lrn(
                                      #     "regr.cv_glmnet",
@@ -371,7 +373,7 @@ wrapper_count_models <- function(df_list,
                 # Because of the potential na.omit() when creating the task, the
                 # row_ids do NOT match the actual samples, shown in rowname_original
                 dt_pred[, sample := c(current_task$data(cols = "rowname_original"))]
-                dt_pred[, row_ids:=NULL]
+                dt_pred[, row_ids := NULL]
                 if ("TaskClassif" %in% class(current_task)) {
                     dt_pred[["class_truth"]] <- dt_pred[["truth"]]
                     dt_pred[["class_response"]] <- dt_pred[["response"]]

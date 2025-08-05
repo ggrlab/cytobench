@@ -17,17 +17,15 @@ export_csv <- function(matrix_list,
                        outdir = ".",
                        verbose = TRUE,
                        feature_unified_dict = NA) {
-    
     # Convert each matrix in the list to a data.table for fast writing
     matrix_list_dt <- lapply(matrix_list, data.table::as.data.table)
-    
+
     # Ensure the output directory exists
-    dir.create(outdir, recursive = TRUE)
-    
+    dir.create(outdir, recursive = TRUE, showWarnings = FALSE)
+
     all_outpaths <- c()
-    
+
     invisible(lapply(names(matrix_list_dt), function(x) {
-        
         # Create a modified copy with unified column names if a dictionary is provided
         if (!all(is.na(feature_unified_dict))) {
             cp_dt <- data.table::copy(matrix_list_dt[[x]])
@@ -38,28 +36,28 @@ export_csv <- function(matrix_list,
         } else {
             cp_dt <- matrix_list_dt[[x]]
         }
-        
+
         # Define output path and create necessary subdirectories
         outpath <- file.path(outdir, x)
         dir.create(dirname(outpath), showWarnings = FALSE, recursive = TRUE)
-        
+
         # Write CSV file
         data.table::fwrite(cp_dt, outpath)
-        
+
         # Optionally report progress
         if (verbose) {
             cat("\nWrote ", outpath)
         }
-        
+
         # Track written file
         all_outpaths <<- c(all_outpaths, outpath)
         names(all_outpaths)[length(all_outpaths)] <<- x
     }))
-    
+
     if (verbose) {
         cat("\n")
     }
-    
+
     # Return all output paths invisibly
     invisible(all_outpaths)
 }

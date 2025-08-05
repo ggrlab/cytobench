@@ -42,8 +42,10 @@ test_that("FlowSOM optimal", {
         )
     })
     testthat::expect_match(w, "By using nClus, I am ignoring the parameter maxMeta", all = FALSE)
-    testthat::expect_match(w, "No relevant_cols provided. Using all columns except known metadata columns.", all = FALSE)
-    scores1 <- flowSOM_performance(fsom_opt$cells_clusters_from_train)
+    testthat::expect_warning(
+        scores1 <- flowSOM_performance(fsom_opt$cells_clusters_from_train), 
+        "No relevant_cols provided. Using all columns except known metadata columns."
+    )
     scores1_v2 <- flowSOM_performance(
         fsom_opt$cells_clusters_from_train,
         relevant_cols = fsom_opt$fs_res_train$map$colsUsed,

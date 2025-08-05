@@ -22,7 +22,7 @@ export_feather <- function(matrix_list,
     matrix_list_dt <- lapply(matrix_list, data.table::as.data.table)
 
     # Ensure the output directory exists
-    dir.create(outdir, recursive = TRUE)
+    dir.create(outdir, recursive = TRUE, showWarnings = FALSE)
 
     all_outpaths <- c()
 
