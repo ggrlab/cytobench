@@ -7,3 +7,4 @@
 .lintr
 removeme.R
 ^data-raw$
+^.*removeme.*$

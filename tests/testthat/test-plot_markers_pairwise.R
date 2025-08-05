@@ -1,5 +1,3 @@
-devtools::load_all()
-
 test_that("Plot markers pairwise", {
     cn <- c(
         "FITC-A", "PE-A", "ECD-A"
