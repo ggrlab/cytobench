@@ -28,17 +28,21 @@ do_flowsom <- function(ff) {
 test_that("FlowSOM optimal", {
     ff_example <- example_processed()[1:1000, ]
     fsom <- do_flowsom(ff_example)
-    fsom_opt <- flowSOM_optimal(
-        flowCore::flowSet(ff_example),
-        # Input options:
-        compensate = FALSE,
-        transform = FALSE,
-        scale = FALSE,
-        # SOM options:
-        colsToUse = c(9, 12, 14:18), xdim = 3, ydim = 3,
-        # Metaclustering options:
-        nClus = 3
-    )
+    w <- testthat::capture_warnings({
+        fsom_opt <- flowSOM_optimal(
+            flowCore::flowSet(ff_example),
+            # Input options:
+            compensate = FALSE,
+            transform = FALSE,
+            scale = FALSE,
+            # SOM options:
+            colsToUse = c(9, 12, 14:18), xdim = 3, ydim = 3,
+            # Metaclustering options:
+            nClus = 3
+        )
+    })
+    testthat::expect_match(w, "By using nClus, I am ignoring the parameter maxMeta", all = FALSE)
+    testthat::expect_match(w, "No relevant_cols provided. Using all columns except known metadata columns.", all = FALSE)
     scores1 <- flowSOM_performance(fsom_opt$cells_clusters_from_train)
     scores1_v2 <- flowSOM_performance(
         fsom_opt$cells_clusters_from_train,

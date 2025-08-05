@@ -1,7 +1,7 @@
 test_that("Extract single and mixed tube MFI", {
     set.seed(42)
     fs_ss <- simulate_cd3()
-    tmpdir <- withr::local_tempdir()
+    tmpdir <- withr::local_tempdir(new = TRUE)
     flowCore::write.flowSet(fs_ss, tmpdir)
 
     extracted_mfis_singlestain <- extract_mfi(
@@ -87,7 +87,7 @@ test_that("Extract single and mixed tube MFI", {
 test_that("Extract mixed tube MFI, new function", {
     set.seed(42)
     fs_ss <- simulate_cd3()
-    tmpdir <- withr::local_tempdir()
+    tmpdir <- withr::local_tempdir(new = TRUE)
     flowCore::write.flowSet(fs_ss, tmpdir)
 
 

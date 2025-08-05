@@ -1,7 +1,7 @@
 test_that("Testing rescale_extracted", {
     set.seed(42)
     fs_ss <- simulate_cd3()
-    tmpdir <- withr::local_tempdir()
+    tmpdir <- withr::local_tempdir(new = TRUE)
     flowCore::write.flowSet(fs_ss, tmpdir)
 
     extracted_mfis_singlestain <- extract_mfi(
@@ -13,16 +13,15 @@ test_that("Testing rescale_extracted", {
         sample_to_rescale = flowCore::exprs(fs_ss[["sample0_12-panel"]]),
         extracted_mfi = extracted_mfis_singlestain
     )
-    testthat::expect(TRUE)
+    testthat::expect_true(TRUE)
 })
 
 test_that("Testing rescale_extracted", {
-    browser()
     set.seed(42)
     fs_ss <- simulate_cd3()
     set.seed(43)
     fs_ss_2 <- simulate_cd3()
-    tmpdir <- withr::local_tempdir()
+    tmpdir <- withr::local_tempdir(new = TRUE)
     flowCore::write.flowSet(fs_ss, tmpdir)
 
     extracted_mfis <- extract_mfi(
@@ -46,13 +45,13 @@ test_that("Testing rescale_extracted", {
     pc7_neg <- extracted_mfis[extracted_mfis$feature == "PC7-A", "negative"][[1]]
     pc7_pos <- extracted_mfis[extracted_mfis$feature == "PC7-A", "positive"][[1]]
 
-    plot(((1:1000) / (10)))
-    x <- (-1000:1000) / 200
-    plot(x, (exp(x) / (1 + exp(x))))
+    # plot(((1:1000) / (10)))
+    # x <- (-1000:1000) / 200
+    # plot(x, (exp(x) / (1 + exp(x))))
     absolute_sigmoid <- function(x) {
         ((1 / (1 + exp(-x))) - .5) * 2
     }
-    plot(x, absolute_sigmoid(x))
+    # plot(x, absolute_sigmoid(x))
 
 
     refactor <- 1e3
@@ -73,7 +72,7 @@ test_that("Testing rescale_extracted", {
             x_aligned_v2_asinh = asinh(x_aligned_v2),
             x_aligned_v3_asinh = asinh(absolute_sigmoid(x_aligned) * refactor)
         )
-    tmpdir <- withr::local_tempdir()
+    tmpdir <- withr::local_tempdir(new = TRUE)
     pdf(file.path(tmpdir, "removeme.pdf"))
     print(tmpplot(df, "x_asinh"))
     print(tmpplot(df, "x_minmax_asinh"))
@@ -86,13 +85,13 @@ test_that("Testing rescale_extracted", {
     pb_neg <- extracted_mfis[extracted_mfis$feature == "PB-A", "negative"][[1]]
     pb_pos <- extracted_mfis[extracted_mfis$feature == "PB-A", "positive"][[1]]
 
-    plot(((1:1000) / (10)))
-    x <- (-1000:1000) / 200
-    plot(x, (exp(x) / (1 + exp(x))))
-    absolute_sigmoid <- function(x) {
-        ((1 / (1 + exp(-x))) - .5) * 2
-    }
-    plot(x, absolute_sigmoid(x))
+    # plot(((1:1000) / (10)))
+    # x <- (-1000:1000) / 200
+    # plot(x, (exp(x) / (1 + exp(x))))
+    # absolute_sigmoid <- function(x) {
+    #     ((1 / (1 + exp(-x))) - .5) * 2
+    # }
+    # plot(x, absolute_sigmoid(x))
 
 
     refactor <- 1e2
@@ -107,7 +106,7 @@ test_that("Testing rescale_extracted", {
             x_aligned_v2_asinh = asinh(x_aligned_v2),
             x_aligned_v3_asinh = asinh(absolute_sigmoid(x_aligned) * refactor)
         )
-    tmpdir <- withr::local_tempdir()
+    tmpdir <- withr::local_tempdir(new = TRUE)
     pdf(file.path(tmpdir, "removeme.pdf"))
     print(tmpplot(df, "x_asinh"))
     print(tmpplot(df, "x_minmax_asinh"))
@@ -119,7 +118,7 @@ test_that("Testing rescale_extracted", {
         sample_to_rescale = flowCore::exprs(loaded_cy1),
         extracted_mfi = extracted_mfis
     )
-    testthat::expect(TRUE)
+    testthat::expect_true(TRUE)
 })
 
 #### I have removed testdata/gated_lymphocytes as the data was too large for CRAN

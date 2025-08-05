@@ -25,27 +25,25 @@ do_flowsom <- function(ff) {
     return(fSOM)
 }
 
-
 test_that("FlowSOM outliers", {
-    fileName <- system.file("extdata", "68983.fcs", package = "FlowSOM")
-    ff <- flowCore::read.FCS(fileName)
-    fsom <- do_flowsom()
+    ff_example <- example_processed()
+    fsom <- do_flowsom(ff_example)
     outliers <- flowSOM_is.outlier(fsom)
     testthat::expect_equal(sum(outliers), 209)
-    testthat::expect_length(outliers, flowCore::nrow(ff))
+    testthat::expect_length(outliers, flowCore::nrow(ff_example))
 })
 
 
-
+devtools::load_all()
 test_that("FlowSOM outliers 2", {
     ff_example <- example_processed()
     fsom <- do_flowsom(ff_example)
     res <- flowSOM_predict(flowsom_result = fsom, flowset = flowCore::flowSet(ff_example))
 
     outliers <- flowSOM_is.outlier(fsom)
-    testthat::expect_equal(outliers, res$cell_outlier)
+    testthat::expect_equal(outliers, res$cells_clusters_from_train[["is_som_outlier"]])
     testthat::expect_equal(sum(outliers), 209)
-    testthat::expect_equal(sum(res$cell_outlier), 209)
+    testthat::expect_equal(sum(res$cells_clusters_from_train[["is_som_outlier"]]), 209)
 })
 
 test_that("FlowSOM new Metaclusters", {
@@ -115,7 +113,7 @@ test_that("FlowSOM wrapper_count_model", {
         df_list = fake_clusterings[allowed_clusterings],
         tvt_col = "tvt",
         # outdir = file.path(outdir_base, basename(metaclustering_dir), training_device),
-        outdir = "removeme",
+        outdir = withr::local_tempdir(new = TRUE),
         dvs_potential = c("sample"),
         dvs_multiclass = c(),
         ivs_regex = "[cC]luster",
@@ -179,17 +177,21 @@ test_that("FlowSOM new Metaclusters, with/out new clustering", {
 
 test_that("FlowSOM optimal", {
     ff_example <- example_processed()
-    fsom <- flowSOM_optimal(
-        flowCore::flowSet(ff_example),
-        # Input options:
-        compensate = FALSE,
-        transform = FALSE,
-        scale = FALSE,
-        # SOM options:
-        colsToUse = c(9, 12, 14:18), xdim = 7, ydim = 7,
-        # Metaclustering options:
-        nClus = 10
+    testthat::expect_warning(
+        fsom <- flowSOM_optimal(
+            flowCore::flowSet(ff_example),
+            # Input options:
+            compensate = FALSE,
+            transform = FALSE,
+            scale = FALSE,
+            # SOM options:
+            colsToUse = c(9, 12, 14:18), xdim = 7, ydim = 7,
+            # Metaclustering options:
+            nClus = 10
+        ),
+        "By using nClus, I am ignoring the parameter maxMeta"
     )
+
     testthat::expect_true(fsom$fs_res_train$map$nMetaclusters == 10)
     testthat::expect_equal(dim(fsom$fs_res_train$ConsensusClusterPlus_MAP), c(49, 10))
 })

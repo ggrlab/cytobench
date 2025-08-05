@@ -12,7 +12,7 @@ test_that("Plot markers pairwise", {
     p0 <- plot_markers_pairwise(
         example_ff
     )
-    tmpdir <- withr::local_tempdir()
+    tmpdir <- withr::local_tempdir(new = TRUE)
     pdf(file.path(tmpdir, "removeme.pdf"), height = 45, width = 45)
     print(p0)
     dev.off()
@@ -46,7 +46,7 @@ test_that("Plot markers pairwise: Cofactors", {
         },
         transform_fun_name = "log10",
     )
-    tmpdir <- withr::local_tempdir()
+    tmpdir <- withr::local_tempdir(new = TRUE)
     pdf(file.path(tmpdir, "removeme.pdf"), height = 45, width = 45)
     print(p0)
     dev.off()
@@ -93,7 +93,7 @@ test_that("Plot markers pairwise: Points", {
         geom = "pointdensity",
         bins = 250
     )
-    tmpdir <- withr::local_tempdir()
+    tmpdir <- withr::local_tempdir(new = TRUE)
     pdf(file.path(tmpdir, "removeme.pdf"), height = 45, width = 45)
     print(p0)
     print(p1)

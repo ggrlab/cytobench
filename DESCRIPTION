@@ -16,7 +16,8 @@ Imports:
     tidyr,
     stats,
     xml2,
-    ggpointdensity
+    ggpointdensity, 
+    patchwork
 Suggests: 
     feather,
     knitr,
