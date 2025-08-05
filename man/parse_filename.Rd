@@ -2,7 +2,7 @@
 % Please edit documentation in R/parse_filename.R
 \name{parse_filename}
 \alias{parse_filename}
-\title{Parse filenames into parts}
+\title{Parse Filenames into Metadata Columns}
 \usage{
 parse_filename(
   fn,
@@ -11,10 +11,28 @@ parse_filename(
 )
 }
 \arguments{
-\item{fn}{Filenames, usually a vector of multiple strings}
+\item{fn}{Character vector. Full paths or base names of filenames to be parsed.}
 
-\item{cn}{The colnames the filename(s) should be split into}
+\item{cn}{Character vector. Names of the fields to extract from the filename (split by \code{delim}).
+Default expects filenames of the format:
+\preformatted{
+study_patientID_tvt_sampleNr_processing_exportedGate_downsamplingMethod_nCells_machine_dye.fcs
+}
+e.g., \code{"R1_d001_train_s001_raw_cd3_random_1000_navios_KrO.fcs"}.}
+
+\item{delim}{Character. Delimiter used to split the filename into components.}
+}
+\value{
+A tibble with one row per input filename and columns named by \code{cn},
+representing each part of the filename, in order. Also includes a column \code{filename}
+with the original filename.
 }
 \description{
-Extracts defined parts of the filename from the filename string
+Splits structured filenames into multiple metadata components by underscore delimiters.
+Useful for extracting information such as study ID, sample ID, gating strategy, etc.,
+from standard naming conventions used in cytometry data processing pipelines.
+}
+\examples{
+parse_filename(c("R1_d001_train_s001_raw_cd3_random_1000_navios_KrO.fcs"))
+
 }

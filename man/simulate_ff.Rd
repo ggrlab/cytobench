@@ -5,7 +5,7 @@
 \title{Simulate a FlowFrame with Normally Distributed Data}
 \usage{
 simulate_ff(
-  ncells,
+  ncells = 250,
   columns = c("FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A", "APC-A", "AF700-A",
     "AA750-A", "PB-A", "KrO-A"),
   flowcore = TRUE

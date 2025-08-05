@@ -2,8 +2,7 @@
 % Please edit documentation in R/extract_mfi.R
 \name{extract_relevant_mfis_singlestain}
 \alias{extract_relevant_mfis_singlestain}
-\title{Extract Single Stain Median Fluorescence Intensity (MFI)
-This function extracts the median fluorescence intensity (MFI) from single-stain FCS files.}
+\title{Extract MFIs from Single-Stain Cytometry Samples}
 \usage{
 extract_relevant_mfis_singlestain(
   loaded_fcs_singlestain,
@@ -14,21 +13,28 @@ extract_relevant_mfis_singlestain(
 )
 }
 \arguments{
-\item{loaded_fcs_singlestain}{A list of cytosets containing the loaded FCS files.}
+\item{loaded_fcs_singlestain}{A named list of cytosets or cytoframes containing single-stain FCS data.
+Each element should contain a single sample with one non-empty marker channel, or none (for unstained). The channels must have "empty" as their description if not filled.}
 
-\item{transform_fun}{A function to transform the fluorescence values. Default is \code{function(x) { asinh(x / 1e3) }}.
-The reported MFIs are calculated as the median of the UNtransformed values. Transformation is only used to cluster the negative and positive populations.}
+\item{transform_fun}{Function applied to the data before clustering. Default: \code{function(x) asinh(x / 1e3)}. Does not affect reported MFIs, only through the clustering.}
+
+\item{seed}{Integer random seed for reproducible k-means clustering. Default is \code{42}.}
 }
 \value{
-A data frame with the extracted MFIs. E.g.:
-\preformatted{
-  feature negative positive unstained
- <chr>      <dbl>    <dbl>     <dbl>
-1 FITC-A      530.   58567.     576.
-2 PE-A        526.  149506.     511.
+A named list of \code{tibble}s, one per input file, each with columns:
+\describe{
+\item{\code{feature}}{The marker channel name (e.g., \code{"FITC-A"}).}
+\item{\code{negative}, \code{positive}}{MFI values per cluster, if applicable.}
+\item{\code{unstained}}{Median intensity if the sample is unstained (no non-empty channels).}
 }
 }
 \description{
-Extract Single Stain Median Fluorescence Intensity (MFI)
-This function extracts the median fluorescence intensity (MFI) from single-stain FCS files.
+This function extracts the median fluorescence intensity (MFI) for each single-stain sample
+using seeded k-means clustering (k=2) to separate positive and negative populations. It also identifies
+unstained samples (i.e., samples with no non-empty channels) and records their median values.
+}
+\examples{
+\dontrun{
+mfis <- extract_relevant_mfis_singlestain(loaded_fcs)
+}
 }

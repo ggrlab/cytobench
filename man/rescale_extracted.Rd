@@ -2,7 +2,7 @@
 % Please edit documentation in R/rescale_extracted.R
 \name{rescale_extracted}
 \alias{rescale_extracted}
-\title{Rescale a sample using a named list of extracted MFIs}
+\title{Rescale Sample Using Extracted MFIs}
 \usage{
 rescale_extracted(
   sample_to_rescale,
@@ -11,30 +11,40 @@ rescale_extracted(
   column_positive = "positive",
   missing_feature = c("minmax", "center_median"),
   inplace_datatable = FALSE,
-  scale_column_fun = scale_column_relative,
+  scale_column_fun = scale_column_minmax,
   ...
 )
 }
 \arguments{
-\item{sample_to_rescale}{data.table of the sample to rescale}
+\item{sample_to_rescale}{A \code{flowFrame} or other object with marker (column) names to be rescaled.}
 
-\item{column_negative}{The column name of the negative population}
+\item{extracted_mfi}{A \code{tibble} (or coercible to one) with at least three columns:
+\describe{
+\item{\code{feature}}{Character. Names of the features (e.g., \code{"FITC-A"}).}
+\item{\code{negative}}{Numeric. MFI values for negative/unlabeled control.}
+\item{\code{positive}}{Numeric. MFI values for positive/labeled control.}
+}}
 
-\item{column_positive}{The column name of the positive population}
+\item{column_negative}{Character vector. Column name as  negative control.
+Defaults to \code{c("negative", "unstained")}. First element is used.}
 
-\item{missing_feature}{How should missing features (NA) be handled?}
+\item{column_positive}{Character. Column name used as positive control. Defaults to \code{"positive"}. First element is used.}
 
-\item{inplace_datatable}{Should the data.table be modified in place?}
+\item{missing_feature}{Character. How to handle missing MFI entries (i.e., where list entry is \code{NA}).
+Options are:
+\itemize{
+\item \code{"minmax"} (default): Rescale using column-wise min/max.
+\item \code{"center_median"}: Shift column so that median is centered.
+\item \code{NA}: Do not rescale columns with missing MFI values.
+}}
 
-\item{scale_column_fun}{Function to scale a column}
+\item{inplace_datatable}{Logical. If \code{TRUE}, modifies \code{sample_to_rescale} in place. If \code{FALSE}, returns a new copy. Default is \code{FALSE}.}
 
-\item{...}{Additional arguments passed to the scale_column_fun}
+\item{scale_column_fun}{Function. The scaling function to apply per column. Default is \code{scale_column_minmax()}.
+This function must accept at least \code{sample_to_rescale} (data.table), \code{scaling_values} (vector of numbers), and \code{colX} (character, a column of \code{sample_to_rescale}).}
 
-\item{extracted_mfi_df}{The extracted MFIs from extract_singlestain_mfi. The column "feature" must
-contain the names of the columns to rescale.
-By default, if a column of sample_to_rescale is not found in the extracted_mfi_namedlist,
-the column is rescaled using the minmax method.}
+\item{...}{Additional arguments passed to \code{scale_column_fun}.}
 }
 \description{
-This function rescales all columns of a sample using the extracted MFIs from extract_singlestain_mfi.
+Rescales all features (columns) in a cytometry sample using median fluorescence intensities (MFIs) extracted from controls.
 }

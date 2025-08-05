@@ -2,7 +2,7 @@
 % Please edit documentation in R/mfis_from_excel.R
 \name{mfis_from_excel}
 \alias{mfis_from_excel}
-\title{Extract MFIs from Excel file}
+\title{Extract Median Fluorescence Intensities (MFIs) from Excel File}
 \usage{
 mfis_from_excel(
   excel_file = "Pre_Arcsinh_Median_FI.xlsx",
@@ -11,27 +11,41 @@ mfis_from_excel(
 )
 }
 \arguments{
-\item{excel_file}{The excel file must have a very specific format with the following columns:
-EXP
-CD3 LOT
-MACHINE
-CHANNEL
-DYE
-Name of the data file containing the data set
-MFI FSC
-MFI SSC
-MFI POSITIVE POPULATION
-MFI NEGATIVE POPULATION (GG)
-MFI NEGATIVE POPULATION  UNSTAINED
+\item{excel_file}{Character. Path to the Excel file. The file must contain a very specific format
+with at least the following columns:
+\itemize{
+\item \code{EXP}
+\item \code{CD3 LOT}
+\item \code{MACHINE}
+\item \code{CHANNEL}
+\item \code{DYE}
+\item \code{Name of the data file containing the data set}
+\item \code{MFI FSC}
+\item \code{MFI SSC}
+\item \code{MFI POSITIVE POPULATION}
+\item \code{MFI NEGATIVE POPULATION (GG)}
+\item \code{MFI NEGATIVE POPULATION  UNSTAINED}
+}
+Each sample should be separated by exactly one blank row.
+Named sheets such as "MFI NAVIOS" or "MFI EX" are assumed.}
 
-Every single staining sample should be delimited by exactly one blank row.
-The two machines "MFI NAVIOS" and "MFI EX" should be named sheets.}
+\item{positive_mfi_colname}{Character. Column name in the Excel file for the positive MFI values.
+Default is \code{"MFI POSITIVE POPULATION"}.}
 
-\item{positive_mfi_colname}{Column name of the excel sheets with the positive MFI}
-
-\item{negative_mfi_colname}{Column name of the excel sheets with the negative MFI.}
+\item{negative_mfi_colname}{Named character vector. Column name(s) in the Excel file for the negative MFI values.
+The names are used as the output list names (e.g. "extern", "intern").
+Default is \code{c("extern" = "MFI NEGATIVE POPULATION  UNSTAINED")}.}
 }
 \value{
+A named list (e.g. "intern", "extern") of per-sample MFI matrices. Each element of the list is itself a
+list where each entry is a matrix with:
+\describe{
+\item{Rows}{Two rows: one for positive MFI and one for negative MFI.}
+\item{Columns}{Channel-marker names (e.g. \code{"FL1 CD3 FITC"}, \code{"FL2 CD3 PE"}, etc.).}
+}
+
+If only one negative column is provided, the output is a single named list (not wrapped in another list).
+
 List ("intern", "extern") of matrices with MFIs per sample, looking like
 this:
 $intern
@@ -41,7 +55,9 @@ MFI POSITIVE POPULATION          37488.82   131657.6   139639.11     790976.38  
 MFI NEGATIVE POPULATION (GG)       219.82      298.0      437.83        615.24       364.9       66.68        164.55         98.35     824.71       792.06
 }
 \description{
-Extract MFIs from Excel file
+This function reads an Excel file containing MFIs for single-stained cytometry samples
+and returns a list of MFI matrices, grouped by sample and machine. Each matrix contains
+the positive and negative MFIs for each channel-marker combination.
 }
 \examples{
 # See tests

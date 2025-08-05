@@ -2,36 +2,39 @@
 % Please edit documentation in R/rescale_named.R
 \name{rescale_named}
 \alias{rescale_named}
-\title{Rescale a sample using a named list of extracted MFIs}
+\title{Rescale a sample using a named list of MFIs}
 \usage{
 rescale_named(
   sample_to_rescale,
   extracted_mfi_namedlist,
   missing_feature = c("minmax", "center_median"),
   inplace_datatable = FALSE,
-  scale_column_fun = scale_column_relative,
+  scale_column_fun = scale_column_minmax,
   ...
 )
 }
 \arguments{
-\item{sample_to_rescale}{data.table of the sample to rescale}
+\item{sample_to_rescale}{A \code{data.table} representing a single sample. Each column corresponds to a marker/channel.}
 
-\item{extracted_mfi_namedlist}{The extracted MFIs as list.
-In contrast to rescale(), this is a named list of positive and negative MFIs
-where the names are the columns of the sample_to_rescale.
-If a column should be rescaled as "missing feature",
-the corresponding list element should be NA.
-By default, if a column of sample_to_rescale is not found in the extracted_mfi_namedlist,
-the column is rescaled using the minmax method.}
+\item{missing_feature}{Character. How to handle missing MFI entries (i.e., where list entry is \code{NA}).
+Options are:
+\itemize{
+\item \code{"minmax"} (default): Rescale using column-wise min/max.
+\item \code{"center_median"}: Shift column so that median is centered.
+\item \code{NA}: Do not rescale columns with missing MFI values.
+}}
 
-\item{missing_feature}{How should missing features (NA) be handled?}
+\item{inplace_datatable}{Logical. If \code{TRUE}, modifies \code{sample_to_rescale} in place. If \code{FALSE}, returns a new copy. Default is \code{FALSE}.}
 
-\item{inplace_datatable}{Should the data.table be modified in place?}
+\item{scale_column_fun}{Function. The scaling function to apply per column. Default is \code{scale_column_minmax()}.
+This function must accept at least \code{sample_to_rescale} (data.table), \code{scaling_values} (vector of numbers), and \code{colX} (character, a column of \code{sample_to_rescale}).}
 
-\item{scale_column_fun}{Function to scale a column}
-
-\item{...}{Additional arguments passed to the scale_column_fun}
+\item{...}{Additional arguments passed to \code{scale_column_fun}.}
+}
+\value{
+A \code{data.table} with rescaled columns. If \code{inplace_datatable = TRUE}, the same object is modified and returned invisibly.
 }
 \description{
-This function rescales all columns of a sample using a named list of extracted MFIs.
+This function rescales each column in a sample data table using a named list of extracted marker intensities (MFIs).
+Each column is matched to its corresponding MFI vector (e.g., with named elements \code{"negative"} and \code{"positive"}).
 }

@@ -10,7 +10,7 @@ extract_singlestain_mfi_wrapper(
   transform_fun = function(x) {
      asinh(x/1000)
  },
-  relevant_columns,
+  relevant_columns = NA,
   ...
 )
 }

@@ -8,35 +8,43 @@ plot_compare_alignment(
   dt_listlist,
   relevant_features = NULL,
   n_resolution = 1000,
-  scale_column_funs = list(default = function(x) {
-     asinh(x * 100)
- }, raw =
-    function(x) {
-     asinh(x/1000)
- }),
+  scale_column_funs = list(default = function(x) asinh(x * 100), raw = function(x)
+    asinh(x/1000)),
   ylim = c(0, 0.4),
   faceting = c("horizontal", "vertical")
 )
 }
 \arguments{
-\item{dt_listlist}{A list of lists of data.tables. The outer list corresponds to the alignment method, the inner list device (which should be aligned). The innermost element is a data.table of feature measurements.}
+\item{dt_listlist}{A named list of lists of \code{data.table}s. The outer list corresponds to the scaling or
+alignment method (e.g. "raw", "minmax"). The inner list groups by device name (e.g., "navios", "cytoflex") - which should usually be aligned.
+Each innermost element is a \code{data.table} of feature measurements.}
 
-\item{relevant_features}{Character vector of feature names to plot, referring to (some of) the column names of the data.tables. If NULL, all features present in the data are plotted.}
+\item{relevant_features}{Character vector of feature names (column names) to include in the plot.
+If \code{NULL}, all features found in the data are used.}
 
-\item{n_resolution}{Integer specifying the number of points to use for density approximation (default: 1000).}
+\item{n_resolution}{Integer. Number of x-values per density curve (default: 1000).}
 
-\item{scale_column_funs}{Named list of functions to scale feature values. Each function should accept a numeric vector and return a transformed numeric vector.}
+\item{scale_column_funs}{Named list of transformation functions to apply to the feature values before
+computing densities. Each function must take a numeric vector and return a transformed numeric vector.}
+
+\item{ylim}{Numeric vector of length 2. Y-axis limits (e.g., c(0, 0.4)). Default: \code{c(0, 0.4)}.}
+
+\item{faceting}{Either \code{"horizontal"} or \code{"vertical"}. Determines how ggplot facets are arranged.}
 }
 \value{
-A ggplot object showing density curves for each feature, device, and scaling method.
+A \code{ggplot2} object showing overlaid density plots, faceted by feature and scaling method.
 }
 \description{
-This function visualizes the density distributions of selected features across multiple devices and scaling methods.
+Visualizes the density distributions of selected features across multiple devices and scaling methods.
+Each method-device-feature combination is plotted using an estimated density function. Useful to assess
+alignment consistency or transformation effects across datasets.
+}
+\details{
 It takes a nested list of data tables, applies specified scaling functions, computes density estimates, and plots
 the results using ggplot2 with faceting by feature and scaling method.
 }
 \examples{
-# Example usage:
-# plot_compare_alignment(dt_listlist, relevant_features = c("feature1", "feature2"))
+# Assuming dt_listlist is a nested list of data.tables with aligned features:
+# plot_compare_alignment(dt_listlist, relevant_features = c("FL1-A", "FL2-A"))
 
 }

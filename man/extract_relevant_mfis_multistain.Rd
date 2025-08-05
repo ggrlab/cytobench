@@ -9,7 +9,7 @@ extract_relevant_mfis_multistain(
   transform_fun = function(x) {
      asinh(x/1000)
  },
-  relevant_columns,
+  relevant_columns = NA,
   seed = 42
 )
 }
