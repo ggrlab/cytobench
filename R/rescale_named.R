@@ -5,6 +5,12 @@
 #'
 #' @param sample_to_rescale A `data.table` representing a single sample. Each column corresponds to a marker/channel.
 #'
+#' @param extracted_mfi_namedlist
+#' A named list where each name corresponds to a column in `sample_to_rescale`.
+#' Each element is a numeric vector representing the MFI values for that marker/channel.
+#' If a column is missing in this list, it will be handled according to `missing_feature`.
+#' See also extracted_mfi in `extract_marker_mfi_list()`.
+#'
 #' @inheritParams extract_marker_mfi_list
 #'
 #' @param missing_feature Character. How to handle missing MFI entries (i.e., where list entry is `NA`).
@@ -19,7 +25,6 @@
 #'
 #' @param scale_column_fun Function. The scaling function to apply per column. Default is `scale_column_minmax()`.
 #' This function must accept at least `sample_to_rescale` (data.table), `scaling_values` (vector of numbers), and `colX` (character, a column of `sample_to_rescale`).
-#'
 #' @param ... Additional arguments passed to `scale_column_fun`.
 #'
 #' @return A `data.table` with rescaled columns. If `inplace_datatable = TRUE`, the same object is modified and returned invisibly.

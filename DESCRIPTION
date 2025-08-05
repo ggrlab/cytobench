@@ -15,16 +15,31 @@ Imports:
     dplyr,
     tidyr,
     stats,
-    xml2,
     ggpointdensity, 
-    patchwork
+    patchwork,
+    withr, 
+    cluster, 
+    ConsensusClusterPlus,
+    ggh4x, 
+    distances, 
+    FlowSOM, 
+    flowWorkspace, 
+    ggplot2, 
+    ggpubr, 
+    mlr3, 
+    mlr3tuning, 
+    pacman, 
+    paradox, 
+    pROC, 
+    qs, 
+    scattermore, 
+    stringr
 Suggests: 
     feather,
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
-    cytoKal,
-    withr
+    cytoKal
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

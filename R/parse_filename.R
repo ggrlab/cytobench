@@ -33,7 +33,8 @@ parse_filename <- function(fn,
                                "n_cells",
                                "machine",
                                "dye"
-                           )) {
+                           ),
+                           delim = "_") {
     filename <- filename_bn <- NULL # Linting
 
     # Convert input to tibble and extract the basename if a path is provided
@@ -45,7 +46,7 @@ parse_filename <- function(fn,
         ) |>
         tidyr::separate_wider_delim(
             filename_bn,
-            delim = "_",
+            delim = delim,
             names = cn
         )
 

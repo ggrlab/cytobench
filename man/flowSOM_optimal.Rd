@@ -26,14 +26,16 @@ flowSOM_optimal(
 \item{transformList}{A \code{transformList} (typically from \code{flowCore::transformList}) defining the transformations to apply.
 If \code{transform = TRUE}, this will be applied during clustering.E.g.
 
+\code{
 fc_transforms <- sapply(colsToUse, function(cn_x) {
-flowCore::arcsinhTransform(
-a = 0,
-b = 1 / pre_rescale_asinh[\link{"navios"}][\link{cn_x}],
-c = 0
-)
+    flowCore::arcsinhTransform(
+        a = 0,
+        b = 1 / pre_rescale_asinh[["navios"]][[cn_x]],
+        c = 0
+    )
 }, simplify = FALSE)
-fc_transformlist_asinh <- flowCore::transformList(names(fc_transforms), fc_transforms)}
+fc_transformlist_asinh <- flowCore::transformList(names(fc_transforms), fc_transforms)
+}}
 
 \item{outdir}{Optional. Directory path to save the FlowSOM result object and associated PDF plots.}
 

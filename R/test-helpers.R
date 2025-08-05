@@ -47,6 +47,7 @@ simulate_ff <- function(
 #'
 #' @param n_samples Integer. Number of synthetic samples to generate.
 #' @inheritParams simulate_ff
+#' @param ... Additional arguments passed to `simulate_ff()`.
 #'
 #' @return A `flowSet` object with `n_samples` simulated `flowFrame`s.
 #'
@@ -92,10 +93,10 @@ simulate_fs <- function(n_samples, flowcore = TRUE, ...) {
 #' flowCore::sampleNames(fs_sim)
 #'
 #' @export
-simulate_cd3 <- function(x, columns = c(
-                                 "FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A",
-                                 "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A"
-                             )) {
+simulate_cd3 <- function(columns = c(
+                             "FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A",
+                             "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A"
+                         )) {
     fs_singlestain <- simulate_fs(length(columns) + 3, flowcore = FALSE)
 
     # Name samples: one for each marker, plus 3 extra controls

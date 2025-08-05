@@ -2,7 +2,7 @@
 #'
 #' This helper function inserts multiple compensation matrices and autofluorescence vectors into
 #' the metadata of an FCS file, following the structure used in the CMV dataset
-#' (Glehr et al., [TO BE SUBMITTED]). These values can later be retrieved conveniently
+#' (Glehr et al., (TO BE SUBMITTED)). These values can later be retrieved conveniently
 #' with the `read.FCS_custom_spillover()` function. They can be directly _applied_ with
 #' `cmv_helper_compensation()`.
 #'

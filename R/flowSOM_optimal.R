@@ -10,6 +10,7 @@
 #' @param transformList A `transformList` (typically from `flowCore::transformList`) defining the transformations to apply.
 #'        If `transform = TRUE`, this will be applied during clustering.E.g.
 #'
+#' \code{
 #' fc_transforms <- sapply(colsToUse, function(cn_x) {
 #'     flowCore::arcsinhTransform(
 #'         a = 0,
@@ -18,6 +19,7 @@
 #'     )
 #' }, simplify = FALSE)
 #' fc_transformlist_asinh <- flowCore::transformList(names(fc_transforms), fc_transforms)
+#' }
 #' @param outdir Optional. Directory path to save the FlowSOM result object and associated PDF plots.
 #' @param seed Integer. Random seed for reproducibility. Default is `3711283`.
 #' @param scale Logical. Whether to scale data (default `TRUE`). Scaling is applied prior to SOM training.

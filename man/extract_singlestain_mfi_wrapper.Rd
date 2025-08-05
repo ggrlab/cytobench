@@ -20,6 +20,9 @@ extract_singlestain_mfi_wrapper(
 \item{transform_fun}{A function to transform the fluorescence values. Default is \code{function(x) { asinh(x / 1e3) }}.
 The reported MFIs are calculated as the median of the UNtransformed values. Transformation is
 only used to cluster the negative and positive populations.}
+
+\item{relevant_columns}{A character vector specifying the relevant columns for MFI extraction.
+Default is \code{NA}, which means all columns will be used.}
 }
 \value{
 A data frame with the extracted MFIs. E.g.:

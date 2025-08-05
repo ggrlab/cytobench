@@ -7,6 +7,7 @@
 #' to use `withr::local_tempdir()` to create a temporary directory that is automatically
 #' cleaned up after the session ends (Useful for testing).
 #' @inheritParams base::dir.create
+#' @param ... Additional arguments passed to `dir.create()`, such as `showWarnings` or `recursive`.
 #' @return A character string containing the full path to the newly created timestamped directory.
 #' The directory is created immediately on disk.
 #'
@@ -26,6 +27,8 @@ tempdir_time <- function(dir = tempdir(), ...) {
 #' Generates a timestamped subdirectory within a temporary directory that will be
 #' automatically cleaned up when the current environment exits (e.g., during testing).
 #' This is useful for managing temporary file outputs in isolated, reproducible sessions.
+#' @param showWarnings Logical. If `TRUE`, shows warnings when creating the directory.
+#' From `base::dir.create()`.
 #'
 #' @return A character string containing the path to the created timestamped subdirectory.
 #'
@@ -33,10 +36,6 @@ tempdir_time <- function(dir = tempdir(), ...) {
 #' Uses [withr::local_tempdir()] to create a base temporary directory that is scoped to the
 #' current environment (typically cleaned up on exit), and then calls `tempdir_time()` to
 #' create a unique subdirectory within it.
-#'
-#' @importFrom withr local_tempdir
-#'
-#' @seealso [tempdir_time()]
 #'
 #' @examples
 #' \dontrun{
@@ -48,7 +47,7 @@ tempdir_time <- function(dir = tempdir(), ...) {
 local_tempdir_time <- function(showWarnings = FALSE, ...) {
     # Create an environment-scoped temporary base directory
     tmpdir <- withr::local_tempdir(.local_envir = parent.frame(2))
-    
+
     # Create a timestamped subdirectory inside the base temp dir
     tempdir_time(file.path(tmpdir, "dirAutoremove"), showWarnings = showWarnings, ...)
 }

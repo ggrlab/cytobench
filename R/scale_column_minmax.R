@@ -1,7 +1,7 @@
 #' Min-Max Scaling for a Single Column
 #'
 #' This function scales a specified column of a data.table using provided
-#' scaling values, neither usually nor necessarily to [0, 1].
+#' scaling values, neither usually nor necessarily to `[0, 1]`.
 #' If a single value is provided, then only one median given which should be centered around 0.
 #' The transformation is performed in-place.
 #'

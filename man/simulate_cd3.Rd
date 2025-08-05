@@ -5,7 +5,6 @@
 \title{Simulate Multi-Stain Flow Cytometry Data}
 \usage{
 simulate_cd3(
-  x,
   columns = c("FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A", "APC-A", "AF700-A",
     "AA750-A", "PB-A", "KrO-A")
 )

@@ -16,6 +16,11 @@ rescale_named(
 \arguments{
 \item{sample_to_rescale}{A \code{data.table} representing a single sample. Each column corresponds to a marker/channel.}
 
+\item{extracted_mfi_namedlist}{A named list where each name corresponds to a column in \code{sample_to_rescale}.
+Each element is a numeric vector representing the MFI values for that marker/channel.
+If a column is missing in this list, it will be handled according to \code{missing_feature}.
+See also extracted_mfi in \code{extract_marker_mfi_list()}.}
+
 \item{missing_feature}{Character. How to handle missing MFI entries (i.e., where list entry is \code{NA}).
 Options are:
 \itemize{

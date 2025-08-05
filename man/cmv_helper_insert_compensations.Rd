@@ -44,7 +44,7 @@ If \code{outdir} is \code{NA}, returns the updated \code{flowFrame}. Otherwise, 
 \description{
 This helper function inserts multiple compensation matrices and autofluorescence vectors into
 the metadata of an FCS file, following the structure used in the CMV dataset
-(Glehr et al., \link{TO BE SUBMITTED}). These values can later be retrieved conveniently
+(Glehr et al., (TO BE SUBMITTED)). These values can later be retrieved conveniently
 with the \code{read.FCS_custom_spillover()} function. They can be directly \emph{applied} with
 \code{cmv_helper_compensation()}.
 }

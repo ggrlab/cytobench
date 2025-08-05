@@ -6,7 +6,7 @@
 #' and to select the best set of features based on the validation performance.
 #'
 #' The independent variables are given either as character vector "ivs" or as a regular expression
-#' "ivs_regex" to select the columns from df_list[[1]].
+#' "ivs_regex" to select the columns from `df_list[[1]]`.
 #'
 #' The dvs are separated into binary, multi-class and continuous outcomes. Multi-class variables
 #' have to be defined in dvs_multiclass.
@@ -44,10 +44,11 @@
 #' The independent variables in the dataframes. Default is all columns except the first one.
 #' If ivs_regex is given, this is ignored.
 #' @param ivs_regex
-#' A regular expression to select the independent variables WITHIN EACH dataframe. This is in contrast to ivs, which must be the same for all dataframes.
-#' If given, ivs is ignored. Default is "[cC]luster".
+#' A regular expression to select the independent variables WITHIN EACH dataframe.
+#' This is in contrast to ivs, which must be the same for all dataframes.
+#' If given, ivs is ignored. Default is `"[cC]luster"`.
 #' @param dvs_multiclass
-#' The dependent variables that are multi-class. Default is c("ABO", "A_AB", "B_AB", "abo_removedAB").
+#' The dependent variables that are multi-class. Default is `c("ABO", "A_AB", "B_AB", "abo_removedAB")`.
 #' @param seed
 #' The seed for the random hyperparameter optimization. Default is 2372876.
 #' @param hparam_n_evaluations
@@ -61,7 +62,7 @@
 #' @param measures
 #' The performance measures for the hyperparameter optimization. If NULL, the default measures are used.
 #' @param hpoptimized_final_trainsets
-#' The sets that are used to train the final model. Default is c("train", "validation").
+#' The sets that are used to train the final model. Default is `c("train", "validation")`.
 #' @export
 wrapper_count_models <- function(df_list,
                                  tvt_col = "tvt",

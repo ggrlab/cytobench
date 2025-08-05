@@ -34,7 +34,7 @@ A \code{flowFrame} with compensation and autofluorescence correction applied.
 }
 \description{
 This helper function applies a compensation matrix and autofluorescence correction
-to CMV flow cytometry data as described in Glehr et al. \link{TO BE SUBMITTED}.
+to CMV flow cytometry data as described in Glehr et al. (TO BE SUBMITTED).
 It retrieves compensation parameters from the FCS file metadata using a custom keyword.
 Multiple compensation types can be selected depending on how the compensation
 was estimated (manual, auto, or auto_singlestain).

@@ -8,6 +8,11 @@
 #'
 #' @inheritParams extract_marker_mfi_list
 #' @inheritParams rescale_named
+#' @param known_missing_features
+#' A character vector of known features that may not have MFI values in `extracted_mfi`.
+#' These features will not raise warnings when missing, but will use fallback methods.
+#' Defaults to `c("FS INT", "FS TOF", "SS INT").
+#'
 #' @return A `data.table` with rescaled columns.
 #' @export
 rescale <- function(sample_to_rescale,

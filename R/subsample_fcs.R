@@ -57,6 +57,7 @@ subsample_fcs <- function(file_x,
 #'
 #' @examples
 #' # Assuming `ff` is a FlowFrame object with flow cytometry data
+#' ff <- simulate_ff()
 #' subsampled_ff <- subsample_ff(ff, n_cells = 5000, seed = 12345)
 #'
 #' @export

@@ -25,6 +25,7 @@ E.g. given 100 cells and n_cells = 5000, the function will replicate each cell o
 }
 \examples{
 # Assuming `ff` is a FlowFrame object with flow cytometry data
+ff <- simulate_ff()
 subsampled_ff <- subsample_ff(ff, n_cells = 5000, seed = 12345)
 
 }

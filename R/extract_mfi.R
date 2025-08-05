@@ -3,7 +3,8 @@
 #' This function extracts the median fluorescence intensity (MFI) from single-stain FCS files.
 #'
 #' @param fcs_dir A character string specifying the directory containing the FCS files. Default is "data-raw/s001".
-#' @param regex_singlestain A regular expression pattern to identify single-stain FCS files. Default is "(-(CD3-.*)|(none))\\.fcs$".
+#' @param regex_singlestain
+#' A regular expression pattern to identify single-stain FCS files. Default is "(-(CD3-.*)|(none))\\.fcs$".
 #' @param transform_fun
 #' A function to transform the fluorescence values. Default is `function(x) { asinh(x / 1e3) }`.
 #' The reported MFIs are calculated as the median of the UNtransformed values. Transformation is
@@ -13,9 +14,32 @@
 #' the gating set is loaded from the file. If a (GatingSet) object is provided, it is used directly.
 #'
 #' @param gate_extract A specific gate to extract from the gating set. Default is NULL.
-#' @param multistaining A logical indicating whether to extract multi-stained samples. Default is FALSE.
-#' Note that if TRUE, the function will return a dataframe as following:
 #'
+#' @param regex_multistain
+#' A regular expression pattern to identify multi-stain FCS files. Default is "(_15-MasterMix)\\.fcs$".
+#' @param multistain_columns
+#' A character vector specifying the relevant columns for multi-staining.
+#'  Default is c("FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A", "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A").
+#'
+#' @return A data frame with the extracted MFIs. E.g.:
+#' \preformatted{
+#' # A tibble: 10 x 4
+#'    feature negative positive unstained
+#'    <chr>      <dbl>    <dbl>     <dbl>
+#'  1 FITC-A      530.   58567.     576.
+#'  2 PE-A        526.  149506.     511.
+#'  3 ECD-A       453.  107584.     454.
+#'  4 PC5.5-A     233.  242867.     166.
+#'  5 PC7-A       176.  195307.     138.
+#'  6 APC-A       136.  105036.     122.
+#'  7 AF700-A     131.   28408.      97.2
+#'  8 AA750-A     324.   75247.     296.
+#'  9 PB-A        469.   13426.     442.
+#' 10 KrO-A       442.    4473.     444.
+#' }
+#'
+#'
+#' If there are multi-stained samples:
 #' #' \preformatted{
 #' # A tibble: 10 x 4
 # A tibble: 10 x 7
@@ -35,34 +59,13 @@
 #'
 #' If there have been NO single-stained samples (except for the unstained samples),
 #' "negative" and "positive" will be filled with the values from the multi-stained samples.
-#'
-#' @param regex_multistain A regular expression pattern to identify multi-stain FCS files. Default is "(_15-MasterMix)\\.fcs$".
-#' @param multistain_columns A character vector specifying the relevant columns for multi-staining. Default is c("FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A", "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A").
-#'
-#' @return A data frame with the extracted MFIs. E.g.:
-#' \preformatted{
-#' # A tibble: 10 x 4
-#'    feature negative positive unstained
-#'    <chr>      <dbl>    <dbl>     <dbl>
-#'  1 FITC-A      530.   58567.     576.
-#'  2 PE-A        526.  149506.     511.
-#'  3 ECD-A       453.  107584.     454.
-#'  4 PC5.5-A     233.  242867.     166.
-#'  5 PC7-A       176.  195307.     138.
-#'  6 APC-A       136.  105036.     122.
-#'  7 AF700-A     131.   28408.      97.2
-#'  8 AA750-A     324.   75247.     296.
-#'  9 PB-A        469.   13426.     442.
-#' 10 KrO-A       442.    4473.     444.
-#' }
 #' @examples
 #' \dontrun{
 #' extracted_mfis <- extract_singlestain_mfi(
 #'     "data-raw/s001",
-#'     gating_set_file = "data-raw/CT_p001_s001_raw_ungated_none_Inf_navios_01-CD3-FITC-single_CD3_compensation.flowWorkspace_gatingset"
+#'     gating_set_file = "data-raw/SAMPLENAME_CD3-FITC-single_CD3_compensation.flowWorkspace_gatingset"
 #' )
 #' }
-#' @export
 #' @export
 extract_mfi <- function(fcs_dir = "data-raw/s001",
                         regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
@@ -153,6 +156,8 @@ extract_mfi <- function(fcs_dir = "data-raw/s001",
 
 #' Extract Single Stain Median Fluorescence Intensity (MFI)
 #' @inheritParams extract_mfi
+#' @param transform
+#' As `transform_fun` in `extract_mfi`.
 #' @export
 extract_singlestain_mfi <- function(fcs_dir = "data-raw/s001",
                                     regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
@@ -246,6 +251,8 @@ load_mfi_files <- function(fcs_dir = "data-raw/s001",
 #' @param transform_fun A function to transform the fluorescence values. Default is `function(x) { asinh(x / 1e3) }`.
 #' The reported MFIs are calculated as the median of the UNtransformed values. Transformation is
 #' only used to cluster the negative and positive populations.
+#' @param relevant_columns A character vector specifying the relevant columns for MFI extraction.
+#' Default is `NA`, which means all columns will be used.
 #' @return A data frame with the extracted MFIs. E.g.:
 #' \preformatted{
 #' # A tibble: 10 x 4

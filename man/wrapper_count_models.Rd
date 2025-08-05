@@ -16,10 +16,10 @@ wrapper_count_models(
   hparam_n_evaluations = 1000,
   learners_classification = list(mlr3::lrn("classif.ranger", predict_type = "prob",
     predict_sets = c("train", "test"), max.depth = paradox::to_tune(2, 20), num.trees =
-    paradox::to_tune(c(500, 1000, 1500, 2000)))),
+    paradox::to_tune(c(500, 1000, 1500, 2000)), use_weights = "error")),
   learners_regression = list(mlr3::lrn("regr.ranger", predict_sets = c("train", "test"),
     max.depth = paradox::to_tune(2, 20), num.trees = paradox::to_tune(c(500, 1000, 1500,
-    2000)))),
+    2000)), use_weights = "error")),
   dv_class_positive = NULL,
   measures = NULL,
   hpoptimized_final_trainsets = c("train", "validation")
@@ -42,10 +42,11 @@ model is trained. Default is the first column name of the first dataframe.}
 \item{ivs}{The independent variables in the dataframes. Default is all columns except the first one.
 If ivs_regex is given, this is ignored.}
 
-\item{ivs_regex}{A regular expression to select the independent variables WITHIN EACH dataframe. This is in contrast to ivs, which must be the same for all dataframes.
-If given, ivs is ignored. Default is "\link{cC}luster".}
+\item{ivs_regex}{A regular expression to select the independent variables WITHIN EACH dataframe.
+This is in contrast to ivs, which must be the same for all dataframes.
+If given, ivs is ignored. Default is \code{"[cC]luster"}.}
 
-\item{dvs_multiclass}{The dependent variables that are multi-class. Default is c("ABO", "A_AB", "B_AB", "abo_removedAB").}
+\item{dvs_multiclass}{The dependent variables that are multi-class. Default is \code{c("ABO", "A_AB", "B_AB", "abo_removedAB")}.}
 
 \item{seed}{The seed for the random hyperparameter optimization. Default is 2372876.}
 
@@ -59,7 +60,7 @@ If given, ivs is ignored. Default is "\link{cC}luster".}
 
 \item{measures}{The performance measures for the hyperparameter optimization. If NULL, the default measures are used.}
 
-\item{hpoptimized_final_trainsets}{The sets that are used to train the final model. Default is c("train", "validation").}
+\item{hpoptimized_final_trainsets}{The sets that are used to train the final model. Default is \code{c("train", "validation")}.}
 }
 \description{
 Use the list of dataframes in df_list to create hyperparameter-optimized models for all potential dependent variables
@@ -68,7 +69,7 @@ The idea is to have a list of dataframes with different independent variables (e
 and to select the best set of features based on the validation performance.
 
 The independent variables are given either as character vector "ivs" or as a regular expression
-"ivs_regex" to select the columns from df_list[\link{1}].
+"ivs_regex" to select the columns from \code{df_list[[1]]}.
 
 The dvs are separated into binary, multi-class and continuous outcomes. Multi-class variables
 have to be defined in dvs_multiclass.

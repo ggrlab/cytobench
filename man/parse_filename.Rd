@@ -7,7 +7,8 @@
 parse_filename(
   fn,
   cn = c("study", "patientID", "tvt", "sample_nr", "processing", "exported_gate",
-    "downsampling_method", "n_cells", "machine", "dye")
+    "downsampling_method", "n_cells", "machine", "dye"),
+  delim = "_"
 )
 }
 \arguments{

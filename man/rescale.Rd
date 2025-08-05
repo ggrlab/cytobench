@@ -38,6 +38,10 @@ Options are:
 
 \item{inplace_datatable}{Logical. If \code{TRUE}, modifies \code{sample_to_rescale} in place. If \code{FALSE}, returns a new copy. Default is \code{FALSE}.}
 
+\item{known_missing_features}{A character vector of known features that may not have MFI values in \code{extracted_mfi}.
+These features will not raise warnings when missing, but will use fallback methods.
+Defaults to `c("FS INT", "FS TOF", "SS INT").}
+
 \item{scale_column_fun}{Function. The scaling function to apply per column. Default is \code{scale_column_minmax()}.
 This function must accept at least \code{sample_to_rescale} (data.table), \code{scaling_values} (vector of numbers), and \code{colX} (character, a column of \code{sample_to_rescale}).}
 

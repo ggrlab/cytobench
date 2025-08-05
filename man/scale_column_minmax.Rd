@@ -30,7 +30,7 @@ Invisibly returns the modified \code{sample_to_rescale}.
 }
 \description{
 This function scales a specified column of a data.table using provided
-scaling values, neither usually nor necessarily to \link{0, 1}.
+scaling values, neither usually nor necessarily to \verb{[0, 1]}.
 If a single value is provided, then only one median given which should be centered around 0.
 The transformation is performed in-place.
 }

@@ -87,6 +87,9 @@ usethis::use_readme_md()
 usethis::use_github_action("check-standard")
 usethis::use_github_action("test-coverage")
 
+# I have not set pkgdown yet (because I have a private repo - 2025-08-05)
+# gitcreds::gitcreds_set()
+# usethis::use_pkgdown_github_pages()
 ```
 
 ```bash

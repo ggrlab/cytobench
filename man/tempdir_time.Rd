@@ -4,7 +4,14 @@
 \alias{tempdir_time}
 \title{Create Timestamped Temporary Directory}
 \usage{
-tempdir_time()
+tempdir_time(dir = tempdir(), ...)
+}
+\arguments{
+\item{dir}{Base directory to append the timestamp to. Defaults to \code{\link[=tempdir]{tempdir()}}. You might want
+to use \code{withr::local_tempdir()} to create a temporary directory that is automatically
+cleaned up after the session ends (Useful for testing).}
+
+\item{...}{Additional arguments passed to \code{dir.create()}, such as \code{showWarnings} or \code{recursive}.}
 }
 \value{
 A character string containing the full path to the newly created timestamped directory.

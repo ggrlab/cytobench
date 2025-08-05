@@ -10,6 +10,8 @@ simulate_fs(n_samples, flowcore = TRUE, ...)
 \item{n_samples}{Integer. Number of synthetic samples to generate.}
 
 \item{flowcore}{Logical. If \code{TRUE}, returns a \code{flowFrame}; if \code{FALSE}, returns a \code{data.table}.}
+
+\item{...}{Additional arguments passed to \code{simulate_ff()}.}
 }
 \value{
 A \code{flowSet} object with \code{n_samples} simulated \code{flowFrame}s.
