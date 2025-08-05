@@ -76,11 +76,14 @@ flowSOM_performance <- function(
             clustering_map <- flowsom_result$fs_res_train$ConsensusClusterPlus_MAP[, n_metaclusters, drop = FALSE]
         } else {
             # Fall back to unique cluster–metaCluster pairs
-            clustering_map <- unique(dt_clustered[, .(cluster, metaCluster)])[, metaCluster := as.numeric(as.character(metaCluster))]
+            clustering_map <- unique(
+                dt_clustered[, .(cluster, metaCluster)]
+            )[, metaCluster := as.numeric(as.character(metaCluster))]
         }
     }
 
     # Optional subsampling of cells for efficiency
+    rownum <- NULL # only for linter
     dt_clustered[, rownum := seq_len(.N)]
     if (!is.null(ncells)) {
         dt_clustered[, rownum := seq_len(.N)]
@@ -89,8 +92,11 @@ flowSOM_performance <- function(
     }
 
     # Select appropriate mapping(s) to evaluate
-    test_clustermap <- if (include_clusters) clustering_map else clustering_map[, -which(colnames(clustering_map) == "cluster"), with = FALSE]
-
+    test_clustermap <- if (include_clusters) {
+        clustering_map
+    } else {
+        clustering_map[, -which(colnames(clustering_map) == "cluster"), with = FALSE]
+    }
     # Compute distance matrix from selected features
     distmat <- distances::distances(
         dt_clustered[, ..relevant_cols]
@@ -105,7 +111,12 @@ flowSOM_performance <- function(
         meta_labels <- current_map[dt_clustered[, .(cluster)], on = "cluster"][["metaCluster"]]
         if (length(unique(meta_labels)) == 1) {
             warning("Only one metacluster found in the current mapping. Silhouette score cannot be computed.")
-            return(data.table(rownum = dt_clustered[["rownum"]], metacluster = meta_labels, neighbor = NA, sil_width = NA))
+            return(data.table(
+                rownum = dt_clustered[["rownum"]],
+                metacluster = meta_labels,
+                neighbor = NA,
+                sil_width = NA
+            ))
         }
         # Compute silhouette scores
         sil <- cluster::silhouette(meta_labels, dist = distmat) |>
@@ -113,7 +124,8 @@ flowSOM_performance <- function(
         colnames(sil) <- c("metacluster", "neighbor", "sil_width")
         # Return silhouette results along with subsampled row indices
         cbind(rownum = dt_clustered[["rownum"]], sil)
-    }) |> data.table::rbindlist(idcol = "clustering")
+    }) |>
+        data.table::rbindlist(idcol = "clustering")
 
     return(score_sil)
 }
