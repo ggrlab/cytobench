@@ -57,6 +57,7 @@ plot_markers_pairwise <- function(ff,
                                   n_cells = Inf,
                                   count_transform = function(x) log10(x + 1),
                                   add_ggplot_elements = list()) {
+    x <- y <- count <- NULL # LINTR
     # Generate blank diagonal marker name plots
     marker_names <- names(flowCore::markernames(ff))
     xy_plots <- list()
@@ -72,7 +73,7 @@ plot_markers_pairwise <- function(ff,
 
     # All pairwise combinations of markers
     all_combos <- combn(marker_names, 2, simplify = FALSE)
-    all_combos_str <- vapply(all_combos, paste0, collapse = "_", FUN.VALUE = character(1))
+    all_combos_str <- lapply(all_combos, paste0, collapse = "_")
 
     # Extract data and optionally downsample
     exprs_dt <- data.table::as.data.table(flowCore::exprs(ff))
@@ -87,7 +88,7 @@ plot_markers_pairwise <- function(ff,
         for (marker_x in marker_names) {
             xy_str <- paste0(marker_x, "_", marker_y)
 
-            which_matching <- which(unlist(all_marker_combinations_str) == xy_str)
+            which_matching <- which(unlist(all_combos_str) == xy_str)
             # Only plot lower triangle of matrix
             if (xy_str %in% all_combos_str) {
                 if (!missing(cofactor_namedvec)) {
@@ -114,10 +115,10 @@ plot_markers_pairwise <- function(ff,
                         x = transform_fun(exprs_dt[[marker_x]] / cofactor_x),
                         y = transform_fun(exprs_dt[[marker_y]] / cofactor_y)
                     )
-                    p <- ggplot2::ggplot(dt_transformed, ggplot2::aes(x = x, y = y))
+                    p <- ggplot2::ggplot(dt, ggplot2::aes(x = x, y = y))
 
                     if (geom[1] == "hex") {
-                        p <- p + gplot2::geom_hex(
+                        p <- p + ggplot2::geom_hex(
                             bins = bins,
                             ggplot2::aes(fill = ggplot2::stat(count_transform(ggplot2::after_stat(count))))
                         )
@@ -165,7 +166,7 @@ plot_markers_pairwise <- function(ff,
                 names(p_m) <- xy_str
 
                 plots_all_patchwork <- c(plots_all_patchwork, p_m)
-                all_marker_combinations_str[[which_matching]] <- NULL
+                all_combos_str[[which_matching]] <- NULL
             } else {
                 plots_all_patchwork <- c(plots_all_patchwork, list(patchwork::plot_spacer()))
             }
@@ -179,7 +180,7 @@ plot_markers_pairwise <- function(ff,
     } else {
         plots_all_patchwork[1:(length(marker_names) + 1)] <- c(list(patchwork::plot_spacer()), xy_plots)
         plotlist_wrapper <- plots_all_patchwork
-        plotlist_wrapper[(1:length(plotlist_wrapper)) %% (length(marker_names) + 1) == 0] <- NULL
+        plotlist_wrapper[(seq_along(plotlist_wrapper)) %% (length(marker_names) + 1) == 0] <- NULL
         ncol_wrapper <- length(marker_names)
     }
 

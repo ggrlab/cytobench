@@ -1,34 +1,35 @@
-# devtools::load_all()
+devtools::load_all()
 
 test_that("Plot markers pairwise", {
+    cn <- c(
+        "FITC-A", "PE-A", "ECD-A"
+    )
     example_ff <- flowCore::flowFrame(
         matrix(
-            rnorm(1000 * 10, mean = 1000, sd = 100),
-            ncol = 10,
-            dimnames = list(NULL, c(
-                "FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A",
-                "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A"
-            ))
+            rnorm(1000 * length(cn), mean = 1000, sd = 100),
+            ncol = length(cn),
+            dimnames = list(NULL, cn)
         )
     )
     p0 <- plot_markers_pairwise(
         example_ff
     )
-    pdf("removeme.pdf", height = 45, width = 45)
+    tmpdir <- withr::local_tempdir()
+    pdf(file.path(tmpdir, "removeme.pdf"), height = 45, width = 45)
     print(p0)
     dev.off()
+    testthat::expect_true(TRUE) # run through test
 })
 
 
 test_that("Plot markers pairwise: Cofactors", {
     cn <- c(
-        "FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A",
-        "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A"
+        "FITC-A", "PE-A", "ECD-A"
     )
     example_ff <- flowCore::flowFrame(
         matrix(
-            rnorm(1000 * 10, mean = 1000, sd = 100),
-            ncol = 10,
+            rnorm(1000 * length(cn), mean = 1000, sd = 100),
+            ncol = length(cn),
             dimnames = list(NULL, cn)
         )
     )
@@ -42,25 +43,26 @@ test_that("Plot markers pairwise: Cofactors", {
         special_cofactor_list = list(
             "FITC-A_PE-A" = c(1000, 1000)
         ),
-        transform_fun = function(x){
+        transform_fun = function(x) {
             log10(x)
         },
         transform_fun_name = "log10",
     )
-    pdf("removeme.pdf", height = 45, width = 45)
+    tmpdir <- withr::local_tempdir()
+    pdf(file.path(tmpdir, "removeme.pdf"), height = 45, width = 45)
     print(p0)
     dev.off()
+    testthat::expect_true(TRUE) # run through test
 })
 
 test_that("Plot markers pairwise: Points", {
     cn <- c(
-        "FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A",
-        "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A"
+        "FITC-A", "PE-A", "ECD-A"
     )
     example_ff <- flowCore::flowFrame(
         matrix(
-            rnorm(1000 * 10, mean = 1000, sd = 100),
-            ncol = 10,
+            rnorm(1000 * length(cn), mean = 1000, sd = 100),
+            ncol = length(cn),
             dimnames = list(NULL, cn)
         )
     )
@@ -74,7 +76,7 @@ test_that("Plot markers pairwise: Points", {
         special_cofactor_list = list(
             "FITC-A_PE-A" = c(1000, 1000)
         ),
-        transform_fun = function(x){
+        transform_fun = function(x) {
             log10(x)
         },
         transform_fun_name = "log10",
@@ -86,16 +88,17 @@ test_that("Plot markers pairwise: Points", {
         special_cofactor_list = list(
             "FITC-A_PE-A" = c(1000, 1000)
         ),
-        transform_fun = function(x){
+        transform_fun = function(x) {
             log10(x)
         },
         transform_fun_name = "log10",
         geom = "pointdensity",
         bins = 250
     )
-    # browser()
-    # pdf("removeme.pdf", height = 45, width = 45)
-    # print(p0)
-    # print(p1)
-    # dev.off()
+    tmpdir <- withr::local_tempdir()
+    pdf(file.path(tmpdir, "removeme.pdf"), height = 45, width = 45)
+    print(p0)
+    print(p1)
+    dev.off()
+    testthat::expect_true(TRUE) # run through test
 })
