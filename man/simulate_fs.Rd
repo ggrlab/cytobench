@@ -24,4 +24,3 @@ fs <- simulate_fs(3)
 fs[[1]]
 
 }
-\keyword{internal}
