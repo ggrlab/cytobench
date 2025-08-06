@@ -56,4 +56,9 @@ Computes silhouette scores to assess clustering performance using
 FlowSOM results. Accepts both raw cluster assignments and the
 result object from \code{flowSOM_optimal()}.
 }
+\examples{
+ff_example <- example_processed()
+fsom <- do_flowsom(ff_example)
+flowSOM_performance(fsom$cells_clusters_from_train)
+}
 \keyword{flowsom}

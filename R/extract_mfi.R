@@ -59,15 +59,29 @@
 #'
 #' If there have been NO single-stained samples (except for the unstained samples),
 #' "negative" and "positive" will be filled with the values from the multi-stained samples.
-#' @examples
-#' \dontrun{
-#' extracted_mfis <- extract_singlestain_mfi(
-#'     "data-raw/s001",
-#'     gating_set_file = "data-raw/SAMPLENAME_CD3-FITC-single_CD3_compensation.flowWorkspace_gatingset"
-#' )
-#' }
 #' @export
 #' @keywords relativisation
+#' @examples
+#' set.seed(42)
+#' fs_ss <- simulate_cd3()
+#' tmpdir <- local_tempdir_time()
+#' flowCore::write.flowSet(fs_ss, tmpdir)
+#'
+#' extracted_mfis_singlestain <- extract_mfi(
+#'     tmpdir,
+#'     regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$"
+#' )
+#'
+#' extracted_mfis_multistain <- extract_mfi(
+#'     tmpdir,
+#'     regex_singlestain = "(none)\\.fcs$",
+#'     multistaining = TRUE,
+#'     regex_multistain = "(_15-MasterMix)\\.fcs$",
+#'     multistain_columns = c(
+#'         "FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A",
+#'         "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A"
+#'     ),
+#' )
 extract_mfi <- function(fcs_dir = "data-raw/s001",
                         regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
                         transform_fun = function(x) {
@@ -161,6 +175,18 @@ extract_mfi <- function(fcs_dir = "data-raw/s001",
 #' As `transform_fun` in `extract_mfi`.
 #' @export
 #' @keywords relativisation
+#' @examples
+#' set.seed(42)
+#' fs_ss <- simulate_cd3()
+#' tmpdir <- local_tempdir_time()
+#' flowCore::write.flowSet(fs_ss, tmpdir)
+#' loaded_fcs <- load_mfi_files(
+#'     fcs_dir = tmpdir,
+#'     regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
+#'     gating_set_file = NULL,
+#'     gate_extract = NULL
+#' )
+#' extract_relevant_mfis_singlestain(loaded_fcs)
 extract_singlestain_mfi <- function(fcs_dir = "data-raw/s001",
                                     regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
                                     transform = function(x) {
@@ -197,6 +223,17 @@ extract_singlestain_mfi <- function(fcs_dir = "data-raw/s001",
 #' @return A named list of cytosets or gated cytosets, ready for MFI computation.
 #'   Each entry corresponds to one FCS file.
 #' @keywords relativisation
+#' @examples
+#' set.seed(42)
+#' fs_ss <- simulate_cd3()
+#' tmpdir <- local_tempdir_time()
+#' flowCore::write.flowSet(fs_ss, tmpdir)
+#' loaded_fcs <- load_mfi_files(
+#'     fcs_dir = tmpdir,
+#'     regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
+#'     gating_set_file = NULL,
+#'     gate_extract = NULL
+#' )
 load_mfi_files <- function(fcs_dir = "data-raw/s001",
                            regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
                            gating_set_file = NULL,
@@ -274,6 +311,18 @@ load_mfi_files <- function(fcs_dir = "data-raw/s001",
 #' 10 KrO-A       442.    4473.     444.
 #' }
 #' @keywords relativisation
+#' @examples
+#' set.seed(42)
+#' fs_ss <- simulate_cd3()
+#' tmpdir <- local_tempdir_time()
+#' flowCore::write.flowSet(fs_ss, tmpdir)
+#' loaded_fcs <- load_mfi_files(
+#'     fcs_dir = tmpdir,
+#'     regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
+#'     gating_set_file = NULL,
+#'     gate_extract = NULL
+#' )
+#' extract_singlestain_mfi_wrapper(loaded_fcs)
 extract_singlestain_mfi_wrapper <- function(loaded_fcs,
                                             transform_fun = function(x) {
                                                 asinh(x / 1e3)
@@ -349,7 +398,19 @@ extract_singlestain_mfi_wrapper <- function(loaded_fcs,
 #' }
 #'
 #' @keywords relativisation
-clustering_seeded_mfi <- function(values, seed, transform_fun, featurename) {
+#' @examples
+#' \dontrun{
+#' clustering_seeded_mfi(rnorm(100))
+#' clustering_seeded_mfi(
+#'     rnorm(100),
+#'     seed = 123,
+#'     transform_fun = function(x) asinh(x / 1e3),
+#'     featurename = "Test Marker"
+#' )
+#' }
+clustering_seeded_mfi <- function(values, seed = 42, transform_fun = function(x) {
+                                      x
+                                  }, featurename = NA) {
     set.seed(seed)
 
     # Apply transformation before clustering
@@ -387,7 +448,6 @@ clustering_seeded_mfi <- function(values, seed, transform_fun, featurename) {
 #' @param seed Integer. Random seed to ensure reproducibility. Default is `42`.
 #' @param transform_fun Function. Transformation to apply prior to clustering
 #'   (e.g., `asinh(x / 1e3)`).
-#' @param featurename (Unused) Optional character label; retained for compatibility. Ignored.
 #'
 #' @return A `tibble` with columns:
 #' \describe{
@@ -398,10 +458,20 @@ clustering_seeded_mfi <- function(values, seed, transform_fun, featurename) {
 #' }
 #'
 #' @keywords relativisation
+#' @examples
+#' \dontrun{
+#' df <- data.frame(
+#'     marker1 = rnorm(100, mean = 100, sd = 20),
+#'     marker2 = rnorm(100, mean = 200, sd = 30)
+#' )
+#' clustering_seeded_mfi_multicolor(df)
+#' clustering_seeded_mfi_multicolor(df, seed = 123, transform_fun = function(x) asinh(x / 1e3))
+#'}
 clustering_seeded_mfi_multicolor <- function(values,
                                              seed = 42,
-                                             transform_fun,
-                                             featurename = NULL) {
+                                             transform_fun = function(x) {
+                                                 x
+                                             }) {
     cluster <- NULL # linting
     set.seed(seed)
 
@@ -413,7 +483,7 @@ clustering_seeded_mfi_multicolor <- function(values,
     values_copy[, cluster := clustering$cluster]
 
     # calculate median per column (marker) grouped by cluster with data.table
-    medians <- values_copy[, lapply(.SD, median), by = cluster]
+    medians <- values_copy[, lapply(.SD, stats::median), by = cluster]
 
     # Define the "negative" cluster as the one with the lowest sum of medians
     index_negative_median <- which.min(apply(medians, 1, sum))
@@ -472,12 +542,21 @@ clustering_seeded_mfi_multicolor <- function(values,
 #'   \item{`unstained`}{Median intensity if the sample is unstained (no non-empty channels).}
 #' }
 #'
-#' @examples
-#' \dontrun{
-#' mfis <- extract_relevant_mfis_singlestain(loaded_fcs)
-#' }
 #' @export
 #' @keywords relativisation
+#' @examples
+#' set.seed(42)
+#' fs_ss <- simulate_cd3()
+#' tmpdir <- local_tempdir_time()
+#' flowCore::write.flowSet(fs_ss, tmpdir)
+#' loaded_fcs <- load_mfi_files(
+#'     fcs_dir = tmpdir,
+#'     regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
+#'     gating_set_file = NULL,
+#'     gate_extract = NULL
+#' )
+#' extract_singlestain_mfi_wrapper(loaded_fcs)
+#' extract_relevant_mfis_singlestain(loaded_fcs)
 extract_relevant_mfis_singlestain <- function(loaded_fcs_singlestain,
                                               transform_fun = function(x) {
                                                   x
@@ -497,7 +576,7 @@ extract_relevant_mfis_singlestain <- function(loaded_fcs_singlestain,
 
         # Handle unstained sample (no active marker channel)
         if (length(nonempty_channel) == 0) {
-            mfis <- apply(flowCore::exprs(ff_x), 2, median)
+            mfis <- apply(flowCore::exprs(ff_x), 2, stats::median)
             mfis_tib <- tibble::tibble(
                 "feature" = names(mfis),
                 "unstained" = mfis
@@ -544,15 +623,22 @@ extract_relevant_mfis_singlestain <- function(loaded_fcs_singlestain,
 #'   \item{`negative.iqr`, `positive.iqr`}{(Optional) Interquartile ranges if computed.}
 #' }
 #'
-#' @examples
-#' \dontrun{
-#' mfis_multi <- extract_relevant_mfis_multistain(
-#'     loaded_fcs_multistain = multistain_list,
-#'     relevant_columns = c("FITC-A", "PE-A", "APC-A")
-#' )
-#' }
 #' @export
 #' @keywords relativisation
+#' @examples
+#' set.seed(42)
+#' fs_ss <- simulate_cd3()
+#' tmpdir <- local_tempdir_time()
+#' flowCore::write.flowSet(fs_ss, tmpdir)
+#' loaded_fcs_multistain <- load_mfi_files(
+#'     fcs_dir = tmpdir,
+#'     regex_singlestain = "(_15-MasterMix)\\.fcs$",
+#'     gating_set_file = NULL,
+#'     gate_extract = NULL
+#' )
+#' extract_relevant_mfis_multistain(
+#'     loaded_fcs_multistain
+#' )
 extract_relevant_mfis_multistain <- function(loaded_fcs_multistain,
                                              transform_fun = function(x) {
                                                  asinh(x / 1e3)
@@ -566,7 +652,7 @@ extract_relevant_mfis_multistain <- function(loaded_fcs_multistain,
 
     # Process each multistain sample individually
     multistain_mfis <- lapply(loaded_fcs_multistain, function(ff_x) {
-        if (!all(is.na(relevant_columns))) {
+        if (all(is.na(relevant_columns))) {
             relevant_columns <- flowCore::colnames(ff_x[[1]])
         }
         # Extract expression values for relevant columns

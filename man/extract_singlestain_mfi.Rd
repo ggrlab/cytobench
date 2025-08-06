@@ -30,4 +30,17 @@ the gating set is loaded from the file. If a (GatingSet) object is provided, it 
 \description{
 Extract Single Stain Median Fluorescence Intensity (MFI)
 }
+\examples{
+set.seed(42)
+fs_ss <- simulate_cd3()
+tmpdir <- local_tempdir_time()
+flowCore::write.flowSet(fs_ss, tmpdir)
+loaded_fcs <- load_mfi_files(
+    fcs_dir = tmpdir,
+    regex_singlestain = "(-(CD3-.*)|(none))\\\\.fcs$",
+    gating_set_file = NULL,
+    gate_extract = NULL
+)
+extract_relevant_mfis_singlestain(loaded_fcs)
+}
 \keyword{relativisation}

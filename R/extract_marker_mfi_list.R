@@ -20,6 +20,22 @@
 #'   containing a numeric vector of length two with names `"negative"` and `"positive"`.
 #'   Missing markers are filled with `NA`.
 #' @keywords relativisation
+#' @examples
+#' set.seed(42)
+#' fs_ss <- simulate_cd3()
+#' tmpdir <- local_tempdir_time()
+#' flowCore::write.flowSet(fs_ss, tmpdir)
+#'
+#' extracted_mfis_singlestain <- extract_mfi(
+#'     tmpdir,
+#'     regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$"
+#' )
+#' extract_marker_mfi_list(
+#'     sample_to_rescale = fs_ss[["sample0_12-panel"]],
+#'     extracted_mfi = extracted_mfis_singlestain,
+#'     column_negative = "negative",
+#'     column_positive = "positive"
+#' )
 extract_marker_mfi_list <- function(
     sample_to_rescale,
     extracted_mfi,

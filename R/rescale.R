@@ -16,6 +16,30 @@
 #' @return A `data.table` with rescaled columns.
 #' @export
 #' @keywords relativisation
+#' @examples
+#' extracted_mfis <- mfis_from_excel(
+#'     system.file("extdata", "Pre_Arcsinh_MFI_example.xlsx", package = "cytobench"),
+#'     negative_mfi_colname = "MFI NEGATIVE POPULATION  UNSTAINED"
+#' )
+#'
+#' set.seed(42)
+#' ff <- simulate_ff(columns = colnames(extracted_mfis[[1]]))
+#' f_unif_dict <- data.frame(
+#'     "unified" = flowCore::colnames(fs_ss[["sample0_12-panel"]]),
+#'     "unified_single_staining" = flowCore::colnames(extracted_mfis[[1]])
+#' ) |>
+#'     dplyr::mutate(
+#'         unified = sub("-", "_", unified),
+#'         unified_single_staining = sub("-", "_", unified_single_staining)
+#'     )
+#' rownames(f_unif_dict) <- f_unif_dict$unified_single_staining
+#' rescale(
+#'     sample_to_rescale = flowCore::exprs(ff),
+#'     extracted_mfi = extracted_mfis[[1]],
+#'     feature_unified_dict = f_unif_dict,
+#'     missing_feature = c("minmax")
+#' )
+#'
 rescale <- function(sample_to_rescale,
                     extracted_mfi,
                     feature_unified_dict,
@@ -51,7 +75,7 @@ rescale <- function(sample_to_rescale,
                 }
                 scale_column_fun <- scale_column_minmax
             } else if (missing_feature[1] == "center_median") {
-                extracted_values <- sample_to_rescale[, lapply(.SD, median), .SDcols = colX]
+                extracted_values <- sample_to_rescale[, lapply(.SD, stats::median), .SDcols = colX]
                 if (!colX %in% known_missing_features) {
                     warning(paste0(
                         "No MFI feature values for '", colX,

@@ -32,4 +32,8 @@ Invisibly returns a named character vector of output file paths.
 This function exports a named list of matrices or data frames to the Apache Feather file format.
 Optionally, it can rename columns according to a unified feature dictionary before export.
 }
+\examples{
+ff <- simulate_ff()
+export_feather(list("s1.csv" = flowCore::exprs(ff)), outdir = local_tempdir_time())
+}
 \keyword{cytometry}

@@ -39,4 +39,12 @@ It retrieves compensation parameters from the FCS file metadata using a custom k
 Multiple compensation types can be selected depending on how the compensation
 was estimated (manual, auto, or auto_singlestain).
 }
+\examples{
+\dontrun{
+   cytobench::cmv_helper_compensation(
+       ff_unapplied_compensations,
+       compensation_type = "manual"
+   )
+}
+}
 \keyword{relativisation}

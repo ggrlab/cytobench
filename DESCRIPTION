@@ -1,5 +1,5 @@
 Package: cytobench
-Title: Bench of tools for cytometry data
+Title: Bench of Tools for Cytometry Data and Relativisation
 Version: 0.6.0.9000
 Authors@R: 
     person("Gunther", "Glehr", , "gunthergl@gmx.net", role = c("aut", "cre"),
@@ -34,12 +34,15 @@ Imports:
     qs, 
     scattermore, 
     stringr, 
+    hexbin, 
     feather
 Suggests: 
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
     cytoKal
+Depends: 
+    R (>= 4.1.0)
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

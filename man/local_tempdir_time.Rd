@@ -26,10 +26,9 @@ current environment (typically cleaned up on exit), and then calls \code{tempdir
 create a unique subdirectory within it.
 }
 \examples{
-\dontrun{
-tmp <- local_tempdir_time()
-print(tmp)
-}
+tmpdir <- local_tempdir_time()
+print(tmpdir)
+unlink(tmpdir, recursive = TRUE) # Clean up the temporary directory
 
 }
 \keyword{test-helper}

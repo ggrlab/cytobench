@@ -23,6 +23,14 @@
 #' }
 #' @export
 #' @keywords cytometry
+#' @examples
+#' \dontrun{
+#' read.FCS_custom_spillover(
+#'     fcs = outfile,
+#'     custom_spillover_keyword = comp_x,
+#'     original_spillover_keyword = spillover_keyword
+#' )
+#' }
 read.FCS_custom_spillover <- function(fcs,
                                       custom_spillover_keyword = "spillover.manual",
                                       original_spillover_keyword = "$SPILLOVER") {

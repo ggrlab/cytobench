@@ -29,3 +29,4 @@ ff <- simulate_ff()
 subsampled_ff <- subsample_ff(ff, n_cells = 5000, seed = 12345)
 
 }
+\keyword{cytometry}

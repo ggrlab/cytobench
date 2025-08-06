@@ -82,11 +82,25 @@ If there have been NO single-stained samples (except for the unstained samples),
 This function extracts the median fluorescence intensity (MFI) from single-stain FCS files.
 }
 \examples{
-\dontrun{
-extracted_mfis <- extract_singlestain_mfi(
-    "data-raw/s001",
-    gating_set_file = "data-raw/SAMPLENAME_CD3-FITC-single_CD3_compensation.flowWorkspace_gatingset"
+set.seed(42)
+fs_ss <- simulate_cd3()
+tmpdir <- local_tempdir_time()
+flowCore::write.flowSet(fs_ss, tmpdir)
+
+extracted_mfis_singlestain <- extract_mfi(
+    tmpdir,
+    regex_singlestain = "(-(CD3-.*)|(none))\\\\.fcs$"
 )
-}
+
+extracted_mfis_multistain <- extract_mfi(
+    tmpdir,
+    regex_singlestain = "(none)\\\\.fcs$",
+    multistaining = TRUE,
+    regex_multistain = "(_15-MasterMix)\\\\.fcs$",
+    multistain_columns = c(
+        "FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A",
+        "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A"
+    ),
+)
 }
 \keyword{relativisation}

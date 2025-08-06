@@ -74,6 +74,9 @@
 #'
 #' @export
 #' @keywords cytometry
+#' @examples
+#' ff <- simulate_ff()
+#' export_fcs(list("s1.csv" = flowCore::exprs(ff)), outdir = local_tempdir_time())
 export_fcs <- function(matrix_list,
                        safety_scaling = 1.20,
                        safety_shift = 0,
@@ -190,5 +193,6 @@ export_fcs <- function(matrix_list,
         cat("\n")
     }
 
+    flowCore::keyword(fcs_extreme_copy)[["GUID"]] <- "extreme_template"
     return(fcs_extreme_copy)
 }

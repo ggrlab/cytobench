@@ -47,4 +47,20 @@ Optionally, a new number of meta-clusters can be specified, triggering recomputa
 \code{ConsensusClusterPlus}. The function also optionally updates the \code{FlowSOM} object to reflect
 the new meta-clustering.
 }
+\keyword{)}
+\keyword{3}
+\keyword{<-}
+\keyword{=}
+\keyword{clustered_df}
+\keyword{do_flowsom(ff_example)}
+\keyword{example_processed()}
+\keyword{ff_example}
+\keyword{flowSOM_newMetacluster(}
 \keyword{flowsom}
+\keyword{flowsom_result}
+\keyword{fsom}
+\keyword{fsom,}
+\keyword{n_metacluster}
+\keyword{n_metaclusters}
+\keyword{res[["ncells_per_x"]][["cluster"]],}
+\keyword{res_norecluster}

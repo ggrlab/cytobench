@@ -54,4 +54,29 @@ A \code{data.table} with rescaled columns.
 This function rescales a sample (data.table) using extracted MFI values and a unified feature mapping.
 If a feature is not listed in the dictionary, fallback methods such as min-max or median-centering are used.
 }
+\examples{
+extracted_mfis <- mfis_from_excel(
+    system.file("extdata", "Pre_Arcsinh_MFI_example.xlsx", package = "cytobench"),
+    negative_mfi_colname = "MFI NEGATIVE POPULATION  UNSTAINED"
+)
+
+set.seed(42)
+ff <- simulate_ff(columns = colnames(extracted_mfis[[1]]))
+f_unif_dict <- data.frame(
+    "unified" = flowCore::colnames(fs_ss[["sample0_12-panel"]]),
+    "unified_single_staining" = flowCore::colnames(extracted_mfis[[1]])
+) |>
+    dplyr::mutate(
+        unified = sub("-", "_", unified),
+        unified_single_staining = sub("-", "_", unified_single_staining)
+    )
+rownames(f_unif_dict) <- f_unif_dict$unified_single_staining
+rescale(
+    sample_to_rescale = flowCore::exprs(ff),
+    extracted_mfi = extracted_mfis[[1]],
+    feature_unified_dict = f_unif_dict,
+    missing_feature = c("minmax")
+)
+
+}
 \keyword{relativisation}

@@ -4,7 +4,14 @@
 \alias{clustering_seeded_mfi}
 \title{Clustered MFI Extraction for Single Marker Channel}
 \usage{
-clustering_seeded_mfi(values, seed, transform_fun, featurename)
+clustering_seeded_mfi(
+  values,
+  seed = 42,
+  transform_fun = function(x) {
+     x
+ },
+  featurename = NA
+)
 }
 \arguments{
 \item{values}{Numeric vector. Raw fluorescence values from a single marker channel.}
@@ -27,5 +34,16 @@ A one-row \code{tibble} with columns:
 This function performs seeded k-means clustering (with two clusters) on transformed
 fluorescence values from a single marker channel. It returns the median and standard
 deviation of the original (untransformed) values per cluster, labeled as negative and positive.
+}
+\examples{
+\dontrun{
+clustering_seeded_mfi(rnorm(100))
+clustering_seeded_mfi(
+    rnorm(100),
+    seed = 123,
+    transform_fun = function(x) asinh(x / 1e3),
+    featurename = "Test Marker"
+)
+}
 }
 \keyword{relativisation}

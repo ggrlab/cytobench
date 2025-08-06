@@ -60,6 +60,9 @@ and returns a list of MFI matrices, grouped by sample and machine. Each matrix c
 the positive and negative MFIs for each channel-marker combination.
 }
 \examples{
-# See tests
+extracted_mfis <- mfis_from_excel(
+    system.file("extdata", "Pre_Arcsinh_MFI_example.xlsx", package = "cytobench"),
+    negative_mfi_colname = "MFI NEGATIVE POPULATION  UNSTAINED"
+)
 }
 \keyword{relativisation}

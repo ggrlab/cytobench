@@ -27,6 +27,13 @@
 #' @return A `flowFrame` with compensation and autofluorescence correction applied.
 #' @export
 #' @keywords relativisation
+#' @examples
+#' \dontrun{
+#'    cytobench::cmv_helper_compensation(
+#'        ff_unapplied_compensations,
+#'        compensation_type = "manual"
+#'    )
+#' }
 cmv_helper_compensation <- function(ff_unapplied_compensations,
                                     compensation_type = c(
                                         "manual", "auto",

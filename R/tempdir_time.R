@@ -39,10 +39,9 @@ tempdir_time <- function(dir = tempdir(), ...) {
 #' create a unique subdirectory within it.
 #'
 #' @examples
-#' \dontrun{
-#' tmp <- local_tempdir_time()
-#' print(tmp)
-#' }
+#' tmpdir <- local_tempdir_time()
+#' print(tmpdir)
+#' unlink(tmpdir, recursive = TRUE) # Clean up the temporary directory
 #'
 #' @export
 #' @keywords test-helper

@@ -22,12 +22,13 @@ This function is useful for workflows requiring in-memory processing or
 quick temporary storage of FCS files without polluting the working directory.
 }
 \examples{
-\dontrun{
-library(flowCore)
-ff <- read.FCS("path/to/your/file.fcs")
-fcs_path <- write_memory_FCS(ff)
-print(fcs_path)
-}
-
+ff <- simulate_ff()
+tmp <- write_memory_FCS(ff)
+reread_ff <- flowCore::read.FCS(tmp)
+identical(reread_ff, ff)
+nrow(reread_ff) == nrow(ff)
+print(
+    summary(flowCore::exprs(ff) - flowCore::exprs(reread_ff))
+)
 }
 \keyword{cytometry}

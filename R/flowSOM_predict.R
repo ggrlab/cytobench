@@ -13,12 +13,22 @@
 #' See FlowSOM::TestOutliers() or flowSOM_is.outlier()
 #' @export
 #' @keywords flowsom
+#' @examples
+#' ff_example <- example_processed()
+#' fsom <- do_flowsom(ff_example)
+#' testthat::expect_true(fsom$map$nMetaclusters == 10)
+#' n_metaclusters <- 3
+#' res <- flowSOM_predict(
+#'     flowsom_result = fsom,
+#'     flowset = flowCore::flowSet(ff_example),
+#'     n_metacluster = n_metaclusters
+#' )
 flowSOM_predict <- function(flowsom_result,
                             flowset,
                             madAllowed = 4,
                             n_metacluster = NULL,
                             missing_seed = 3711283) {
-    cluster <- metaCluster <-  NULL # to avoid R CMD check note about undefined global variable (data.table function)
+    cluster <- metaCluster <- NULL # to avoid R CMD check note about undefined global variable (data.table function)
     if ("fs_res_train" %in% names(flowsom_result)) {
         flowsom_result <- flowsom_result[["fs_res_train"]]
     }

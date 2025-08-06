@@ -36,8 +36,17 @@ using seeded k-means clustering (k=2) to separate positive and negative populati
 unstained samples (i.e., samples with no non-empty channels) and records their median values.
 }
 \examples{
-\dontrun{
-mfis <- extract_relevant_mfis_singlestain(loaded_fcs)
-}
+set.seed(42)
+fs_ss <- simulate_cd3()
+tmpdir <- local_tempdir_time()
+flowCore::write.flowSet(fs_ss, tmpdir)
+loaded_fcs <- load_mfi_files(
+    fcs_dir = tmpdir,
+    regex_singlestain = "(-(CD3-.*)|(none))\\\\.fcs$",
+    gating_set_file = NULL,
+    gate_extract = NULL
+)
+extract_singlestain_mfi_wrapper(loaded_fcs)
+extract_relevant_mfis_singlestain(loaded_fcs)
 }
 \keyword{relativisation}

@@ -29,6 +29,31 @@
 #'
 #' @export
 #' @keywords relativisation
+#' @examples
+#' set.seed(42)
+#' fs_ss <- simulate_cd3()
+#' tmpdir <- local_tempdir_time()
+#' flowCore::write.flowSet(fs_ss, tmpdir)
+#'
+#' extracted_mfis_singlestain <- extract_mfi(
+#'     tmpdir,
+#'     regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$"
+#' )
+#' # Convert extracted MFI table into named list of feature -> MFI (negative/positive)
+#' mfis_namedlist <- extract_marker_mfi_list(
+#'     sample_to_rescale = flowCore::exprs(fs_ss[["sample0_12-panel"]]),
+#'     extracted_mfi = extracted_mfis_singlestain,
+#'     column_negative = "negative",
+#'     column_positive = "positive"
+#' )
+#'
+#' rescale_named(
+#'     sample_to_rescale = flowCore::exprs(fs_ss[["sample0_12-panel"]]),
+#'     extracted_mfi_namedlist = mfis_namedlist,
+#'     missing_feature = "minmax",
+#'     inplace_datatable = TRUE,
+#'     scale_column_fun = scale_column_minmax
+#' )
 rescale_named <- function(sample_to_rescale,
                           extracted_mfi_namedlist,
                           missing_feature = c("minmax", "center_median"),
@@ -71,7 +96,7 @@ rescale_named <- function(sample_to_rescale,
                 # Then do not rescale this column
                 extracted_values <- NA
             } else if (missing_feature[1] == "center_median") {
-                extracted_values <- sample_to_rescale[, lapply(.SD, median), .SDcols = colX]
+                extracted_values <- sample_to_rescale[, lapply(.SD, stats::median), .SDcols = colX]
                 scale_column_fun <- scale_column_minmax
             } else if (missing_feature[1] == "minmax") {
                 extracted_values <- c(

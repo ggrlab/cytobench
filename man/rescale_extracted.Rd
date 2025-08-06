@@ -48,4 +48,20 @@ This function must accept at least \code{sample_to_rescale} (data.table), \code{
 \description{
 Rescales all features (columns) in a cytometry sample using median fluorescence intensities (MFIs) extracted from controls.
 }
+\examples{
+set.seed(42)
+fs_ss <- simulate_cd3()
+tmpdir <- local_tempdir_time()
+flowCore::write.flowSet(fs_ss, tmpdir)
+
+extracted_mfis_singlestain <- extract_mfi(
+    tmpdir,
+    regex_singlestain = "(-(CD3-.*)|(none))\\\\.fcs$"
+)
+
+rescaled_sample <- rescale_extracted(
+    sample_to_rescale = flowCore::exprs(fs_ss[["sample0_12-panel"]]),
+    extracted_mfi = extracted_mfis_singlestain
+)
+}
 \keyword{relativisation}

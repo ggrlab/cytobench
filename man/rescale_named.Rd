@@ -43,4 +43,30 @@ A \code{data.table} with rescaled columns. If \code{inplace_datatable = TRUE}, t
 This function rescales each column in a sample data table using a named list of extracted marker intensities (MFIs).
 Each column is matched to its corresponding MFI vector (e.g., with named elements \code{"negative"} and \code{"positive"}).
 }
+\examples{
+set.seed(42)
+fs_ss <- simulate_cd3()
+tmpdir <- local_tempdir_time()
+flowCore::write.flowSet(fs_ss, tmpdir)
+
+extracted_mfis_singlestain <- extract_mfi(
+    tmpdir,
+    regex_singlestain = "(-(CD3-.*)|(none))\\\\.fcs$"
+)
+# Convert extracted MFI table into named list of feature -> MFI (negative/positive)
+mfis_namedlist <- extract_marker_mfi_list(
+    sample_to_rescale = flowCore::exprs(fs_ss[["sample0_12-panel"]]),
+    extracted_mfi = extracted_mfis_singlestain,
+    column_negative = "negative",
+    column_positive = "positive"
+)
+
+rescale_named(
+    sample_to_rescale = flowCore::exprs(fs_ss[["sample0_12-panel"]]),
+    extracted_mfi_namedlist = mfis_namedlist,
+    missing_feature = "minmax",
+    inplace_datatable = TRUE,
+    scale_column_fun = scale_column_minmax
+)
+}
 \keyword{relativisation}

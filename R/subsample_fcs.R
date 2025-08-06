@@ -13,20 +13,28 @@
 #'
 #' @return None. The function writes the subsampled FCS file to the specified output directory.
 #'
-#' @examples
-#' \dontrun{
-#' subsample_fcs(
-#'     "path/to/input.fcs",
-#'     n_cells = 5000,
-#'     seed = 12345,
-#'     outdir = "output/directory",
-#'     indir = "input/directory",
-#'     verbose = TRUE
-#' )
-#' }
-#'
 #' @export
 #' @keywords cytometry
+#' @examples
+#' ff_dt <- simulate_ff(columns = c("FL1", "FL2", "FL3"), flowcore = TRUE)
+#' tmpdir <- local_tempdir_time()
+#' flowCore::write.FCS(ff_dt, file.path(tmpdir, "test.fcs"))
+#' list.files(tmpdir)
+#' # Run the subsampling function
+#' subsample_fcs(
+#'     file_x = file.path(tmpdir, "test.fcs"),
+#'     n_cells = 100,
+#'     seed = 42,
+#'     outdir = file.path(tmpdir, "subsampled"),
+#'     indir = tmpdir,
+#'     verbose = FALSE
+#' )
+#' ff <- flowCore::read.FCS(file.path(tmpdir, "subsampled", "test.fcs"))
+#' if (nrow(ff) != 100) {
+#'     stop("Subsampling did not return the expected number of cells.")
+#' }
+#' unlink(tmpdir, recursive = TRUE) # Clean up the temporary directory
+#'
 subsample_fcs <- function(file_x,
                           n_cells = 10000,
                           seed = 427764,
@@ -70,6 +78,7 @@ subsample_fcs <- function(file_x,
 #' subsampled_ff <- subsample_ff(ff, n_cells = 5000, seed = 12345)
 #'
 #' @export
+#' @keywords cytometry
 subsample_ff <- function(flowframe,
                          n_cells = 10000,
                          seed = 427764) {

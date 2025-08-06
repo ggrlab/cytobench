@@ -28,4 +28,15 @@ Only used and relevant if n_metaclusters != NULL.}
 \description{
 Predict the (meta-) clusters for all cells using a flowsom result.
 }
+\examples{
+ff_example <- example_processed()
+fsom <- do_flowsom(ff_example)
+testthat::expect_true(fsom$map$nMetaclusters == 10)
+n_metaclusters <- 3
+res <- flowSOM_predict(
+    flowsom_result = fsom,
+    flowset = flowCore::flowSet(ff_example),
+    n_metacluster = n_metaclusters
+)
+}
 \keyword{flowsom}

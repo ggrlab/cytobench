@@ -48,4 +48,35 @@ the metadata of an FCS file, following the structure used in the CMV dataset
 with the \code{read.FCS_custom_spillover()} function. They can be directly \emph{applied} with
 \code{cmv_helper_compensation()}.
 }
+\examples{
+\dontrun{
+cytobench::cmv_helper_insert_compensations(
+    file.path("intermediate", "CS", file_x),
+    named_compensation_files = list(
+        # 1. Manual compensation, separately for single-stain and panel samples
+        # The manual compensation used  "DCtubes_auto" compensation as basis
+        "manual" = comp_manual,
+        # 2. Autocompensation, calculated on regular Duraclone Compensation tubes
+        "DCtubes_auto" = file.path(
+            "intermediate", "compensation.panel.autocomp_DCtubes", device_x, sample_id
+        ),
+        # 3. Autocompensation, calculated on a sample-by-sample basis using single-stain samples
+        "singlestain_auto" = file.path(
+            "intermediate", "compensation.singlestain.autocomp", device_x, sample_id
+        ),
+        # 4. Manual compensation, done on a sample-by-sample
+        #    basis using concattenated single-stain samples
+        # The manual compensation used "singlestain_auto" compensation as basis
+        "singlestain_manual" = file.path(
+            "intermediate",
+            "compensation.singlestain.manualcomp",
+            device_x, sample_id
+        )
+    ),
+    outdir = outdir,
+    sub_filename = c("intermediate/CS", ""),
+    verbose = TRUE
+)
+}
+}
 \keyword{relativisation}

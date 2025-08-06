@@ -14,16 +14,17 @@
 #'
 #' @importFrom flowCore write.FCS
 #'
-#' @examples
-#' \dontrun{
-#' library(flowCore)
-#' ff <- read.FCS("path/to/your/file.fcs")
-#' fcs_path <- write_memory_FCS(ff)
-#' print(fcs_path)
-#' }
-#'
 #' @export
 #' @keywords cytometry
+#' @examples
+#' ff <- simulate_ff()
+#' tmp <- write_memory_FCS(ff)
+#' reread_ff <- flowCore::read.FCS(tmp)
+#' identical(reread_ff, ff)
+#' nrow(reread_ff) == nrow(ff)
+#' print(
+#'     summary(flowCore::exprs(ff) - flowCore::exprs(reread_ff))
+#' )
 write_memory_FCS <- function(ff) {
     tryCatch(
         {

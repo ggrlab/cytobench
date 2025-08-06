@@ -26,6 +26,15 @@
 #'
 #' @export
 #' @keywords cytometry
+#' @examples
+#' \dontrun{
+#' gate_x <- flowWorkspace::load_gating_set("path/to/gating_set.xml")
+#' gated <- cytobench::gate_cells(
+#'     flowset = flowCore::read.flowSet(file_x),
+#'     gatingset = gate_x,
+#'     gatename = "/Singlets/Lymphocytes",
+#' )
+#' }
 gate_cells <- function(flowset,
                        gatingset,
                        gatename = "/Singlets/CD45+/CD3+",

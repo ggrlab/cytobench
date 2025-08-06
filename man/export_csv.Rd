@@ -30,4 +30,9 @@ This function exports a named list of matrices or data frames to \code{.csv} fil
 optionally applying a unified feature naming scheme to the column names.
 Each matrix is saved as a separate CSV file, preserving its name in the output path.
 }
+\examples{
+ff <- simulate_ff()
+export_csv(list("s1.csv" = flowCore::exprs(ff)), outdir = local_tempdir_time())
+
+}
 \keyword{cytometry}

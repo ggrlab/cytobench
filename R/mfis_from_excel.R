@@ -47,7 +47,10 @@
 #' MFI NEGATIVE POPULATION (GG)       219.82      298.0      437.83        615.24       364.9       66.68        164.55         98.35     824.71       792.06
 #'
 #' @examples
-#' # See tests
+#' extracted_mfis <- mfis_from_excel(
+#'     system.file("extdata", "Pre_Arcsinh_MFI_example.xlsx", package = "cytobench"),
+#'     negative_mfi_colname = "MFI NEGATIVE POPULATION  UNSTAINED"
+#' )
 #' @export
 #' @keywords relativisation
 mfis_from_excel <- function(excel_file = "Pre_Arcsinh_Median_FI.xlsx",

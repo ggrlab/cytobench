@@ -7,8 +7,9 @@
 clustering_seeded_mfi_multicolor(
   values,
   seed = 42,
-  transform_fun,
-  featurename = NULL
+  transform_fun = function(x) {
+     x
+ }
 )
 }
 \arguments{
@@ -19,8 +20,6 @@ Columns represent marker channels; rows are cells.}
 
 \item{transform_fun}{Function. Transformation to apply prior to clustering
 (e.g., \code{asinh(x / 1e3)}).}
-
-\item{featurename}{(Unused) Optional character label; retained for compatibility. Ignored.}
 }
 \value{
 A \code{tibble} with columns:
@@ -40,5 +39,15 @@ values for each marker, returning a tidy \code{tibble} with one row per marker.
 \details{
 The cluster with the lower total median signal across all markers is considered
 the negative population.
+}
+\examples{
+\dontrun{
+df <- data.frame(
+    marker1 = rnorm(100, mean = 100, sd = 20),
+    marker2 = rnorm(100, mean = 200, sd = 30)
+)
+clustering_seeded_mfi_multicolor(df)
+clustering_seeded_mfi_multicolor(df, seed = 123, transform_fun = function(x) asinh(x / 1e3))
+}
 }
 \keyword{relativisation}

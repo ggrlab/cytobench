@@ -47,6 +47,66 @@ the results using ggplot2 with faceting by feature and scaling method.
 # Assuming dt_listlist is a nested list of data.tables with aligned features:
 # plot_compare_alignment(dt_listlist, relevant_features = c("FL1-A", "FL2-A"))
 
+# Mock data: create 2 scaling methods, each with 2 devices, each with 3 features and 500 values
+set.seed(123)
+dt_listlist <- list(
+    "raw" = list(
+        "device1" = data.table(A = rnorm(500, 1), B = rnorm(500, 5), C = rnorm(500, 10)),
+        "device2" = data.table(A = rnorm(500, 1.2), B = rnorm(500, 4.8), C = rnorm(500, 9.5))
+    ),
+    "default" = list(
+        "device1" = data.table(A = rnorm(500, 1), B = rnorm(500, 5), C = rnorm(500, 10)),
+        "device2" = data.table(A = rnorm(500, 1.1), B = rnorm(500, 5.1), C = rnorm(500, 10.5))
+    )
+)
+
+# Call the function with this mock data
+p <- plot_compare_alignment(
+    dt_listlist = dt_listlist,
+    relevant_features = c("A", "B", "C"),
+    ylim = NA,
+    scale_column_funs = list("default" = function(x) {
+        x
+    })
+)
+print(p)
+
+fs <- simulate_fs(
+    n_samples = 2,
+    flowcore = FALSE,
+    ncells = 250,
+    columns = c("FL1-A", "FL2-A", "FL3-A")
+)
+fs_example <- list(
+    "raw" = fs,
+    "modified" = lapply(fs, function(x) {
+        (x + 5) * 1.5
+    })
+)
+p2 <- plot_compare_alignment(
+    fs_example,
+    ylim = NA,
+    scale_column_funs = list(
+        "default" = function(x) {
+            x
+        }
+    )
+)
+print(p2)
+p3 <- plot_compare_alignment(
+    fs_example,
+    ylim = NA,
+    scale_column_funs = list(
+        "raw" = function(x) {
+            x
+        },
+        "modified" = function(x) {
+            log10(x)
+        }
+    )
+)
+print(p3)
+
 }
 \keyword{cytometry}
-\keyword{relativisation,}
+\keyword{relativisation}

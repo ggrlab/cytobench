@@ -32,4 +32,16 @@ This function loads FCS files from a directory that match a specified pattern
 (typically single-stain or multi-stain), and optionally applies a \code{GatingSet}
 to restrict analysis to a specific gated population.
 }
+\examples{
+set.seed(42)
+fs_ss <- simulate_cd3()
+tmpdir <- local_tempdir_time()
+flowCore::write.flowSet(fs_ss, tmpdir)
+loaded_fcs <- load_mfi_files(
+    fcs_dir = tmpdir,
+    regex_singlestain = "(-(CD3-.*)|(none))\\\\.fcs$",
+    gating_set_file = NULL,
+    gate_extract = NULL
+)
+}
 \keyword{relativisation}

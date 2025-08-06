@@ -37,4 +37,21 @@ from a tibble, returning a named list that maps each feature (e.g., "FITC-A") to
 named numeric vector of its negative and positive control values. Features present
 in \code{sample_to_rescale} but missing from \code{extracted_mfi} are included with \code{NA}.
 }
+\examples{
+set.seed(42)
+fs_ss <- simulate_cd3()
+tmpdir <- local_tempdir_time()
+flowCore::write.flowSet(fs_ss, tmpdir)
+
+extracted_mfis_singlestain <- extract_mfi(
+    tmpdir,
+    regex_singlestain = "(-(CD3-.*)|(none))\\\\.fcs$"
+)
+extract_marker_mfi_list(
+    sample_to_rescale = fs_ss[["sample0_12-panel"]],
+    extracted_mfi = extracted_mfis_singlestain,
+    column_negative = "negative",
+    column_positive = "positive"
+)
+}
 \keyword{relativisation}

@@ -35,6 +35,19 @@
 #'
 #' @export
 #' @keywords flowsom
+#' @examples
+#' ff_example <- example_processed()
+#' fsom <- flowSOM_optimal(
+#'     flowCore::flowSet(ff_example),
+#'     # Input options:
+#'     compensate = FALSE,
+#'     transform = FALSE,
+#'     scale = FALSE,
+#'     # SOM options:
+#'     colsToUse = c(9, 12, 14:18), xdim = 3, ydim = 3,
+#'     # Metaclustering options:
+#'     nClus = 5
+#' )
 flowSOM_optimal <- function(fs_train,
                             colsToUse,
                             transform = TRUE,

@@ -21,10 +21,8 @@ This function uses the \code{readxl} package to load each sheet in the Excel wor
 It is useful when you want to batch process all sheets without specifying them manually.
 }
 \examples{
-\dontrun{
-all_sheets <- read_excel_allsheets("my_data.xlsx")
-names(all_sheets) # Shows the names of the sheets
-}
-
+extracted_mfis <- read_excel_allsheets(
+    system.file("extdata", "Pre_Arcsinh_MFI_example.xlsx", package = "cytobench")
+)
 }
 \keyword{relativisation}

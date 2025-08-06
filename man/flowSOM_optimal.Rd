@@ -59,4 +59,18 @@ Runs the FlowSOM algorithm on a cytometry dataset and determines an optimal numb
 of meta-clusters using \code{ConsensusClusterPlus}. Automatically generates and optionally
 saves plots and the clustering result. Can also return per-cell cluster predictions.
 }
+\examples{
+ff_example <- example_processed()
+fsom <- flowSOM_optimal(
+    flowCore::flowSet(ff_example),
+    # Input options:
+    compensate = FALSE,
+    transform = FALSE,
+    scale = FALSE,
+    # SOM options:
+    colsToUse = c(9, 12, 14:18), xdim = 3, ydim = 3,
+    # Metaclustering options:
+    nClus = 5
+)
+}
 \keyword{flowsom}

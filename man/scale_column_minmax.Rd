@@ -44,4 +44,20 @@ If \code{length(scaling_values) == 2}, then traditional min-max scaling is appli
 
 The operation modifies the input \code{sample_to_rescale} in place.
 }
+\examples{
+ff_dt <- simulate_ff(columns = c("FL1", "FL2", "FL3"), flowcore = FALSE)
+dt2 <- data.table::data.table(ff_dt)
+scale_column_minmax(
+    sample_to_rescale = dt2,
+    scaling_values = c(10, 100),
+    colX = "FL1",
+    subtract_bg = TRUE
+)
+scale_column_minmax(
+    sample_to_rescale = dt2,
+    scaling_values = c(100),
+    colX = "FL1",
+    subtract_bg = TRUE
+)
+}
 \keyword{relativisation}

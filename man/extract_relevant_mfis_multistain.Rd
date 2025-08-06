@@ -41,11 +41,18 @@ applying k-means clustering (k = 2) on transformed marker intensities to separat
 negative and positive populations. The MFIs are reported on the original (untransformed) scale.
 }
 \examples{
-\dontrun{
-mfis_multi <- extract_relevant_mfis_multistain(
-    loaded_fcs_multistain = multistain_list,
-    relevant_columns = c("FITC-A", "PE-A", "APC-A")
+set.seed(42)
+fs_ss <- simulate_cd3()
+tmpdir <- local_tempdir_time()
+flowCore::write.flowSet(fs_ss, tmpdir)
+loaded_fcs_multistain <- load_mfi_files(
+    fcs_dir = tmpdir,
+    regex_singlestain = "(_15-MasterMix)\\\\.fcs$",
+    gating_set_file = NULL,
+    gate_extract = NULL
 )
-}
+extract_relevant_mfis_multistain(
+    loaded_fcs_multistain
+)
 }
 \keyword{relativisation}

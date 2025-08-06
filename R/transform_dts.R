@@ -26,6 +26,28 @@
 #'
 #' @export
 #' @keywords cytometry
+#' @examples
+# Simulate a list of data.tables with some flow-like markers
+#' dt1 <- data.table::data.table(
+#'     `FL1 CD45RA FITC` = runif(100, 0, 100000),
+#'     `FL2 CCR7 PE` = runif(100, 0, 100000),
+#'     `FS INT` = runif(100, 0, 500)
+#' )
+#'
+#' dt2 <- data.table::data.table(
+#'     `FL1 CD45RA FITC` = runif(100, 0, 100000),
+#'     `FL2 CCR7 PE` = runif(100, 0, 100000),
+#'     `FS INT` = runif(100, 0, 500)
+#' )
+#'
+#' datatable_list <- list(dt1, dt2)
+#'
+#' # Apply transformation
+#' transformed_list <- transform_dts(lapply(datatable_list, data.table::data.table))
+#'
+#' # Inspect the result
+#' summary(transformed_list[[1]][, `FL1 CD45RA FITC`])
+#' summary(datatable_list[[1]][, `FL1 CD45RA FITC`])
 transform_dts <- function(datatable_list,
                           scalings_names_unified = c(
                               "FS INT" = -14,

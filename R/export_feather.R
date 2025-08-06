@@ -14,6 +14,9 @@
 #' @return Invisibly returns a named character vector of output file paths.
 #' @export
 #' @keywords cytometry
+#' @examples
+#' ff <- simulate_ff()
+#' export_feather(list("s1.csv" = flowCore::exprs(ff)), outdir = local_tempdir_time())
 export_feather <- function(matrix_list,
                            outdir = ".",
                            verbose = TRUE,

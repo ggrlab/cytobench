@@ -28,12 +28,21 @@
 #' }
 #' @export
 #' @keywords flowsom
+#' ff_example <- example_processed()
+#' fsom <- do_flowsom(ff_example)
+#' n_metaclusters <- 3
+#' res_norecluster <- flowSOM_newMetacluster(
+#'     flowsom_result = fsom,
+#'     clustered_df = res[["ncells_per_x"]][["cluster"]],
+#'     n_metacluster = n_metaclusters
+#' )
 flowSOM_newMetacluster <- function(flowsom_result,
                                    clustered_df = NULL,
                                    n_metacluster = NULL,
                                    update_flowsom = TRUE,
                                    missing_seed = 3711283) {
-    cluster_numeric <- cluster <- value <- metaCluster <- ncells <- NULL # to avoid R CMD check note about undefined global variable
+    # to avoid R CMD check note about undefined global variable
+    cluster_numeric <- cluster <- value <- metaCluster <- ncells <- NULL
     if (!all(is.null(n_metacluster))) {
         # If the number of metaclusters is given, CHANGE the metaclusters to the new number
         if ("seed" %in% names(flowsom_result)) {

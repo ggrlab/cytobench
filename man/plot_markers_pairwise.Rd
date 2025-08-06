@@ -61,26 +61,46 @@ Axes are asinh-transformed and scaled using marker-specific cofactors. This is p
 for visual QC of compensation, cofactor choices and signal separation.
 }
 \examples{
-\dontrun{
-pdf("removeme.pdf", width = 60, height = 50)
-print(
-    plot_combinations(
-        current_sample_gated[[1]],
-        pre_rescale_asinh_sscheck[[device_x]],
-        special_asinh[[device_x]],
-        debugplots = TRUE
-    )
+fs <- simulate_fs(
+    n_samples = 2,
+    flowcore = TRUE,
+    ncells = 250,
+    columns = c("FL1-A", "FL2-A", "FL3-A")
 )
-print(
-    plot_combinations(
-        current_sample_gated[[1]],
-        pre_rescale_asinh_sscheck[[device_x]],
-        special_asinh[[device_x]],
-        diag_plot = FALSE,
-        debugplots = TRUE
-    )
+p0 <- plot_markers_pairwise(fs[[1]])
+print(p0)
+p1 <- plot_markers_pairwise(
+    fs[[1]],
+    cofactor_namedvec = c("FL1-A" = 5, "FL2-A" = 10, "FL3-A" = 15),
+    special_cofactor_list = list("FL1-A_FL2-A" = c(3, 6), "FL2-A_FL3-A" = c(4, 8)),
+    transform_fun = function(x) log10(x + 1),
+    transform_fun_name = "log10p1"
 )
-dev.off()
-}
+print(p1)
+p2 <- plot_markers_pairwise(
+    fs[[1]],
+    cofactor_namedvec = c("FL1-A" = 5, "FL2-A" = 10, "FL3-A" = 15),
+    special_cofactor_list = list("FL1-A_FL2-A" = c(3, 6), "FL2-A_FL3-A" = c(4, 8)),
+    geom = "points",
+    bins = 100,
+    diag_plot = TRUE,
+    debugplots = FALSE,
+    axis_full_labels = TRUE,
+    n_cells = 1000
+)
+print(p2)
+p3 <- plot_markers_pairwise(
+    fs[[1]],
+    cofactor_namedvec = c("FL1-A" = 5, "FL2-A" = 10, "FL3-A" = 15),
+    special_cofactor_list = list("FL1-A_FL2-A" = c(3, 6), "FL2-A_FL3-A" = c(4, 8)),
+    geom = "pointdensity",
+    bins = 100,
+    diag_plot = TRUE,
+    debugplots = FALSE,
+    axis_full_labels = TRUE,
+    n_cells = 1000,
+    add_ggplot_elements = list(ggplot2::theme_minimal())
+)
+print(p3)
 }
 \keyword{cytometry}

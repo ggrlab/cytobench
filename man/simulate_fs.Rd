@@ -4,10 +4,12 @@
 \alias{simulate_fs}
 \title{Simulate a FlowSet with Multiple Synthetic Samples}
 \usage{
-simulate_fs(n_samples, flowcore = TRUE, ...)
+simulate_fs(n_samples, ncells = 100, flowcore = TRUE, ...)
 }
 \arguments{
 \item{n_samples}{Integer. Number of synthetic samples to generate.}
+
+\item{ncells}{Integer. Number of simulated cells (rows).}
 
 \item{flowcore}{Logical. If \code{TRUE}, returns a \code{flowFrame}; if \code{FALSE}, returns a \code{data.table}.}
 

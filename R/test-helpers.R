@@ -33,7 +33,9 @@ simulate_ff <- function(
     data <- matrix(stats::rnorm(ncells * length(columns)), ncol = length(columns))
     colnames(data) <- columns
     if (flowcore) {
-        flowCore::flowFrame(data)
+        ff <- flowCore::flowFrame(data)
+        flowCore::keyword(ff)[["GUID"]] <- "simulated_flowframe"
+        ff
     } else {
         data.table::as.data.table(data)
     }
@@ -58,11 +60,11 @@ simulate_ff <- function(
 #'
 #' @export
 #' @keywords test-helper
-simulate_fs <- function(n_samples, flowcore = TRUE, ...) {
+simulate_fs <- function(n_samples, ncells = 100, flowcore = TRUE, ...) {
     tmp <- sapply(
         paste0("simsample_", seq_len(n_samples)),
         simplify = FALSE,
-        function(x) simulate_ff(100, flowcore = flowcore, ...)
+        function(x) simulate_ff(ncells = ncells, flowcore = flowcore, ...)
     )
 
     if (flowcore) {
@@ -135,4 +137,92 @@ simulate_cd3 <- function(columns = c(
     flowCore::markernames(ff_list[["sample0_11-none"]])[TRUE] <- "empty"
 
     return(flowCore::flowSet(ff_list))
+}
+
+#' Load and Preprocess Example FCS File
+#'
+#' Loads an example FCS file provided by the `FlowSOM` package and applies
+#' compensation and logicle transformation to prepare the data for downstream analysis.
+#'
+#' This function demonstrates a minimal preprocessing pipeline using `flowCore`
+#' and `flowWorkspace`, including compensation using the embedded spillover matrix
+#' and a logicle transformation based on the compensated channels.
+#' @param ncells Integer.
+#'  Number of cells to use from system.file("extdata", "68983.fcs", package = "FlowSOM")
+#' @return A `flowFrame` object containing compensated and transformed cytometry data.
+#'
+#' @examples
+#' ff <- example_processed()
+#' flowCore::exprs(ff)[1:5, ]
+#'
+#' @keywords test-helper
+example_processed <- function(ncells = 250) {
+    # Load an example FCS file from the FlowSOM package
+    fileName <- system.file("extdata", "68983.fcs", package = "FlowSOM")
+
+    # Read the FCS file into a flowFrame object
+    ff <- flowCore::read.FCS(fileName)
+
+    # Extract the compensation matrix from the FCS metadata
+    comp <- flowCore::keyword(ff)[["SPILL"]]
+
+    # Apply compensation to the raw flowFrame
+    ff <- flowWorkspace::compensate(ff, comp)
+
+    # Estimate logicle transformation based on compensated channels
+    transformList <- flowCore::estimateLogicle(ff, channels = colnames(comp))
+
+    # Apply the transformation to the data
+    ff <- flowWorkspace::transform(ff, transformList)
+
+    # Return the preprocessed flowFrame
+    if (!is.infinite(ncells)) {
+        ff <- ff[seq_len(min(ncells, nrow(ff))), ]
+    }
+    return(ff)
+}
+#'  Run FlowSOM Clustering on a flowFrame
+#'
+#' Performs self-organizing map (SOM) clustering and meta-clustering on a flowFrame using the `FlowSOM` package.
+#' This function disables internal compensation, transformation, and scaling, assuming the
+#' input is already preprocessed.
+#'
+#' @param ff A `flowFrame` object containing cytometry data that has already been compensated and transformed.
+#'
+#' @return A `FlowSOM` object containing the trained SOM, meta-clusters, and other results.
+#'
+#' @details
+#' The clustering uses a fixed seed (`237123`) for reproducibility. Only selected channels are used for training:
+#' channels 9, 12, and 14 through 18. The SOM grid is set to 7x7 nodes, and the data are grouped into 10 meta-clusters.
+#'
+#' @examples
+#' ff <- example_processed()
+#' fsom_result <- do_flowsom(ff)
+do_flowsom <- function(ff) {
+    # Set a fixed seed for reproducibility
+    set.seed(237123)
+
+    # Run FlowSOM clustering
+    fSOM <- FlowSOM::FlowSOM(
+        ff,
+        compensate = FALSE, # Data already compensated
+        transform = FALSE, # Data already transformed
+        scale = FALSE, # Assume input is scaled if needed
+
+        # Use selected marker channels (adjust indices as needed for your dataset)
+        colsToUse = c(9, 12, 14:18),
+
+        # SOM grid dimensions
+        xdim = 7,
+        ydim = 7,
+
+        # Number of meta-clusters to generate
+        nClus = 10
+    )
+
+    # Store the seed for reference (can be useful for reproducibility tracking)
+    fSOM[["seed"]] <- 237123
+
+    # Return the FlowSOM result object
+    return(fSOM)
 }

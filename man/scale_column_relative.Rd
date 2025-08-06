@@ -39,4 +39,20 @@ If \code{subtract_bg = FALSE}, then \eqn{low = 0}.
 
 For single-valued \code{scaling_values}, this behaves like centering the data around the median.
 }
+\examples{
+ff_dt <- simulate_ff(columns = c("FL1", "FL2", "FL3"), flowcore = FALSE)
+dt2 <- data.table::data.table(ff_dt)
+scale_column_relative(
+    sample_to_rescale = dt2,
+    scaling_values = c(10, 100),
+    colX = "FL1",
+    subtract_bg = TRUE
+)
+scale_column_relative(
+    sample_to_rescale = dt2,
+    scaling_values = c(100),
+    colX = "FL1",
+    subtract_bg = TRUE
+)
+}
 \keyword{relativisation}

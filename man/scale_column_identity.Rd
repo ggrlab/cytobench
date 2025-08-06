@@ -18,4 +18,26 @@ Invisibly returns \code{sample_to_rescale} without modification.
 This function performs no scaling on the data. It is used as a placeholder or for debugging
 when no transformation is required. It invisibly returns the input unchanged.
 }
+\keyword{"FL1",}
+\keyword{"FL2",}
+\keyword{"FL3"),}
+\keyword{)}
+\keyword{100),}
+\keyword{<-}
+\keyword{=}
+\keyword{FALSE)}
+\keyword{TRUE}
+\keyword{c("FL1",}
+\keyword{c(10,}
+\keyword{colX}
+\keyword{data.table::data.table(ff_dt)}
+\keyword{dt2}
+\keyword{dt2,}
+\keyword{ff_dt}
+\keyword{flowcore}
 \keyword{relativisation}
+\keyword{sample_to_rescale}
+\keyword{scale_column_identity(}
+\keyword{scaling_values}
+\keyword{simulate_ff(columns}
+\keyword{subtract_bg}

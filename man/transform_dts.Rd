@@ -48,4 +48,26 @@ If \code{inplace = FALSE}, copies of the input data.tables are created before tr
 transformations are done in-place using \code{data.table::set()}.
 The function will fail if unknown columns or NAs are encountered.
 }
+\examples{
+dt1 <- data.table::data.table(
+    `FL1 CD45RA FITC` = runif(100, 0, 100000),
+    `FL2 CCR7 PE` = runif(100, 0, 100000),
+    `FS INT` = runif(100, 0, 500)
+)
+
+dt2 <- data.table::data.table(
+    `FL1 CD45RA FITC` = runif(100, 0, 100000),
+    `FL2 CCR7 PE` = runif(100, 0, 100000),
+    `FS INT` = runif(100, 0, 500)
+)
+
+datatable_list <- list(dt1, dt2)
+
+# Apply transformation
+transformed_list <- transform_dts(lapply(datatable_list, data.table::data.table))
+
+# Inspect the result
+summary(transformed_list[[1]][, `FL1 CD45RA FITC`])
+summary(datatable_list[[1]][, `FL1 CD45RA FITC`])
+}
 \keyword{cytometry}
