@@ -1,3 +1,3 @@
-# cytobench (development version)
+# cytobench 0.6.0.9000
 
-* Initial submission.
+- Cleaned up code, documentation and added examples.
