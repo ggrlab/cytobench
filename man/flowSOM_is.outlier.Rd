@@ -26,7 +26,7 @@ This channelwise outlier assignment is different from the per-default reported o
 }
 \examples{
 ff_example <- example_processed()
-fsom <- do_flowsom(ff_example)
+fsom <- do_flowsom_TESTING(ff_example)
 outliers <- flowSOM_is.outlier(fsom)
 }
 \keyword{flowsom}

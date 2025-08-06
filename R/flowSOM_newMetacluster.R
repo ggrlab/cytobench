@@ -29,7 +29,7 @@
 #' @export
 #' @keywords flowsom
 #' ff_example <- example_processed()
-#' fsom <- do_flowsom(ff_example)
+#' fsom <- do_flowsom_TESTING(ff_example)
 #' n_metaclusters <- 3
 #' res_norecluster <- flowSOM_newMetacluster(
 #'     flowsom_result = fsom,

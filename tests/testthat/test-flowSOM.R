@@ -1,6 +1,6 @@
 test_that("FlowSOM outliers", {
     ff_example <- example_processed()
-    fsom <- do_flowsom(ff_example)
+    fsom <- do_flowsom_TESTING(ff_example)
     outliers <- flowSOM_is.outlier(fsom)
     testthat::expect_equal(sum(outliers), 209)
     testthat::expect_length(outliers, flowCore::nrow(ff_example))
@@ -9,7 +9,7 @@ test_that("FlowSOM outliers", {
 
 test_that("FlowSOM outliers 2", {
     ff_example <- example_processed()
-    fsom <- do_flowsom(ff_example)
+    fsom <- do_flowsom_TESTING(ff_example)
     res <- flowSOM_predict(flowsom_result = fsom, flowset = flowCore::flowSet(ff_example))
 
     outliers <- flowSOM_is.outlier(fsom)
@@ -20,7 +20,7 @@ test_that("FlowSOM outliers 2", {
 
 test_that("FlowSOM new Metaclusters", {
     ff_example <- example_processed()
-    fsom <- do_flowsom(ff_example)
+    fsom <- do_flowsom_TESTING(ff_example)
     testthat::expect_true(fsom$map$nMetaclusters == 10)
 
     # for (n_metaclusters in 3:44) {
@@ -67,7 +67,7 @@ test_that("FlowSOM new Metaclusters", {
 # test wrapper_count_model
 test_that("FlowSOM wrapper_count_model", {
     ff_example <- example_processed()
-    fsom <- do_flowsom(ff_example)
+    fsom <- do_flowsom_TESTING(ff_example)
     res <- flowSOM_predict(
         flowsom_result = fsom,
         flowset = flowCore::flowSet(ff_example)
@@ -113,7 +113,7 @@ test_that("FlowSOM wrapper_count_model", {
 
 test_that("FlowSOM new Metaclusters, with/out new clustering", {
     ff_example <- example_processed()
-    fsom <- do_flowsom(ff_example)
+    fsom <- do_flowsom_TESTING(ff_example)
     testthat::expect_true(fsom$map$nMetaclusters == 10)
 
     for (n_metaclusters in c(3, 20, 44)) {

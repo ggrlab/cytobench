@@ -52,7 +52,7 @@ the new meta-clustering.
 \keyword{<-}
 \keyword{=}
 \keyword{clustered_df}
-\keyword{do_flowsom(ff_example)}
+\keyword{do_flowsom_TESTING(ff_example)}
 \keyword{example_processed()}
 \keyword{ff_example}
 \keyword{flowSOM_newMetacluster(}

@@ -1,6 +1,6 @@
 test_that("FlowSOM optimal", {
     ff_example <- example_processed()
-    fsom <- do_flowsom(ff_example)
+    fsom <- do_flowsom_TESTING(ff_example)
     w <- testthat::capture_warnings({
         fsom_opt <- flowSOM_optimal(
             flowCore::flowSet(ff_example),

@@ -198,7 +198,7 @@ example_processed <- function(ncells = 250) {
 #'
 #' @examples
 #' ff <- example_processed()
-#' fsom_result <- do_flowsom(ff)
+#' fsom_result <- do_flowsom_TESTING(ff)
 #' @export
 do_flowsom_TESTING <- function(ff) {
     # Set a fixed seed for reproducibility

@@ -23,5 +23,5 @@ channels 9, 12, and 14 through 18. The SOM grid is set to 7x7 nodes, and the dat
 }
 \examples{
 ff <- example_processed()
-fsom_result <- do_flowsom(ff)
+fsom_result <- do_flowsom_TESTING(ff)
 }

@@ -62,7 +62,7 @@
 #' @keywords cytometry
 #' @examples
 #' ff_example <- example_processed()
-#' fsom <- do_flowsom(ff_example)
+#' fsom <- do_flowsom_TESTING(ff_example)
 #' res <- flowSOM_predict(
 #'     flowsom_result = fsom,
 #'     flowset = flowCore::flowSet(ff_example)

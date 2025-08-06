@@ -35,7 +35,7 @@
 #' @keywords flowsom
 #' @examples
 #' ff_example <- example_processed()
-#' fsom <- do_flowsom(ff_example)
+#' fsom <- do_flowsom_TESTING(ff_example)
 #' flowSOM_performance(fsom$cells_clusters_from_train)
 flowSOM_performance <- function(
     dt_clustered,
