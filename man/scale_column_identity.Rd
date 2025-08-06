@@ -18,3 +18,4 @@ Invisibly returns \code{sample_to_rescale} without modification.
 This function performs no scaling on the data. It is used as a placeholder or for debugging
 when no transformation is required. It invisibly returns the input unchanged.
 }
+\keyword{relativisation}

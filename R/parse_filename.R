@@ -21,6 +21,7 @@
 #' parse_filename(c("R1_d001_train_s001_raw_cd3_random_1000_navios_KrO.fcs"))
 #'
 #' @export
+#' @keywords relativisation
 parse_filename <- function(fn,
                            cn = c(
                                "study",

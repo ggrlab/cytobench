@@ -89,3 +89,4 @@ extracted_mfis <- extract_singlestain_mfi(
 )
 }
 }
+\keyword{relativisation}

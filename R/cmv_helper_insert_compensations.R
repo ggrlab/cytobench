@@ -26,6 +26,7 @@
 #'
 #' @return If `outdir` is `NA`, returns the updated `flowFrame`. Otherwise, writes the modified FCS file and returns invisible.
 #' @export
+#' @keywords relativisation
 cmv_helper_insert_compensations <- function(
     fcs_filename,
     named_compensation_files = list(

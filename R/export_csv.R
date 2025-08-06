@@ -13,6 +13,7 @@
 #'
 #' @return Invisibly returns a named character vector of output file paths.
 #' @export
+#' @keywords cytometry
 export_csv <- function(matrix_list,
                        outdir = ".",
                        verbose = TRUE,

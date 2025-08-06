@@ -47,3 +47,4 @@ Optionally, a new number of meta-clusters can be specified, triggering recomputa
 \code{ConsensusClusterPlus}. The function also optionally updates the \code{FlowSOM} object to reflect
 the new meta-clustering.
 }
+\keyword{flowsom}

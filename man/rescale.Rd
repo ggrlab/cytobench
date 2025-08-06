@@ -54,3 +54,4 @@ A \code{data.table} with rescaled columns.
 This function rescales a sample (data.table) using extracted MFI values and a unified feature mapping.
 If a feature is not listed in the dictionary, fallback methods such as min-max or median-centering are used.
 }
+\keyword{relativisation}

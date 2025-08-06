@@ -30,3 +30,4 @@ This function exports a named list of matrices or data frames to \code{.csv} fil
 optionally applying a unified feature naming scheme to the column names.
 Each matrix is saved as a separate CSV file, preserving its name in the output path.
 }
+\keyword{cytometry}

@@ -48,3 +48,4 @@ A data frame with the extracted MFIs. E.g.:
 Extract Single Stain Median Fluorescence Intensity (MFI)
 This function extracts the median fluorescence intensity (MFI) from single-stain FCS files.
 }
+\keyword{relativisation}

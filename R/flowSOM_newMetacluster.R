@@ -27,6 +27,7 @@
 #'   \item{`ncells_per_x`}{A summary `data.frame` (or list of `data.frame`s) with counts per meta-cluster (and cluster if applicable).}
 #' }
 #' @export
+#' @keywords flowsom
 flowSOM_newMetacluster <- function(flowsom_result,
                                    clustered_df = NULL,
                                    n_metacluster = NULL,

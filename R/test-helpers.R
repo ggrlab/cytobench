@@ -14,6 +14,7 @@
 #' ff <- simulate_ff(100)
 #' flowCore::exprs(ff)[1:5, ]
 #' @export
+#' @keywords test-helper
 simulate_ff <- function(
     ncells = 250,
     columns = c(
@@ -56,6 +57,7 @@ simulate_ff <- function(
 #' fs[[1]]
 #'
 #' @export
+#' @keywords test-helper
 simulate_fs <- function(n_samples, flowcore = TRUE, ...) {
     tmp <- sapply(
         paste0("simsample_", seq_len(n_samples)),
@@ -93,6 +95,7 @@ simulate_fs <- function(n_samples, flowcore = TRUE, ...) {
 #' flowCore::sampleNames(fs_sim)
 #'
 #' @export
+#' @keywords test-helper
 simulate_cd3 <- function(columns = c(
                              "FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A",
                              "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A"

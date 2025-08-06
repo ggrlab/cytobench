@@ -26,6 +26,7 @@
 #'
 #' @return A `flowFrame` with compensation and autofluorescence correction applied.
 #' @export
+#' @keywords relativisation
 cmv_helper_compensation <- function(ff_unapplied_compensations,
                                     compensation_type = c(
                                         "manual", "auto",

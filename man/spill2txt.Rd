@@ -15,3 +15,4 @@ The result of the \code{spill2txt} function.
 \description{
 This function is a wrapper for the \code{spill2txt} function from the \code{flowCore} package.
 }
+\keyword{re-export}

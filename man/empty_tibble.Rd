@@ -19,3 +19,4 @@ Returns a placeholder tibble used for failed or empty MFI extraction.
 All entries are initialized to \code{NA}, and column names follow the
 standard format for single-stain MFI tables.
 }
+\keyword{internal}

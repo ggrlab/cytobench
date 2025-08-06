@@ -23,6 +23,7 @@
 #' }
 #'
 #' @export
+#' @keywords cytometry
 write_memory_FCS <- function(ff) {
     tryCatch(
         {

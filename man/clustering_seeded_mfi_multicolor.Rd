@@ -41,3 +41,4 @@ values for each marker, returning a tidy \code{tibble} with one row per marker.
 The cluster with the lower total median signal across all markers is considered
 the negative population.
 }
+\keyword{relativisation}

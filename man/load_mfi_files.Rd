@@ -32,3 +32,4 @@ This function loads FCS files from a directory that match a specified pattern
 (typically single-stain or multi-stain), and optionally applies a \code{GatingSet}
 to restrict analysis to a specific gated population.
 }
+\keyword{relativisation}

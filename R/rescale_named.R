@@ -28,6 +28,7 @@
 #' @return A `data.table` with rescaled columns. If `inplace_datatable = TRUE`, the same object is modified and returned invisibly.
 #'
 #' @export
+#' @keywords relativisation
 rescale_named <- function(sample_to_rescale,
                           extracted_mfi_namedlist,
                           missing_feature = c("minmax", "center_median"),

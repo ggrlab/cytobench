@@ -34,6 +34,7 @@
 #' }
 #'
 #' @export
+#' @keywords flowsom
 flowSOM_optimal <- function(fs_train,
                             colsToUse,
                             transform = TRUE,

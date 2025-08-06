@@ -15,6 +15,7 @@
 #' list.files(tmp) # should be empty
 #'
 #' @export
+#' @keywords misc
 tempdir_time <- function(dir = tempdir(), ...) {
     tmpdir_time <- paste0(dir, "_", format(Sys.time(), "%F_%H_%M_%OS3"))
     dir.create(tmpdir_time, ...)
@@ -44,6 +45,7 @@ tempdir_time <- function(dir = tempdir(), ...) {
 #' }
 #'
 #' @export
+#' @keywords test-helper
 local_tempdir_time <- function(showWarnings = FALSE, ...) {
     # Create an environment-scoped temporary base directory
     tmpdir <- withr::local_tempdir(.local_envir = parent.frame(2))

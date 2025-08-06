@@ -30,3 +30,4 @@ Intended for testing or demonstration purposes only.
 ff <- simulate_ff(100)
 flowCore::exprs(ff)[1:5, ]
 }
+\keyword{test-helper}

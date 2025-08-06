@@ -15,3 +15,4 @@ The result of the \code{string_to_spill} function.
 \description{
 This function is a wrapper for the \code{string_to_spill} function from the \code{flowCore} package.
 }
+\keyword{re-export}

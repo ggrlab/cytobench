@@ -5,11 +5,18 @@
 #' for visual QC of compensation, cofactor choices and signal separation.
 #'
 #' @param ff A `flowFrame` containing the cytometry data.
-#' @param cofactor_namedvec A named numeric vector providing default cofactors per marker. The names of the vector should be the same as the marker names in the flowFrame object.
-#' @param special_cofactor_list A named list with overrides for specific marker combinations. Each name should be `"markerX_markerY"`, with values being a numeric vector of length 2: `c(cofactor_x, cofactor_y)`.
+#' @param cofactor_namedvec
+#' A named numeric vector providing default cofactors per marker. The names
+#' of the vector should be the same as the marker names in the flowFrame object.
+#' @param special_cofactor_list
+#' A named list with overrides for specific marker combinations.
+#' Each name should be `"markerX_markerY"`, with values being a
+#' numeric vector of length 2: `c(cofactor_x, cofactor_y)`.
 #' @param transform_fun A function used to transform intensity values (default: `asinh`).
 #' @param transform_fun_name Character label for the transformation function (used in axis labels).
-#' @param geom Character. One of `"hex"` (default), `"points"`, or `"pointdensity"` - determines the ggplot2 geometry used. Hex is usually still the fastest.
+#' @param geom Character.
+#' One of `"hex"` (default), `"points"`, or `"pointdensity"` -
+#' determines the ggplot2 geometry used. Hex is usually still the fastest.
 #' @param bins Number of bins (resolution) in each 2D plot (default: 50).
 #' @param diag_plot Logical. Whether to include labeled marker names along the diagonal (default: FALSE).
 #' @param debugplots Logical. If TRUE, plots text placeholders instead of actual data - useful for layout testing.
@@ -44,6 +51,7 @@
 #' )
 #' dev.off()
 #' }
+#' @keywords cytometry
 plot_markers_pairwise <- function(ff,
                                   cofactor_namedvec,
                                   special_cofactor_list,

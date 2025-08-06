@@ -67,6 +67,7 @@
 #' )
 #' }
 #' @export
+#' @keywords relativisation
 extract_mfi <- function(fcs_dir = "data-raw/s001",
                         regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
                         transform_fun = function(x) {
@@ -159,6 +160,7 @@ extract_mfi <- function(fcs_dir = "data-raw/s001",
 #' @param transform
 #' As `transform_fun` in `extract_mfi`.
 #' @export
+#' @keywords relativisation
 extract_singlestain_mfi <- function(fcs_dir = "data-raw/s001",
                                     regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
                                     transform = function(x) {
@@ -194,6 +196,7 @@ extract_singlestain_mfi <- function(fcs_dir = "data-raw/s001",
 #'
 #' @return A named list of cytosets or gated cytosets, ready for MFI computation.
 #'   Each entry corresponds to one FCS file.
+#' @keywords relativisation
 load_mfi_files <- function(fcs_dir = "data-raw/s001",
                            regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
                            gating_set_file = NULL,
@@ -270,6 +273,7 @@ load_mfi_files <- function(fcs_dir = "data-raw/s001",
 #'  9 PB-A        469.   13426.     442.
 #' 10 KrO-A       442.    4473.     444.
 #' }
+#' @keywords relativisation
 extract_singlestain_mfi_wrapper <- function(loaded_fcs,
                                             transform_fun = function(x) {
                                                 asinh(x / 1e3)
@@ -344,6 +348,7 @@ extract_singlestain_mfi_wrapper <- function(loaded_fcs,
 #'   \item{`negative.sd`, `positive.sd`}{Standard deviations within each cluster.}
 #' }
 #'
+#' @keywords relativisation
 clustering_seeded_mfi <- function(values, seed, transform_fun, featurename) {
     set.seed(seed)
 
@@ -392,6 +397,7 @@ clustering_seeded_mfi <- function(values, seed, transform_fun, featurename) {
 #'   \item{`negative.iqr`, `positive.iqr`}{Interquartile ranges within clusters}
 #' }
 #'
+#' @keywords relativisation
 clustering_seeded_mfi_multicolor <- function(values,
                                              seed = 42,
                                              transform_fun,
@@ -471,6 +477,7 @@ clustering_seeded_mfi_multicolor <- function(values,
 #' mfis <- extract_relevant_mfis_singlestain(loaded_fcs)
 #' }
 #' @export
+#' @keywords relativisation
 extract_relevant_mfis_singlestain <- function(loaded_fcs_singlestain,
                                               transform_fun = function(x) {
                                                   x
@@ -545,6 +552,7 @@ extract_relevant_mfis_singlestain <- function(loaded_fcs_singlestain,
 #' )
 #' }
 #' @export
+#' @keywords relativisation
 extract_relevant_mfis_multistain <- function(loaded_fcs_multistain,
                                              transform_fun = function(x) {
                                                  asinh(x / 1e3)

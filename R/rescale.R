@@ -15,6 +15,7 @@
 #'
 #' @return A `data.table` with rescaled columns.
 #' @export
+#' @keywords relativisation
 rescale <- function(sample_to_rescale,
                     extracted_mfi,
                     feature_unified_dict,

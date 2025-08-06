@@ -28,3 +28,4 @@ This function performs seeded k-means clustering (with two clusters) on transfor
 fluorescence values from a single marker channel. It returns the median and standard
 deviation of the original (untransformed) values per cluster, labeled as negative and positive.
 }
+\keyword{relativisation}

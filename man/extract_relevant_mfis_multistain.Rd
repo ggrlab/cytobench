@@ -48,3 +48,4 @@ mfis_multi <- extract_relevant_mfis_multistain(
 )
 }
 }
+\keyword{relativisation}

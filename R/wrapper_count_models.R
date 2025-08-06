@@ -58,7 +58,7 @@
 #' @param hpoptimized_final_trainsets Sets used for final model training. Default: c("train", "validation").
 #' @param verbose Logical. If TRUE, prints progress messages. Default: TRUE.
 #' @export
-
+#' @keywords cytometry, models
 wrapper_count_models <- function(df_list,
                                  tvt_col = "tvt",
                                  outdir = "res_count_models",

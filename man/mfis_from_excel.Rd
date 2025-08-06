@@ -62,3 +62,4 @@ the positive and negative MFIs for each channel-marker combination.
 \examples{
 # See tests
 }
+\keyword{relativisation}

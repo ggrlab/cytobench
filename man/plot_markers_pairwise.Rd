@@ -23,15 +23,20 @@ plot_markers_pairwise(
 \arguments{
 \item{ff}{A \code{flowFrame} containing the cytometry data.}
 
-\item{cofactor_namedvec}{A named numeric vector providing default cofactors per marker. The names of the vector should be the same as the marker names in the flowFrame object.}
+\item{cofactor_namedvec}{A named numeric vector providing default cofactors per marker. The names
+of the vector should be the same as the marker names in the flowFrame object.}
 
-\item{special_cofactor_list}{A named list with overrides for specific marker combinations. Each name should be \code{"markerX_markerY"}, with values being a numeric vector of length 2: \code{c(cofactor_x, cofactor_y)}.}
+\item{special_cofactor_list}{A named list with overrides for specific marker combinations.
+Each name should be \code{"markerX_markerY"}, with values being a
+numeric vector of length 2: \code{c(cofactor_x, cofactor_y)}.}
 
 \item{transform_fun}{A function used to transform intensity values (default: \code{asinh}).}
 
 \item{transform_fun_name}{Character label for the transformation function (used in axis labels).}
 
-\item{geom}{Character. One of \code{"hex"} (default), \code{"points"}, or \code{"pointdensity"} - determines the ggplot2 geometry used. Hex is usually still the fastest.}
+\item{geom}{Character.
+One of \code{"hex"} (default), \code{"points"}, or \code{"pointdensity"} -
+determines the ggplot2 geometry used. Hex is usually still the fastest.}
 
 \item{bins}{Number of bins (resolution) in each 2D plot (default: 50).}
 
@@ -78,3 +83,4 @@ print(
 dev.off()
 }
 }
+\keyword{cytometry}

@@ -10,6 +10,7 @@
 #'     \item{`negative`, `positive`}{Numeric columns for median intensities.}
 #'     \item{`positive.sd`, `negative.sd`}{Numeric columns for standard deviations.}
 #'   }
+#' @keywords internal
 empty_tibble <- function() {
     tibble::tibble(
         "feature" = NA,

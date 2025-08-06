@@ -28,6 +28,7 @@
 #' )
 #' n_cells_per_x(dt)
 #' @export
+#' @keywords flowsom
 n_cells_per_x <- function(dt,
                           which = c("cluster", "metaCluster"),
                           id_cols = c("sample"),

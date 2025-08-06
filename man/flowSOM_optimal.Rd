@@ -59,3 +59,4 @@ Runs the FlowSOM algorithm on a cytometry dataset and determines an optimal numb
 of meta-clusters using \code{ConsensusClusterPlus}. Automatically generates and optionally
 saves plots and the clustering result. Can also return per-cell cluster predictions.
 }
+\keyword{flowsom}

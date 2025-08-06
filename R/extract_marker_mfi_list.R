@@ -19,6 +19,7 @@
 #' @return A named list. Each entry corresponds to a marker (column) in `sample_to_rescale`,
 #'   containing a numeric vector of length two with names `"negative"` and `"positive"`.
 #'   Missing markers are filled with `NA`.
+#' @keywords relativisation
 extract_marker_mfi_list <- function(
     sample_to_rescale,
     extracted_mfi,

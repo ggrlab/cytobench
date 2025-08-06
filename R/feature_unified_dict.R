@@ -22,6 +22,7 @@
 #' dict <- feature_unified_dict_default()
 #' dict["FL1 CD3 FITC", "unified"]
 #' @export
+#' @keywords cytometry
 feature_unified_dict_default <- function() {
     alternative <- unified <- NULL # lint
     f_dict <- data.frame(unified = c(

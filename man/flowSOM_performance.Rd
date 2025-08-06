@@ -56,3 +56,4 @@ Computes silhouette scores to assess clustering performance using
 FlowSOM results. Accepts both raw cluster assignments and the
 result object from \code{flowSOM_optimal()}.
 }
+\keyword{flowsom}

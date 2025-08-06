@@ -27,3 +27,4 @@ names(all_sheets) # Shows the names of the sheets
 }
 
 }
+\keyword{relativisation}

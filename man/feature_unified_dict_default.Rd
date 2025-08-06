@@ -31,3 +31,4 @@ tables, e.g., for CSV or FCS exports.
 dict <- feature_unified_dict_default()
 dict["FL1 CD3 FITC", "unified"]
 }
+\keyword{cytometry}

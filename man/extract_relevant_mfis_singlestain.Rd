@@ -40,3 +40,4 @@ unstained samples (i.e., samples with no non-empty channels) and records their m
 mfis <- extract_relevant_mfis_singlestain(loaded_fcs)
 }
 }
+\keyword{relativisation}

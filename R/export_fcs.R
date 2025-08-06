@@ -73,6 +73,7 @@
 #' ranges for all samples come from this extreme sample.
 #'
 #' @export
+#' @keywords cytometry
 export_fcs <- function(matrix_list,
                        safety_scaling = 1.20,
                        safety_shift = 0,

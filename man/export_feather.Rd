@@ -32,3 +32,4 @@ Invisibly returns a named character vector of output file paths.
 This function exports a named list of matrices or data frames to the Apache Feather file format.
 Optionally, it can rename columns according to a unified feature dictionary before export.
 }
+\keyword{cytometry}

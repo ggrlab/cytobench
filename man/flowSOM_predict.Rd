@@ -28,3 +28,4 @@ Only used and relevant if n_metaclusters != NULL.}
 \description{
 Predict the (meta-) clusters for all cells using a flowsom result.
 }
+\keyword{flowsom}

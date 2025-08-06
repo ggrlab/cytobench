@@ -46,3 +46,4 @@ dt <- data.table::data.table(
 )
 n_cells_per_x(dt)
 }
+\keyword{flowsom}

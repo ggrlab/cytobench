@@ -48,3 +48,5 @@ the results using ggplot2 with faceting by feature and scaling method.
 # plot_compare_alignment(dt_listlist, relevant_features = c("FL1-A", "FL2-A"))
 
 }
+\keyword{cytometry}
+\keyword{relativisation,}

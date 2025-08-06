@@ -30,3 +30,4 @@ the gating set is loaded from the file. If a (GatingSet) object is provided, it 
 \description{
 Extract Single Stain Median Fluorescence Intensity (MFI)
 }
+\keyword{relativisation}

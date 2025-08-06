@@ -37,3 +37,4 @@ from a tibble, returning a named list that maps each feature (e.g., "FITC-A") to
 named numeric vector of its negative and positive control values. Features present
 in \code{sample_to_rescale} but missing from \code{extracted_mfi} are included with \code{NA}.
 }
+\keyword{relativisation}

@@ -25,6 +25,7 @@
 #' - All columns are temporarily treated as marker names to enable MFI extraction across the full feature set.
 #'
 #' @export
+#' @keywords cytometry
 gate_cells <- function(flowset,
                        gatingset,
                        gatename = "/Singlets/CD45+/CD3+",

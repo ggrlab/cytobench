@@ -22,6 +22,7 @@
 #'   \item{`autofluorescence_proportional`}{A named numeric vector with autofluorescence contributions per channel.}
 #' }
 #' @export
+#' @keywords cytometry
 read.FCS_custom_spillover <- function(fcs,
                                       custom_spillover_keyword = "spillover.manual",
                                       original_spillover_keyword = "$SPILLOVER") {

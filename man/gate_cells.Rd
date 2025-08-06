@@ -45,3 +45,4 @@ such as counts, frequencies, and median fluorescence intensities (MFIs).
 \item All columns are temporarily treated as marker names to enable MFI extraction across the full feature set.
 }
 }
+\keyword{cytometry}

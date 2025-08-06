@@ -15,3 +15,4 @@ The result of the \code{GeomScattermore} function.
 \description{
 This function is a wrapper for the \code{GeomScattermore} function from the \code{scattermore} package.
 }
+\keyword{re-export}

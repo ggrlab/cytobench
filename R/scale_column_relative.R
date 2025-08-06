@@ -20,6 +20,7 @@
 #'
 #' @return Invisibly returns the modified `sample_to_rescale`.
 #' @export
+#' @keywords relativisation
 scale_column_relative <- function(sample_to_rescale,
                                   scaling_values,
                                   colX,

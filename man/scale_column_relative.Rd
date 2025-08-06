@@ -39,3 +39,4 @@ If \code{subtract_bg = FALSE}, then \eqn{low = 0}.
 
 For single-valued \code{scaling_values}, this behaves like centering the data around the median.
 }
+\keyword{relativisation}

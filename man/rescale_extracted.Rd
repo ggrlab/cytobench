@@ -48,3 +48,4 @@ This function must accept at least \code{sample_to_rescale} (data.table), \code{
 \description{
 Rescales all features (columns) in a cytometry sample using median fluorescence intensities (MFIs) extracted from controls.
 }
+\keyword{relativisation}

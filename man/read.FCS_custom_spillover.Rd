@@ -38,3 +38,4 @@ The function expects the spillover matrix and autofluorescence vector to be enco
 custom keywords within the FCS metadata, following a convention like
 \code{"spillover.manual"} and \code{"spillover_autofluorescence.manual"}.
 }
+\keyword{cytometry}

@@ -39,3 +39,4 @@ It retrieves compensation parameters from the FCS file metadata using a custom k
 Multiple compensation types can be selected depending on how the compensation
 was estimated (manual, auto, or auto_singlestain).
 }
+\keyword{relativisation}

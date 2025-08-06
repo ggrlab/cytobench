@@ -49,6 +49,7 @@
 #' @examples
 #' # See tests
 #' @export
+#' @keywords relativisation
 mfis_from_excel <- function(excel_file = "Pre_Arcsinh_Median_FI.xlsx",
                             positive_mfi_colname = "MFI POSITIVE POPULATION",
                             negative_mfi_colname = c("extern" = "MFI NEGATIVE POPULATION  UNSTAINED")) {

@@ -12,6 +12,7 @@
 #' @param madAllowed
 #' See FlowSOM::TestOutliers() or flowSOM_is.outlier()
 #' @export
+#' @keywords flowsom
 flowSOM_predict <- function(flowsom_result,
                             flowset,
                             madAllowed = 4,

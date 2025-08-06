@@ -100,3 +100,4 @@ This is particularly useful for exporting flow cytometry data for use in softwar
 which reads the metadata to set up the plots. Especially the maximum and minimum channel
 values are important for Kaluza to visualize the data correctly.
 }
+\keyword{cytometry}

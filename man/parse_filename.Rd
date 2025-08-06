@@ -37,3 +37,4 @@ from standard naming conventions used in cytometry data processing pipelines.
 parse_filename(c("R1_d001_train_s001_raw_cd3_random_1000_navios_KrO.fcs"))
 
 }
+\keyword{relativisation}

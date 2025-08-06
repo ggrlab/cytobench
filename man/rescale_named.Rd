@@ -43,3 +43,4 @@ A \code{data.table} with rescaled columns. If \code{inplace_datatable = TRUE}, t
 This function rescales each column in a sample data table using a named list of extracted marker intensities (MFIs).
 Each column is matched to its corresponding MFI vector (e.g., with named elements \code{"negative"} and \code{"positive"}).
 }
+\keyword{relativisation}

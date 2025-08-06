@@ -24,6 +24,7 @@
 #' # plot_compare_alignment(dt_listlist, relevant_features = c("FL1-A", "FL2-A"))
 #'
 #' @export
+#' @keywords relativisation, cytometry
 plot_compare_alignment <- function(
     dt_listlist,
     relevant_features = NULL,

@@ -19,6 +19,7 @@
 #' }
 #'
 #' @export
+#' @keywords relativisation
 read_excel_allsheets <- function(filename) {
     # Identify all sheet names in the Excel file
     sheets <- readxl::excel_sheets(filename)

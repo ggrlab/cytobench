@@ -15,3 +15,4 @@ The result of the \code{UpdateDerivedValues} function.
 \description{
 This function is a wrapper for the \code{UpdateDerivedValues} function from the \code{FlowSOM} package.
 }
+\keyword{re-export}

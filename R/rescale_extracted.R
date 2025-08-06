@@ -6,6 +6,7 @@
 #' @inheritParams rescale_named
 #'
 #' @export
+#' @keywords relativisation
 rescale_extracted <- function(sample_to_rescale,
                               extracted_mfi,
                               column_negative = c("negative", "unstained"),

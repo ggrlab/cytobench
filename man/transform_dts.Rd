@@ -48,3 +48,4 @@ If \code{inplace = FALSE}, copies of the input data.tables are created before tr
 transformations are done in-place using \code{data.table::set()}.
 The function will fail if unknown columns or NAs are encountered.
 }
+\keyword{cytometry}

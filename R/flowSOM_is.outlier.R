@@ -13,6 +13,7 @@
 #'                       the original fsom object is used.
 #' @param channels If channels are given, return the result of FlowSOM::TestOutliers()
 #' @export
+#' @keywords flowsom
 flowSOM_is.outlier <- function(fsom,
                              madAllowed = 4,
                              fsomReference = NULL,

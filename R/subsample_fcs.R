@@ -26,6 +26,7 @@
 #' }
 #'
 #' @export
+#' @keywords cytometry
 subsample_fcs <- function(file_x,
                           n_cells = 10000,
                           seed = 427764,

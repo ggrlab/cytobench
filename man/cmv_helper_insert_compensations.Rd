@@ -48,3 +48,4 @@ the metadata of an FCS file, following the structure used in the CMV dataset
 with the \code{read.FCS_custom_spillover()} function. They can be directly \emph{applied} with
 \code{cmv_helper_compensation()}.
 }
+\keyword{relativisation}

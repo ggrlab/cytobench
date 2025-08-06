@@ -26,3 +26,4 @@ tmp <- tempdir_time()
 list.files(tmp) # should be empty
 
 }
+\keyword{misc}

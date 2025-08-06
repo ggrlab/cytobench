@@ -44,3 +44,4 @@ If \code{length(scaling_values) == 2}, then traditional min-max scaling is appli
 
 The operation modifies the input \code{sample_to_rescale} in place.
 }
+\keyword{relativisation}

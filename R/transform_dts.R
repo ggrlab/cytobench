@@ -25,6 +25,7 @@
 #' The function will fail if unknown columns or NAs are encountered.
 #'
 #' @export
+#' @keywords cytometry
 transform_dts <- function(datatable_list,
                           scalings_names_unified = c(
                               "FS INT" = -14,
