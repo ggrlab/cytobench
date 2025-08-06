@@ -58,7 +58,17 @@ result object from \code{flowSOM_optimal()}.
 }
 \examples{
 ff_example <- example_processed()
-fsom <- do_flowsom_TESTING(ff_example)
+fsom <- flowSOM_optimal(
+    flowCore::flowSet(ff_example),
+    # Input options:
+    compensate = FALSE,
+    transform = FALSE,
+    scale = FALSE,
+    # SOM options:
+    colsToUse = c(9, 12, 14:18), xdim = 3, ydim = 3,
+    # Metaclustering options:
+    nClus = 5
+)
 flowSOM_performance(fsom$cells_clusters_from_train)
 }
 \keyword{flowsom}

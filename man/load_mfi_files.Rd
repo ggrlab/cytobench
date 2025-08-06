@@ -44,4 +44,5 @@ loaded_fcs <- load_mfi_files(
     gate_extract = NULL
 )
 }
+\keyword{internal}
 \keyword{relativisation}

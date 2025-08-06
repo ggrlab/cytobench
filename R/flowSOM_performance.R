@@ -35,7 +35,17 @@
 #' @keywords flowsom
 #' @examples
 #' ff_example <- example_processed()
-#' fsom <- do_flowsom_TESTING(ff_example)
+#' fsom <- flowSOM_optimal(
+#'     flowCore::flowSet(ff_example),
+#'     # Input options:
+#'     compensate = FALSE,
+#'     transform = FALSE,
+#'     scale = FALSE,
+#'     # SOM options:
+#'     colsToUse = c(9, 12, 14:18), xdim = 3, ydim = 3,
+#'     # Metaclustering options:
+#'     nClus = 5
+#' )
 #' flowSOM_performance(fsom$cells_clusters_from_train)
 flowSOM_performance <- function(
     dt_clustered,
@@ -47,7 +57,7 @@ flowSOM_performance <- function(
     relevant_cols = NULL,
     clustering_map = NULL) {
     # to avoid R CMD check note about undefined global variable (data.table function)
-    . <- cluster <- metaCluster <- ..relevant_cols <- NULL
+    . <- cluster <- metaCluster <- NULL
     # Support direct call: flowSOM_performance(flowsom_result)
     if ("flowSOM_optimal" %in% class(dt_clustered)) {
         flowsom_result <- dt_clustered
@@ -106,7 +116,7 @@ flowSOM_performance <- function(
     }
     # Compute distance matrix from selected features
     distmat <- distances::distances(
-        dt_clustered[, ..relevant_cols]
+        dt_clustered[, relevant_cols, with = FALSE]
     )
 
     # Apply silhouette calculation for each clustering solution

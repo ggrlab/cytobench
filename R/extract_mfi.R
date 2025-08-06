@@ -223,6 +223,7 @@ extract_singlestain_mfi <- function(fcs_dir = "data-raw/s001",
 #' @return A named list of cytosets or gated cytosets, ready for MFI computation.
 #'   Each entry corresponds to one FCS file.
 #' @keywords relativisation
+#' @keywords internal
 #' @examples
 #' set.seed(42)
 #' fs_ss <- simulate_cd3()
@@ -234,6 +235,7 @@ extract_singlestain_mfi <- function(fcs_dir = "data-raw/s001",
 #'     gating_set_file = NULL,
 #'     gate_extract = NULL
 #' )
+#' @export
 load_mfi_files <- function(fcs_dir = "data-raw/s001",
                            regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
                            gating_set_file = NULL,
@@ -311,6 +313,8 @@ load_mfi_files <- function(fcs_dir = "data-raw/s001",
 #' 10 KrO-A       442.    4473.     444.
 #' }
 #' @keywords relativisation
+#' @keywords internal
+#' @export
 #' @examples
 #' set.seed(42)
 #' fs_ss <- simulate_cd3()

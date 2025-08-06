@@ -20,6 +20,7 @@
 #'   containing a numeric vector of length two with names `"negative"` and `"positive"`.
 #'   Missing markers are filled with `NA`.
 #' @keywords relativisation
+#' @keywords internal
 #' @examples
 #' set.seed(42)
 #' fs_ss <- simulate_cd3()

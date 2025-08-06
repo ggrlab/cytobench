@@ -61,4 +61,5 @@ loaded_fcs <- load_mfi_files(
 )
 extract_singlestain_mfi_wrapper(loaded_fcs)
 }
+\keyword{internal}
 \keyword{relativisation}
