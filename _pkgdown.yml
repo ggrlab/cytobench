@@ -1,0 +1,34 @@
+url: ~
+template:
+  bootstrap: 5
+
+articles:
+  - title: Articles
+    navbar: ~
+    contents:
+      - contributing
+
+reference:
+  - title: Relativisation
+    desc: "Relativisation of cytometry data."
+    contents: [has_keyword("relativisation")]
+  - title: Cytometry functions
+    desc: "Functions for primary use with cytometry data"
+    contents: [has_keyword("cytometry")]
+  - title: flowsom
+    desc: "Convenience functions for the usage of FlowSOM"
+    contents: [has_keyword("flowsom")]
+  - title: Miscellaneous
+    desc: "Miscellaneous functions that do not fit into the other categories"
+    contents: [has_keyword("misc")]
+  - title: Test helper functions
+    desc: "Helper functions mainly used for our tests"
+    contents: [has_keyword("test-helper")]
+  - title: Models
+    desc: "Convenience functions for creating predictive models"
+    contents: [has_keyword("models")]
+  - title: Internal
+    desc: "Internal helper functions. Although exported, they should not be used directly."
+    contents: 
+      - [has_keyword("internal")]
+      - [has_keyword("re-export")]

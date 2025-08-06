@@ -8,3 +8,6 @@
 removeme.R
 ^data-raw$
 ^.*removeme.*$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
