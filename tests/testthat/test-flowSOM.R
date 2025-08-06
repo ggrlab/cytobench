@@ -1,30 +1,3 @@
-example_processed <- function() {
-    fileName <- system.file("extdata", "68983.fcs", package = "FlowSOM")
-    ff <- flowCore::read.FCS(fileName)
-    # Compensation
-    comp <- flowCore::keyword(ff)[["SPILL"]]
-    ff <- flowWorkspace::compensate(ff, comp)
-    # Transformation
-    transformList <- flowCore::estimateLogicle(ff, channels = colnames(comp))
-    ff <- flowWorkspace::transform(ff, transformList)
-    return(ff)
-}
-do_flowsom <- function(ff) {
-    set.seed(237123)
-    fSOM <- FlowSOM::FlowSOM(ff,
-        # Input options:
-        compensate = FALSE,
-        transform = FALSE,
-        scale = FALSE,
-        # SOM options:
-        colsToUse = c(9, 12, 14:18), xdim = 7, ydim = 7,
-        # Metaclustering options:
-        nClus = 10
-    )
-    fSOM[["seed"]] <- 237123
-    return(fSOM)
-}
-
 test_that("FlowSOM outliers", {
     ff_example <- example_processed()
     fsom <- do_flowsom(ff_example)

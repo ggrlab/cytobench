@@ -2,6 +2,8 @@
 
 export(cmv_helper_compensation)
 export(cmv_helper_insert_compensations)
+export(do_flowsom_TESTING)
+export(example_processed)
 export(export_csv)
 export(export_fcs)
 export(export_feather)

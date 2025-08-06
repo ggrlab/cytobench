@@ -156,6 +156,7 @@ simulate_cd3 <- function(columns = c(
 #' flowCore::exprs(ff)[1:5, ]
 #'
 #' @keywords test-helper
+#' @export
 example_processed <- function(ncells = 250) {
     # Load an example FCS file from the FlowSOM package
     fileName <- system.file("extdata", "68983.fcs", package = "FlowSOM")
@@ -198,7 +199,8 @@ example_processed <- function(ncells = 250) {
 #' @examples
 #' ff <- example_processed()
 #' fsom_result <- do_flowsom(ff)
-do_flowsom <- function(ff) {
+#' @export
+do_flowsom_TESTING <- function(ff) {
     # Set a fixed seed for reproducibility
     set.seed(237123)
 
