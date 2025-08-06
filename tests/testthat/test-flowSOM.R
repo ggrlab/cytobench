@@ -1,5 +1,5 @@
 test_that("FlowSOM outliers", {
-    ff_example <- example_processed()
+    ff_example <- example_processed(ncells = Inf)
     fsom <- do_flowsom_TESTING(ff_example)
     outliers <- flowSOM_is.outlier(fsom)
     testthat::expect_equal(sum(outliers), 209)
@@ -8,7 +8,7 @@ test_that("FlowSOM outliers", {
 
 
 test_that("FlowSOM outliers 2", {
-    ff_example <- example_processed()
+    ff_example <- example_processed(ncells = Inf)
     fsom <- do_flowsom_TESTING(ff_example)
     res <- flowSOM_predict(flowsom_result = fsom, flowset = flowCore::flowSet(ff_example))
 

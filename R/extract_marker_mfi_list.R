@@ -36,6 +36,7 @@
 #'     column_negative = "negative",
 #'     column_positive = "positive"
 #' )
+#' @export
 extract_marker_mfi_list <- function(
     sample_to_rescale,
     extracted_mfi,
