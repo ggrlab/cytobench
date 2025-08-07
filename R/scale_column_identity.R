@@ -11,6 +11,7 @@
 #'
 #' @export
 #' @keywords relativisation
+#' @examples
 #' ff_dt <- simulate_ff(columns = c("FL1", "FL2", "FL3"), flowcore = FALSE)
 #' dt2 <- data.table::data.table(ff_dt)
 #' scale_column_identity(

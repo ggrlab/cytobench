@@ -59,10 +59,17 @@ the new meta-clustering.
 \examples{
 ff_example <- example_processed()
 fsom <- do_flowsom_TESTING(ff_example)
+testthat::expect_true(fsom$map$nMetaclusters == 10)
 n_metaclusters <- 3
+res <- flowSOM_predict(
+    flowsom_result = fsom,
+    flowset = flowCore::flowSet(ff_example),
+    n_metacluster = n_metaclusters
+)
+
 res_norecluster <- flowSOM_newMetacluster(
     flowsom_result = fsom,
-    clustered_df = fsom,
+    clustered_df = res[["ncells_per_x"]][["cluster"]],
     n_metacluster = n_metaclusters
 )
 }

@@ -215,8 +215,8 @@ do_flowsom_TESTING <- function(ff) {
         colsToUse = c(9, 12, 14:18),
 
         # SOM grid dimensions
-        xdim = 7,
-        ydim = 7,
+        xdim = 4,
+        ydim = 4,
 
         # Number of meta-clusters to generate
         nClus = 10
