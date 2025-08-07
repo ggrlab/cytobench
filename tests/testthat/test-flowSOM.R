@@ -24,7 +24,7 @@ test_that("FlowSOM new Metaclusters", {
     testthat::expect_true(fsom$map$nMetaclusters == 10)
 
     # for (n_metaclusters in 3:44) {
-    for (n_metaclusters in c(3,8,12)) {
+    for (n_metaclusters in c(3, 8, 12)) {
         res <- flowSOM_predict(
             flowsom_result = fsom,
             flowset = flowCore::flowSet(ff_example),
@@ -115,7 +115,7 @@ test_that("FlowSOM new Metaclusters, with/out new clustering", {
     fsom <- do_flowsom_TESTING(ff_example)
     testthat::expect_true(fsom$map$nMetaclusters == 10)
 
-    for (n_metaclusters in c(3,8,12)) {
+    for (n_metaclusters in c(3, 8, 12)) {
         res <- flowSOM_predict(
             flowsom_result = fsom,
             flowset = flowCore::flowSet(ff_example),
@@ -170,4 +170,21 @@ test_that("FlowSOM optimal", {
 
     testthat::expect_true(fsom$fs_res_train$map$nMetaclusters == 10)
     testthat::expect_equal(dim(fsom$fs_res_train$ConsensusClusterPlus_MAP), c(49, 10))
+})
+
+test_that("FlowSOM optimal, defaults", {
+    ff_example <- example_processed()
+    testthat::expect_warning(
+        suppressMessages(
+            fsom <- flowSOM_optimal(
+                flowCore::flowSet(ff_example),
+                # Metaclustering options:
+                nClus = 10
+            )
+        ),
+        "By using nClus, I am ignoring the parameter maxMeta"
+    )
+
+    testthat::expect_true(fsom$fs_res_train$map$nMetaclusters == 10)
+    testthat::expect_equal(dim(fsom$fs_res_train$ConsensusClusterPlus_MAP), c(100, 10))
 })

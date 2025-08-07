@@ -49,8 +49,8 @@
 #'     nClus = 5
 #' )
 flowSOM_optimal <- function(fs_train,
-                            colsToUse,
-                            transform = TRUE,
+                            colsToUse = NULL,
+                            transform = FALSE,
                             transformList = NULL,
                             outdir = NULL,
                             seed = 3711283,

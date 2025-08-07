@@ -6,8 +6,8 @@
 \usage{
 flowSOM_optimal(
   fs_train,
-  colsToUse,
-  transform = TRUE,
+  colsToUse = NULL,
+  transform = FALSE,
   transformList = NULL,
   outdir = NULL,
   seed = 3711283,
