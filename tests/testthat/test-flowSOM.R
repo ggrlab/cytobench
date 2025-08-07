@@ -63,7 +63,6 @@ test_that("FlowSOM new Metaclusters", {
         )
     )
 })
-
 # test wrapper_count_model
 test_that("FlowSOM wrapper_count_model", {
     ff_example <- example_processed()

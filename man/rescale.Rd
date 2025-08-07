@@ -63,7 +63,7 @@ extracted_mfis <- mfis_from_excel(
 set.seed(42)
 ff <- simulate_ff(columns = colnames(extracted_mfis[[1]]))
 f_unif_dict <- data.frame(
-    "unified" = flowCore::colnames(fs_ss[["sample0_12-panel"]]),
+    "unified" = flowCore::colnames(ff),
     "unified_single_staining" = flowCore::colnames(extracted_mfis[[1]])
 ) |>
     dplyr::mutate(

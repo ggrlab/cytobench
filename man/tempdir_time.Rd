@@ -4,10 +4,10 @@
 \alias{tempdir_time}
 \title{Create Timestamped Temporary Directory}
 \usage{
-tempdir_time(dir = tempdir(), ...)
+tempdir_time(dir = "removeme", ...)
 }
 \arguments{
-\item{dir}{Base directory to append the timestamp to. Defaults to \code{\link[=tempdir]{tempdir()}}. You might want
+\item{dir}{Base directory to append the timestamp to. Defaults to \code{"removeme"}. You might want
 to use \code{withr::local_tempdir()} to create a temporary directory that is automatically
 cleaned up after the session ends (Useful for testing).}
 

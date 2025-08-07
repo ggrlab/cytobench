@@ -9,7 +9,9 @@ flowSOM_newMetacluster(
   clustered_df = NULL,
   n_metacluster = NULL,
   update_flowsom = TRUE,
-  missing_seed = 3711283
+  missing_seed = 3711283,
+  title = local_tempdir_time(),
+  ...
 )
 }
 \arguments{
@@ -28,6 +30,13 @@ If provided, the function returns an updated version with newly assigned meta-cl
 
 \item{missing_seed}{Numeric.
 If \code{flowsom_result} does not contain a "seed" element, this seed will be used for re-metaclustering.}
+
+\item{title}{\code{ConsensusClusterPlus:ConsensusClusterPlus()}: character value for output directory. Directory is created only if plot is not NULL or writeTable is TRUE. This title can be an abosulte or relative path.
+
+If kept as \code{local_tempdir_time()}, a temporary directory is created with the current
+timestamp which is automatically REMOVED after the function call.}
+
+\item{...}{Further arguments passed to \code{ConsensusClusterPlus::ConsensusClusterPlus()}.}
 }
 \value{
 A named list with:
@@ -47,20 +56,14 @@ Optionally, a new number of meta-clusters can be specified, triggering recomputa
 \code{ConsensusClusterPlus}. The function also optionally updates the \code{FlowSOM} object to reflect
 the new meta-clustering.
 }
-\keyword{)}
-\keyword{3}
-\keyword{<-}
-\keyword{=}
-\keyword{clustered_df}
-\keyword{do_flowsom_TESTING(ff_example)}
-\keyword{example_processed()}
-\keyword{ff_example}
-\keyword{flowSOM_newMetacluster(}
+\examples{
+ff_example <- example_processed()
+fsom <- do_flowsom_TESTING(ff_example)
+n_metaclusters <- 3
+res_norecluster <- flowSOM_newMetacluster(
+    flowsom_result = fsom,
+    clustered_df = res[["ncells_per_x"]][["cluster"]],
+    n_metacluster = n_metaclusters
+)
+}
 \keyword{flowsom}
-\keyword{flowsom_result}
-\keyword{fsom}
-\keyword{fsom,}
-\keyword{n_metacluster}
-\keyword{n_metaclusters}
-\keyword{res[["ncells_per_x"]][["cluster"]],}
-\keyword{res_norecluster}

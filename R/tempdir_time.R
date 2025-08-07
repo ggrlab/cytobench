@@ -3,7 +3,7 @@
 #' Creates a new temporary directory by appending a timestamp to the default `tempdir()`.
 #' This is useful for generating isolated working directories in pipelines or scripts.
 #' @param dir
-#' Base directory to append the timestamp to. Defaults to [tempdir()]. You might want
+#' Base directory to append the timestamp to. Defaults to `"removeme"`. You might want
 #' to use `withr::local_tempdir()` to create a temporary directory that is automatically
 #' cleaned up after the session ends (Useful for testing).
 #' @param ... Additional arguments passed to `dir.create()`, such as `showWarnings` or `recursive`.
@@ -16,7 +16,7 @@
 #'
 #' @export
 #' @keywords misc
-tempdir_time <- function(dir = tempdir(), ...) {
+tempdir_time <- function(dir = "removeme", ...) {
     tmpdir_time <- paste0(dir, "_", format(Sys.time(), "%F_%H_%M_%OS3"))
     dir.create(tmpdir_time, ...)
     return(tmpdir_time)

@@ -193,6 +193,7 @@ wrapper_count_models <- function(df_list,
         outcome_types <- c(outcome_types, outcome_type)
         names(outcome_types)[length(outcome_types)] <- outcome_x
     }
+
     if (length(outcome_types) == 0) {
         stop("No valid outcomes found in dvs_potential")
     }

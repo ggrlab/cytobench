@@ -19,7 +19,14 @@
 #' @param update_flowsom Logical. If `TRUE`, the `flowsom_result` will be updated in place with the new meta-clustering.
 #' @param missing_seed Numeric.
 #' If `flowsom_result` does not contain a "seed" element, this seed will be used for re-metaclustering.
+#' @param title
+#' `ConsensusClusterPlus:ConsensusClusterPlus()`: character value for output directory. Directory is created only if plot is not NULL or writeTable is TRUE. This title can be an abosulte or relative path.
 #'
+#' If kept as `local_tempdir_time()`, a temporary directory is created with the current
+#' timestamp which is automatically REMOVED after the function call.
+#'
+#' @param ...
+#' Further arguments passed to `ConsensusClusterPlus::ConsensusClusterPlus()`.
 #' @return A named list with:
 #' \describe{
 #'   \item{`flowsom_newdata`}{The (optionally updated) `flowsom_result` with meta-clusters.}
@@ -28,6 +35,7 @@
 #' }
 #' @export
 #' @keywords flowsom
+#' @examples
 #' ff_example <- example_processed()
 #' fsom <- do_flowsom_TESTING(ff_example)
 #' n_metaclusters <- 3
@@ -40,7 +48,9 @@ flowSOM_newMetacluster <- function(flowsom_result,
                                    clustered_df = NULL,
                                    n_metacluster = NULL,
                                    update_flowsom = TRUE,
-                                   missing_seed = 3711283) {
+                                   missing_seed = 3711283,
+                                   title = local_tempdir_time(),
+                                   ...) {
     # to avoid R CMD check note about undefined global variable
     cluster_numeric <- cluster <- value <- metaCluster <- ncells <- NULL
     if (!all(is.null(n_metacluster))) {
@@ -67,8 +77,11 @@ flowSOM_newMetacluster <- function(flowsom_result,
                     t(flowsom_result$map$codes),
                     maxK = n_metacluster, reps = 100,
                     pItem = 0.9, pFeature = 1,
-                    title = tempdir(), plot = "pdf", verbose = FALSE,
-                    clusterAlg = "hc", distance = "euclidean", seed = seed
+                    plot = "pdf", verbose = FALSE,
+                    clusterAlg = "hc", distance = "euclidean",
+                    seed = seed,
+                    title = title,
+                    ...
                 )
             )
 

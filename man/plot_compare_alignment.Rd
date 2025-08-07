@@ -51,12 +51,20 @@ the results using ggplot2 with faceting by feature and scaling method.
 set.seed(123)
 dt_listlist <- list(
     "raw" = list(
-        "device1" = data.table(A = rnorm(500, 1), B = rnorm(500, 5), C = rnorm(500, 10)),
-        "device2" = data.table(A = rnorm(500, 1.2), B = rnorm(500, 4.8), C = rnorm(500, 9.5))
+        "device1" = data.table::data.table(
+            A = rnorm(500, 1), B = rnorm(500, 5), C = rnorm(500, 10)
+        ),
+        "device2" = data.table::data.table(
+            A = rnorm(500, 1.2), B = rnorm(500, 4.8), C = rnorm(500, 9.5)
+        )
     ),
     "default" = list(
-        "device1" = data.table(A = rnorm(500, 1), B = rnorm(500, 5), C = rnorm(500, 10)),
-        "device2" = data.table(A = rnorm(500, 1.1), B = rnorm(500, 5.1), C = rnorm(500, 10.5))
+        "device1" = data.table::data.table(
+            A = rnorm(500, 1), B = rnorm(500, 5), C = rnorm(500, 10)
+        ),
+        "device2" = data.table::data.table(
+            A = rnorm(500, 1.1), B = rnorm(500, 5.1), C = rnorm(500, 10.5)
+        )
     )
 )
 
