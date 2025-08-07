@@ -68,12 +68,17 @@
 #'     flowset = flowCore::flowSet(ff_example)
 #' )
 #' fake_clusterings <- lapply(res[["ncells_per_x"]], function(x) {
-#'     lapply(1:50, function(y) {
+#'     tmp <- lapply(1:25, function(y) {
 #'         x[1, -1] <- as.list(sample(1000, ncol(x) - 1))
-#'         x[1, 1] <- sample(c("A", "B"), 1)
-#'         x[["tvt"]] <- sample(c("train", "validation", "test", "prospective"), 1)
 #'         return(x)
 #'     }) |> do.call(what = rbind)
+#'     set.seed(40)
+#'     tmp[["tvt"]] <- sample(c("train", "validation", "test", "prospective"), nrow(tmp), replace = TRUE)
+#'     tmp[["sample"]] <- sample(c("A", "B"), nrow(tmp), replace = TRUE)
+#'     return(tmp)
+#' })
+#' lapply(fake_clusterings, function(x) {
+#'     dplyr::count(x, tvt, sample)
 #' })
 #' allowed_clusterings <- c("cluster", "metaCluster")
 #' finalmodels_predictions <- wrapper_count_models(
