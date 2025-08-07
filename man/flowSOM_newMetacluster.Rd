@@ -62,7 +62,7 @@ fsom <- do_flowsom_TESTING(ff_example)
 n_metaclusters <- 3
 res_norecluster <- flowSOM_newMetacluster(
     flowsom_result = fsom,
-    clustered_df = res[["ncells_per_x"]][["cluster"]],
+    clustered_df = fsom,
     n_metacluster = n_metaclusters
 )
 }

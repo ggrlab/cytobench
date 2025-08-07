@@ -105,7 +105,11 @@ fake_clusterings <- lapply(res[["ncells_per_x"]], function(x) {
         return(x)
     }) |> do.call(what = rbind)
     set.seed(40)
-    tmp[["tvt"]] <- sample(c("train", "validation", "test", "prospective"), nrow(tmp), replace = TRUE)
+    tmp[["tvt"]] <- sample(
+        c("train", "validation", "test", "prospective"),
+        nrow(tmp),
+        replace = TRUE
+    )
     tmp[["sample"]] <- sample(c("A", "B"), nrow(tmp), replace = TRUE)
     return(tmp)
 })
