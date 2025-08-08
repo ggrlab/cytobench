@@ -24,3 +24,9 @@ Here I do the exact same thing as in the FlowSOM package, but I return if the ce
 In contrast, the FlowSOM package returns summaries of that, OR a per-channel outlier assignment.
 This channelwise outlier assignment is different from the per-default reported outliers in the package itself.
 }
+\examples{
+ff_example <- example_processed()
+fsom <- do_flowsom_TESTING(ff_example)
+outliers <- flowSOM_is.outlier(fsom)
+}
+\keyword{flowsom}

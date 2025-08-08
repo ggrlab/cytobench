@@ -11,6 +11,5 @@
 #' @importFrom data.table .NGRP
 #' @importFrom data.table .SD
 #' @importFrom data.table data.table
-#' @importFrom stats median
 ## usethis namespace: end
 NULL

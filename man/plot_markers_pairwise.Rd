@@ -10,64 +10,97 @@ plot_markers_pairwise(
   special_cofactor_list,
   transform_fun = asinh,
   transform_fun_name = "asinh",
+  geom = c("hex", "points", "pointdensity"),
   bins = 50,
   diag_plot = FALSE,
   debugplots = FALSE,
   axis_full_labels = TRUE,
   n_cells = Inf,
-  count_transform = function(x) {
-     x
- },
+  count_transform = function(x) log10(x + 1),
   add_ggplot_elements = list()
 )
 }
 \arguments{
-\item{ff}{A flowFrame object}
+\item{ff}{A \code{flowFrame} containing the cytometry data.}
 
-\item{cofactor_namedvec}{A named vector with the cofactors for each marker. The names of the vector should be the same as the marker names in the flowFrame object.}
+\item{cofactor_namedvec}{A named numeric vector providing default cofactors per marker. The names
+of the vector should be the same as the marker names in the flowFrame object.}
 
-\item{special_cofactor_list}{A named list with special cofactors for certain marker combinations. The names of the list should be the marker combinations, separated by an underscore. The values should be a vector of two values, the first for the x-axis marker and the second for the y-axis marker.}
+\item{special_cofactor_list}{A named list with overrides for specific marker combinations.
+Each name should be \code{"markerX_markerY"}, with values being a
+numeric vector of length 2: \code{c(cofactor_x, cofactor_y)}.}
 
-\item{transform_fun}{The transformation function to apply to the data. Default is asinh.}
+\item{transform_fun}{A function used to transform intensity values (default: \code{asinh}).}
 
-\item{transform_fun_name}{The name of the transformation function. Default is "asinh".}
+\item{transform_fun_name}{Character label for the transformation function (used in axis labels).}
 
-\item{bins}{The number of bins for the hexbin plot}
+\item{geom}{Character.
+One of \code{"hex"} (default), \code{"points"}, or \code{"pointdensity"} -
+determines the ggplot2 geometry used. Hex is usually still the fastest.}
 
-\item{diag_plot}{Whether to include the diagonal plots}
+\item{bins}{Number of bins (resolution) in each 2D plot (default: 50).}
 
-\item{debugplots}{Whether to include debug plots (No cells, only text to show the layout)}
+\item{diag_plot}{Logical. Whether to include labeled marker names along the diagonal (default: FALSE).}
 
-\item{axis_full_labels}{Whether to include the cofactors in the axis labels}
+\item{debugplots}{Logical. If TRUE, plots text placeholders instead of actual data - useful for layout testing.}
 
-\item{n_cells}{The number of cells to plot. Default is Inf, which plots all cells.}
+\item{axis_full_labels}{Logical. If TRUE, axis labels include marker names and cofactor formulas.}
 
-\item{count_transform}{A function to transform the count values. Default is the identity function.}
+\item{n_cells}{Number of cells to downsample from \code{ff} (default: \code{Inf} = use all).}
 
-\item{add_ggplot_elements}{A list of ggplot elements to add to the plot. Default is an empty list.}
+\item{count_transform}{Function to transform hexbin/point counts (e.g. \code{log10(count + 1)}).}
+
+\item{add_ggplot_elements}{A list of ggplot layers to add to each panel (e.g. \code{list(ggplot2::theme_minimal())}).}
+}
+\value{
+A \code{patchwork} object: a composite grid of all marker pairwise comparisons.
 }
 \description{
-Plots all pairwise marker combinations with given cofactors. The cofactors are used to scale the markers before plotting. The plot is a hexbin plot of the asinh transformed values of the markers. The cofactors are used to scale the markers before plotting.
+Generates a matrix of 2D-density plots for all marker combinations in a flow cytometry dataset.
+Axes are asinh-transformed and scaled using marker-specific cofactors. This is particularly useful
+for visual QC of compensation, cofactor choices and signal separation.
 }
 \examples{
-pdf("removeme.pdf", width = 60, height = 50)
-print(
-    plot_combinations(
-        current_sample_gated[[1]],
-        pre_rescale_asinh_sscheck[[device_x]],
-        special_asinh[[device_x]],
-        debugplots = TRUE
-    )
+fs <- simulate_fs(
+    n_samples = 2,
+    flowcore = TRUE,
+    ncells = 250,
+    columns = c("FL1-A", "FL2-A", "FL3-A")
 )
-print(
-    plot_combinations(
-        current_sample_gated[[1]],
-        pre_rescale_asinh_sscheck[[device_x]],
-        special_asinh[[device_x]],
-        diag_plot = FALSE,
-        debugplots = TRUE
-    )
+p0 <- plot_markers_pairwise(fs[[1]])
+print(p0)
+p1 <- plot_markers_pairwise(
+    fs[[1]],
+    cofactor_namedvec = c("FL1-A" = 5, "FL2-A" = 10, "FL3-A" = 15),
+    special_cofactor_list = list("FL1-A_FL2-A" = c(3, 6), "FL2-A_FL3-A" = c(4, 8)),
+    transform_fun = function(x) log10(x + 1),
+    transform_fun_name = "log10p1"
 )
-dev.off()
-
+print(p1)
+p2 <- plot_markers_pairwise(
+    fs[[1]],
+    cofactor_namedvec = c("FL1-A" = 5, "FL2-A" = 10, "FL3-A" = 15),
+    special_cofactor_list = list("FL1-A_FL2-A" = c(3, 6), "FL2-A_FL3-A" = c(4, 8)),
+    geom = "points",
+    bins = 100,
+    diag_plot = TRUE,
+    debugplots = FALSE,
+    axis_full_labels = TRUE,
+    n_cells = 1000
+)
+print(p2)
+p3 <- plot_markers_pairwise(
+    fs[[1]],
+    cofactor_namedvec = c("FL1-A" = 5, "FL2-A" = 10, "FL3-A" = 15),
+    special_cofactor_list = list("FL1-A_FL2-A" = c(3, 6), "FL2-A_FL3-A" = c(4, 8)),
+    geom = "pointdensity",
+    bins = 100,
+    diag_plot = TRUE,
+    debugplots = FALSE,
+    axis_full_labels = TRUE,
+    n_cells = 1000,
+    add_ggplot_elements = list(ggplot2::theme_minimal())
+)
+print(p3)
 }
+\keyword{cytometry}

@@ -4,7 +4,7 @@
 \name{cytobench-package}
 \alias{cytobench}
 \alias{cytobench-package}
-\title{cytobench: Bench of tools for cytometry data}
+\title{cytobench: Bench of Tools for Cytometry Data and Relativisation}
 \description{
 Export .fcs files to be readable within Kaluza. Rescale data with references.
 }

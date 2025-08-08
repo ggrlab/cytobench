@@ -1,22 +1,23 @@
-
-#' Export fcs files
+#' Export Flow Cytometry Data as FCS Files
 #'
-#' Export a list of matrices, usually ``data.table``s.
+#' This function exports a list of matrices or `data.table`s as `.fcs` files using
+#' `flowCore::flowFrame()` and `flowCore::write.FCS()`. It ensures FCS-compatible formatting,
+#' adds optional safety scaling and shifting, handles marker names, and builds a shared
+#' extreme template sample to define channel ranges for all files.
 #'
-#' @param matrix_list
-#'  List of matrices, should all have the same number of columns.
-#' @param safety_scaling
-#' An .fcs file is generated from the maximum cells (high and low). This safety scaling
-#' is soleily for the range of the .fcs files. This does not change any cell values.
-#' @param safety_shift
-#' CAREFUL! Introducing a value here is changing all cell values. It adds this value
-#' to all cells. This is "necessary" as Kaluza cannot visualize negative values on a
-#' linear scale in .fcs files.
-#' @param outdir
-#' Where should the list of matrices be written to. Filenames come from names(matrix_list).
-#' @param use.names Should the column names of each matrix be used when concattenating
-#' the extreme .fcs?
-#' @param verbose Verbose output?
+#' This is particularly useful for exporting flow cytometry data for use in software like Kaluza,
+#' which reads the metadata to set up the plots. Especially the maximum and minimum channel
+#' values are important for Kaluza to visualize the data correctly.
+#'
+#' @param matrix_list A named list of matrices or `data.table`s, all with the same number of columns.
+#' @param safety_scaling Numeric. A scaling factor applied to the max/min range template. Does not modify actual data.
+#'   Default is `1.20` (20% safety buffer).
+#' @param safety_shift Numeric. CAREFUL - MODIFIES DATA AT SAVE!
+#'  An additive shift applied to all cell values before export.
+#'  Necessary to avoid negative values in linear scale visualizations in tools like Kaluza. Default is `0`.
+#' @param outdir Character. Output directory for the `.fcs` files. Filenames are derived from `names(matrix_list)`.
+#' @param use.names Logical. If `TRUE`, retains column names during the concatenation of extreme samples.
+#' @param verbose Logical. Whether to print progress messages. Default is `TRUE`.
 #' @param new_colnames_to In our usecase, there is often the case where we have:
 #'
 #' Sample1:
@@ -56,21 +57,26 @@
 #' Every value which is called "marker" will be used as a marker name setting
 #' flowCore::markernames() IN ORDER! The other values are ignored.
 #'
+#' @param extreme_template A matrix or `flowFrame` to use as a shared max/min template across all samples.
 #'
-#' @param extreme_template
 #' If you have an extreme sample which you want to use as a template for all other samples,
 #' you can provide it here. Usually, this would be the returned fcs_extreme_copy from a
 #' previous run of this function.
 #' Essentially, it needs at least 2 cells (high and low) as "extreme" values.
 #' The cells are replaced by the actual cells given in the matrix_list.
+#' @param cytname Character.
+#' The name of the cytometer. Stored in the `$CYT` keyword, used by Kaluza for default instrument settings.
+#' You can use this to 1) track the source of the data and 2) have one cytname for each extreme template you used.
 #'
-#' @param cytname
-#' The name of the cytometer. This is a custom keyword that we use to track the source. It is e.g. used by Kaluza to identify the default parameters for the cytometer.
-#' @return fcs_extreme_copy:
+#' @return A `flowFrame` (`fcs_extreme_copy`) representing the extreme template.
 #' A copy of the extreme_template which was used to save all samples. The fcs-file
 #' ranges for all samples come from this extreme sample.
 #'
 #' @export
+#' @keywords cytometry
+#' @examples
+#' ff <- simulate_ff()
+#' export_fcs(list("s1.csv" = flowCore::exprs(ff)), outdir = local_tempdir_time())
 export_fcs <- function(matrix_list,
                        safety_scaling = 1.20,
                        safety_shift = 0,
@@ -82,9 +88,12 @@ export_fcs <- function(matrix_list,
                        extreme_template = NULL,
                        cytname = "cytobench_exportedFCS") {
     matrix_list_dt <- lapply(matrix_list, data.table::as.data.table)
+
     if (verbose) {
         cat("Concattenating extreme values of all samples with data.table\n")
     }
+
+    # Build extreme template if not provided
     if (is.null(extreme_template)) {
         matrix_list_dt_extremes <- lapply(matrix_list_dt, function(x) {
             rbind(
@@ -98,13 +107,12 @@ export_fcs <- function(matrix_list,
         } else {
             read_files_bound <- matrix_list_dt_extremes[[1]]
             for (x in matrix_list_dt_extremes[-1]) {
-                if (verbose) {
-                    cat(".")
-                }
+                if (verbose) cat(".")
                 read_files_bound <- rbind(read_files_bound, x, use.names = FALSE)
             }
         }
 
+        # Assign final column names for the extreme template
         if (length(new_colnames) == 1 &&
             (is.numeric(new_colnames[1]) || new_colnames %in% names(matrix_list_dt))) {
             # If new_colnames = 1, this is default behaviour with rbind(...., use.names=FALSE)
@@ -123,12 +131,13 @@ export_fcs <- function(matrix_list,
             colnames(read_files_bound) <- names(new_colnames)
         }
 
+        # Create extreme matrix with safety scaling/shifting
         .SD <- NULL #  only for linting
         extreme_template <- rbind(
             read_files_bound[, lapply(.SD, max)],
             read_files_bound[, lapply(.SD, min)]
         )
-        # have a security net of 20% plus 100 such that no values are negative (for Kaluza)
+        # E.g. have a security net of 20% plus 100 such that no values are negative (for Kaluza)
         extreme_template_safeties <- as.matrix(extreme_template) * safety_scaling + safety_shift
         fcs_extreme <- flowCore::flowFrame(extreme_template_safeties)
         fcs_extreme_copy <- flowCore::flowFrame(extreme_template_safeties)
@@ -140,6 +149,7 @@ export_fcs <- function(matrix_list,
         fcs_extreme_copy <- flowCore::flowFrame(as.matrix(extreme_template) + safety_shift)
     }
 
+    # Loop through each sample and export as .fcs
     for (file_x in names(matrix_list_dt)) {
         current_file <- file.path(outdir, paste0(file_x, ".fcs"))
         dir.create(dirname(current_file), recursive = TRUE, showWarnings = FALSE)
@@ -165,21 +175,24 @@ export_fcs <- function(matrix_list,
         flowCore::keyword(fcs_extreme)[["GUID"]] <- file_x
         flowCore::keyword(fcs_extreme)[["FILENAME"]] <- file_x
         flowCore::keyword(fcs_extreme)[["$CYT"]] <- cytname
-
         # This is a custom (by us) keyword that we use to track
         # the source of how the fcs file was generated
-        flowCore::keyword(fcs_extreme)[["CODE_SOURCE"]] <- "2023-04-11_SSS_04/src/_functions/export_fcs.R"
+        flowCore::keyword(fcs_extreme)[["CODE_SOURCE"]] <- paste0("cytobench_", utils::packageVersion("cytobench"))
 
+        # Assign expression values and write FCS
         # Replace the data with the matrix
         Biobase::exprs(fcs_extreme) <- as.matrix(matrix_list_dt[[file_x]]) + safety_shift
         flowCore::write.FCS(fcs_extreme, current_file)
+
         if (verbose) {
             cat("\nWrote ", current_file)
         }
     }
+
     if (verbose) {
         cat("\n")
     }
 
+    flowCore::keyword(fcs_extreme_copy)[["GUID"]] <- "extreme_template"
     return(fcs_extreme_copy)
 }

@@ -29,7 +29,8 @@ only used to cluster the negative and positive populations.}
 
 \item{regex_multistain}{A regular expression pattern to identify multi-stain FCS files. Default is "(_15-MasterMix)\\.fcs$".}
 
-\item{multistain_columns}{A character vector specifying the relevant columns for multi-staining. Default is c("FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A", "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A").}
+\item{multistain_columns}{A character vector specifying the relevant columns for multi-staining.
+Default is c("FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A", "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A").}
 
 \item{gating_set_file}{A gating set file or object to apply to the FCS files. Default is NULL.
 Usually you want to gate lymphocytes before extracting the MFIs. If a character string is provided,
@@ -37,27 +38,7 @@ the gating set is loaded from the file. If a (GatingSet) object is provided, it 
 
 \item{gate_extract}{A specific gate to extract from the gating set. Default is NULL.}
 
-\item{multistaining}{A logical indicating whether to extract multi-stained samples. Default is FALSE.
-Note that if TRUE, the function will return a dataframe as following:
-
-#' \preformatted{
-# A tibble: 10 x 4
-  feature negative positive unstained sample            negative.multi positive.multi
-  <chr>      <dbl>    <dbl>     <dbl> <chr>                      <dbl>          <dbl>
-1 FITC-A      528.    5489.     520.  data-raw/MX.comp~           528.          5489.
-2 PE-A        497.    4224.     477.  data-raw/MX.comp~           497.          4224.
-3 ECD-A       413.    4260.     411.  data-raw/MX.comp~           413.          4260.
-4 PC5.5-A     167.    3306.     145.  data-raw/MX.comp~           167.          3306.
-5 PC7-A       134.    3958.     131.  data-raw/MX.comp~           134.          3958.
-6 APC-A       120.    1896.     106.  data-raw/MX.comp~           120.          1896.
-7 AF700-A     110.    1884.      87.7 data-raw/MX.comp~           110.          1884.
-8 AA750-A     290.    3116.     284.  data-raw/MX.comp~           290.          3116.
-9 PB-A        422.    4434.     388.  data-raw/MX.comp~           422.          4434.
-10 KrO-A       458.    3858.     416.  data-raw/MX.comp~           458.          3858.
-}
-
-If there have been NO single-stained samples (except for the unstained samples),
-"negative" and "positive" will be filled with the values from the multi-stained samples.}
+\item{...}{Additional arguments which are not used here.}
 }
 \value{
 A data frame with the extracted MFIs. E.g.:
@@ -76,15 +57,50 @@ A data frame with the extracted MFIs. E.g.:
  9 PB-A        469.   13426.     442.
 10 KrO-A       442.    4473.     444.
 }
+
+If there are multi-stained samples:
+#' \preformatted{
+# A tibble: 10 x 4
+  feature negative positive unstained sample            negative.multi positive.multi
+  <chr>      <dbl>    <dbl>     <dbl> <chr>                      <dbl>          <dbl>
+1 FITC-A      528.    5489.     520.  data-raw/MX.comp~           528.          5489.
+2 PE-A        497.    4224.     477.  data-raw/MX.comp~           497.          4224.
+3 ECD-A       413.    4260.     411.  data-raw/MX.comp~           413.          4260.
+4 PC5.5-A     167.    3306.     145.  data-raw/MX.comp~           167.          3306.
+5 PC7-A       134.    3958.     131.  data-raw/MX.comp~           134.          3958.
+6 APC-A       120.    1896.     106.  data-raw/MX.comp~           120.          1896.
+7 AF700-A     110.    1884.      87.7 data-raw/MX.comp~           110.          1884.
+8 AA750-A     290.    3116.     284.  data-raw/MX.comp~           290.          3116.
+9 PB-A        422.    4434.     388.  data-raw/MX.comp~           422.          4434.
+10 KrO-A       458.    3858.     416.  data-raw/MX.comp~           458.          3858.
+}
+
+If there have been NO single-stained samples (except for the unstained samples),
+"negative" and "positive" will be filled with the values from the multi-stained samples.
 }
 \description{
 This function extracts the median fluorescence intensity (MFI) from single-stain FCS files.
 }
 \examples{
-\dontrun{
-extracted_mfis <- extract_singlestain_mfi(
-    "data-raw/s001",
-    gating_set_file = "data-raw/CT_p001_s001_raw_ungated_none_Inf_navios_01-CD3-FITC-single_CD3_compensation.flowWorkspace_gatingset"
+set.seed(42)
+fs_ss <- simulate_cd3()
+tmpdir <- local_tempdir_time()
+flowCore::write.flowSet(fs_ss, tmpdir)
+
+extracted_mfis_singlestain <- extract_mfi(
+    tmpdir,
+    regex_singlestain = "(-(CD3-.*)|(none))\\\\.fcs$"
+)
+
+extracted_mfis_multistain <- extract_mfi(
+    tmpdir,
+    regex_singlestain = "(none)\\\\.fcs$",
+    multistaining = TRUE,
+    regex_multistain = "(_15-MasterMix)\\\\.fcs$",
+    multistain_columns = c(
+        "FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A",
+        "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A"
+    ),
 )
 }
-}
+\keyword{relativisation}

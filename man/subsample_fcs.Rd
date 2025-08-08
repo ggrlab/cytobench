@@ -34,8 +34,24 @@ This function reads an FCS file, subsamples it to a specified number of cells,
 and writes the subsampled data to a new file.
 }
 \examples{
-\dontrun{
-subsample_fcs("path/to/input.fcs", n_cells = 5000, seed = 12345, outdir = "output/directory", indir = "input/directory", verbose = TRUE)
+ff_dt <- simulate_ff(columns = c("FL1", "FL2", "FL3"), flowcore = TRUE)
+tmpdir <- local_tempdir_time()
+flowCore::write.FCS(ff_dt, file.path(tmpdir, "test.fcs"))
+list.files(tmpdir)
+# Run the subsampling function
+subsample_fcs(
+    file_x = file.path(tmpdir, "test.fcs"),
+    n_cells = 100,
+    seed = 42,
+    outdir = file.path(tmpdir, "subsampled"),
+    indir = tmpdir,
+    verbose = FALSE
+)
+ff <- flowCore::read.FCS(file.path(tmpdir, "subsampled", "test.fcs"))
+if (nrow(ff) != 100) {
+    stop("Subsampling did not return the expected number of cells.")
 }
+unlink(tmpdir, recursive = TRUE) # Clean up the temporary directory
 
 }
+\keyword{cytometry}

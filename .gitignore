@@ -5,6 +5,7 @@
 .DS_Store
 .quarto
 data-raw/PRE_ARCSINH_CSV
+data-raw/
 inst/
 example_flowcyto.csv
 inst/doc
@@ -12,3 +13,5 @@ data-raw/CT_p001_s001_raw_ungated_none_Inf_navios_01-CD3-FITC-single_CD3_compens
 data-raw/s001
 data-raw/MX.compensated-manual.navios.s050
 tests/testthat/testdata/
+**removeme**
+docs

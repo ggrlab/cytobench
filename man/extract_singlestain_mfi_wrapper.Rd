@@ -10,7 +10,7 @@ extract_singlestain_mfi_wrapper(
   transform_fun = function(x) {
      asinh(x/1000)
  },
-  relevant_columns,
+  relevant_columns = NA,
   ...
 )
 }
@@ -20,6 +20,11 @@ extract_singlestain_mfi_wrapper(
 \item{transform_fun}{A function to transform the fluorescence values. Default is \code{function(x) { asinh(x / 1e3) }}.
 The reported MFIs are calculated as the median of the UNtransformed values. Transformation is
 only used to cluster the negative and positive populations.}
+
+\item{relevant_columns}{A character vector specifying the relevant columns for MFI extraction.
+Default is \code{NA}, which means all columns will be used.}
+
+\item{...}{Additional arguments passed to the clustering function.}
 }
 \value{
 A data frame with the extracted MFIs. E.g.:
@@ -43,3 +48,18 @@ A data frame with the extracted MFIs. E.g.:
 Extract Single Stain Median Fluorescence Intensity (MFI)
 This function extracts the median fluorescence intensity (MFI) from single-stain FCS files.
 }
+\examples{
+set.seed(42)
+fs_ss <- simulate_cd3()
+tmpdir <- local_tempdir_time()
+flowCore::write.flowSet(fs_ss, tmpdir)
+loaded_fcs <- load_mfi_files(
+    fcs_dir = tmpdir,
+    regex_singlestain = "(-(CD3-.*)|(none))\\\\.fcs$",
+    gating_set_file = NULL,
+    gate_extract = NULL
+)
+extract_singlestain_mfi_wrapper(loaded_fcs)
+}
+\keyword{internal}
+\keyword{relativisation}

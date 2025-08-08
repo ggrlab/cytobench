@@ -1,17 +1,10 @@
-empty_tibble <- tibble::tibble(
-    "feature" = NA,
-    "negative" = NA,
-    "positive" = NA,
-    "positive.sd" = NA,
-    "negative.sd" = NA
-)
-
 #' Extract Single Stain Median Fluorescence Intensity (MFI)
 #'
 #' This function extracts the median fluorescence intensity (MFI) from single-stain FCS files.
 #'
 #' @param fcs_dir A character string specifying the directory containing the FCS files. Default is "data-raw/s001".
-#' @param regex_singlestain A regular expression pattern to identify single-stain FCS files. Default is "(-(CD3-.*)|(none))\\.fcs$".
+#' @param regex_singlestain
+#' A regular expression pattern to identify single-stain FCS files. Default is "(-(CD3-.*)|(none))\\.fcs$".
 #' @param transform_fun
 #' A function to transform the fluorescence values. Default is `function(x) { asinh(x / 1e3) }`.
 #' The reported MFIs are calculated as the median of the UNtransformed values. Transformation is
@@ -21,9 +14,32 @@ empty_tibble <- tibble::tibble(
 #' the gating set is loaded from the file. If a (GatingSet) object is provided, it is used directly.
 #'
 #' @param gate_extract A specific gate to extract from the gating set. Default is NULL.
-#' @param multistaining A logical indicating whether to extract multi-stained samples. Default is FALSE.
-#' Note that if TRUE, the function will return a dataframe as following:
 #'
+#' @param regex_multistain
+#' A regular expression pattern to identify multi-stain FCS files. Default is "(_15-MasterMix)\\.fcs$".
+#' @param multistain_columns
+#' A character vector specifying the relevant columns for multi-staining.
+#'  Default is c("FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A", "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A").
+#' @param ... Additional arguments which are not used here.
+#' @return A data frame with the extracted MFIs. E.g.:
+#' \preformatted{
+#' # A tibble: 10 x 4
+#'    feature negative positive unstained
+#'    <chr>      <dbl>    <dbl>     <dbl>
+#'  1 FITC-A      530.   58567.     576.
+#'  2 PE-A        526.  149506.     511.
+#'  3 ECD-A       453.  107584.     454.
+#'  4 PC5.5-A     233.  242867.     166.
+#'  5 PC7-A       176.  195307.     138.
+#'  6 APC-A       136.  105036.     122.
+#'  7 AF700-A     131.   28408.      97.2
+#'  8 AA750-A     324.   75247.     296.
+#'  9 PB-A        469.   13426.     442.
+#' 10 KrO-A       442.    4473.     444.
+#' }
+#'
+#'
+#' If there are multi-stained samples:
 #' #' \preformatted{
 #' # A tibble: 10 x 4
 # A tibble: 10 x 7
@@ -43,35 +59,29 @@ empty_tibble <- tibble::tibble(
 #'
 #' If there have been NO single-stained samples (except for the unstained samples),
 #' "negative" and "positive" will be filled with the values from the multi-stained samples.
-#'
-#' @param regex_multistain A regular expression pattern to identify multi-stain FCS files. Default is "(_15-MasterMix)\\.fcs$".
-#' @param multistain_columns A character vector specifying the relevant columns for multi-staining. Default is c("FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A", "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A").
-#'
-#' @return A data frame with the extracted MFIs. E.g.:
-#' \preformatted{
-#' # A tibble: 10 x 4
-#'    feature negative positive unstained
-#'    <chr>      <dbl>    <dbl>     <dbl>
-#'  1 FITC-A      530.   58567.     576.
-#'  2 PE-A        526.  149506.     511.
-#'  3 ECD-A       453.  107584.     454.
-#'  4 PC5.5-A     233.  242867.     166.
-#'  5 PC7-A       176.  195307.     138.
-#'  6 APC-A       136.  105036.     122.
-#'  7 AF700-A     131.   28408.      97.2
-#'  8 AA750-A     324.   75247.     296.
-#'  9 PB-A        469.   13426.     442.
-#' 10 KrO-A       442.    4473.     444.
-#' }
+#' @export
+#' @keywords relativisation
 #' @examples
-#' \dontrun{
-#' extracted_mfis <- extract_singlestain_mfi(
-#'     "data-raw/s001",
-#'     gating_set_file = "data-raw/CT_p001_s001_raw_ungated_none_Inf_navios_01-CD3-FITC-single_CD3_compensation.flowWorkspace_gatingset"
+#' set.seed(42)
+#' fs_ss <- simulate_cd3()
+#' tmpdir <- local_tempdir_time()
+#' flowCore::write.flowSet(fs_ss, tmpdir)
+#'
+#' extracted_mfis_singlestain <- extract_mfi(
+#'     tmpdir,
+#'     regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$"
 #' )
-#' }
-#' @export
-#' @export
+#'
+#' extracted_mfis_multistain <- extract_mfi(
+#'     tmpdir,
+#'     regex_singlestain = "(none)\\.fcs$",
+#'     multistaining = TRUE,
+#'     regex_multistain = "(_15-MasterMix)\\.fcs$",
+#'     multistain_columns = c(
+#'         "FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A",
+#'         "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A"
+#'     ),
+#' )
 extract_mfi <- function(fcs_dir = "data-raw/s001",
                         regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
                         transform_fun = function(x) {
@@ -87,7 +97,7 @@ extract_mfi <- function(fcs_dir = "data-raw/s001",
                         ...) {
     joint_df <- tryCatch(
         {
-            loaded_fcs <- cytobench:::load_mfi_files(
+            loaded_fcs <- load_mfi_files(
                 fcs_dir = fcs_dir,
                 regex_singlestain = regex_singlestain,
                 gating_set_file = gating_set_file,
@@ -161,7 +171,22 @@ extract_mfi <- function(fcs_dir = "data-raw/s001",
 
 #' Extract Single Stain Median Fluorescence Intensity (MFI)
 #' @inheritParams extract_mfi
+#' @param transform
+#' As `transform_fun` in `extract_mfi`.
 #' @export
+#' @keywords relativisation
+#' @examples
+#' set.seed(42)
+#' fs_ss <- simulate_cd3()
+#' tmpdir <- local_tempdir_time()
+#' flowCore::write.flowSet(fs_ss, tmpdir)
+#' loaded_fcs <- load_mfi_files(
+#'     fcs_dir = tmpdir,
+#'     regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
+#'     gating_set_file = NULL,
+#'     gate_extract = NULL
+#' )
+#' extract_relevant_mfis_singlestain(loaded_fcs)
 extract_singlestain_mfi <- function(fcs_dir = "data-raw/s001",
                                     regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
                                     transform = function(x) {
@@ -180,6 +205,37 @@ extract_singlestain_mfi <- function(fcs_dir = "data-raw/s001",
     )
 }
 
+
+#' Load and Optionally Gate FCS Files for MFI Extraction
+#'
+#' This function loads FCS files from a directory that match a specified pattern
+#' (typically single-stain or multi-stain), and optionally applies a `GatingSet`
+#' to restrict analysis to a specific gated population.
+#'
+#' @param fcs_dir Character. Directory containing FCS files. Default: `"data-raw/s001"`.
+#' @param regex_singlestain Character. Regular expression used to filter FCS filenames.
+#'   Only matching files will be loaded. Default: `"(-(CD3-.*)|(none))\\.fcs$"`.
+#' @param gating_set_file Optional. A path to a `GatingSet` folder (as a string) or an in-memory `GatingSet` object.
+#'   If provided, the gating set will be applied to all loaded FCS samples.
+#' @param gate_extract Optional. Name of the population to extract from the gating set.
+#'   If `NULL`, the first non-root gate will be used automatically.
+#'
+#' @return A named list of cytosets or gated cytosets, ready for MFI computation.
+#'   Each entry corresponds to one FCS file.
+#' @keywords relativisation
+#' @keywords internal
+#' @examples
+#' set.seed(42)
+#' fs_ss <- simulate_cd3()
+#' tmpdir <- local_tempdir_time()
+#' flowCore::write.flowSet(fs_ss, tmpdir)
+#' loaded_fcs <- load_mfi_files(
+#'     fcs_dir = tmpdir,
+#'     regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
+#'     gating_set_file = NULL,
+#'     gate_extract = NULL
+#' )
+#' @export
 load_mfi_files <- function(fcs_dir = "data-raw/s001",
                            regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
                            gating_set_file = NULL,
@@ -237,6 +293,9 @@ load_mfi_files <- function(fcs_dir = "data-raw/s001",
 #' @param transform_fun A function to transform the fluorescence values. Default is `function(x) { asinh(x / 1e3) }`.
 #' The reported MFIs are calculated as the median of the UNtransformed values. Transformation is
 #' only used to cluster the negative and positive populations.
+#' @param relevant_columns A character vector specifying the relevant columns for MFI extraction.
+#' Default is `NA`, which means all columns will be used.
+#' @param ... Additional arguments passed to the clustering function.
 #' @return A data frame with the extracted MFIs. E.g.:
 #' \preformatted{
 #' # A tibble: 10 x 4
@@ -253,11 +312,26 @@ load_mfi_files <- function(fcs_dir = "data-raw/s001",
 #'  9 PB-A        469.   13426.     442.
 #' 10 KrO-A       442.    4473.     444.
 #' }
+#' @keywords relativisation
+#' @keywords internal
+#' @export
+#' @examples
+#' set.seed(42)
+#' fs_ss <- simulate_cd3()
+#' tmpdir <- local_tempdir_time()
+#' flowCore::write.flowSet(fs_ss, tmpdir)
+#' loaded_fcs <- load_mfi_files(
+#'     fcs_dir = tmpdir,
+#'     regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
+#'     gating_set_file = NULL,
+#'     gate_extract = NULL
+#' )
+#' extract_singlestain_mfi_wrapper(loaded_fcs)
 extract_singlestain_mfi_wrapper <- function(loaded_fcs,
                                             transform_fun = function(x) {
                                                 asinh(x / 1e3)
                                             },
-                                            relevant_columns,
+                                            relevant_columns = NA,
                                             ...) {
     # Extract median fluorescence intensities (MFIs) from the loaded FCS files
     relevant_mfis_single <- tryCatch(
@@ -265,12 +339,12 @@ extract_singlestain_mfi_wrapper <- function(loaded_fcs,
             extract_relevant_mfis_singlestain(loaded_fcs, transform_fun = transform_fun, ...)
         },
         error = function(e) {
-            list(empty_tibble)
+            list(empty_tibble())
         }
     )
     # Combine single stainings into a single data frame
     single_stainings <- do.call(rbind, relevant_mfis_single[!sapply(relevant_mfis_single, function(x) nrow(x) > 1)])
-    if (!missing(relevant_columns)) {
+    if (!all(is.na(relevant_columns))) {
         for (relevant_x in relevant_columns) {
             if (!relevant_x %in% single_stainings$feature) {
                 single_stainings <- rbind(single_stainings, tibble::tibble(
@@ -309,12 +383,48 @@ extract_singlestain_mfi_wrapper <- function(loaded_fcs,
     }
     return(single_stainings)
 }
-
-clustering_seeded_mfi <- function(values, seed, transform_fun, featurename) {
+#' Clustered MFI Extraction for Single Marker Channel
+#'
+#' This function performs seeded k-means clustering (with two clusters) on transformed
+#' fluorescence values from a single marker channel. It returns the median and standard
+#' deviation of the original (untransformed) values per cluster, labeled as negative and positive.
+#'
+#' @param values Numeric vector. Raw fluorescence values from a single marker channel.
+#' @param seed Integer. Random seed to make clustering reproducible.
+#' @param transform_fun Function. Transformation to apply before clustering (e.g., `asinh(x / 1e3)`).
+#' @param featurename Character. Name of the feature/marker (e.g., `"FITC-A"`), used for labeling output.
+#'
+#' @return A one-row `tibble` with columns:
+#' \describe{
+#'   \item{`feature`}{The marker name.}
+#'   \item{`negative`, `positive`}{Clustered median intensities (original scale).}
+#'   \item{`negative.sd`, `positive.sd`}{Standard deviations within each cluster.}
+#' }
+#'
+#' @keywords relativisation
+#' @examples
+#' \dontrun{
+#' clustering_seeded_mfi(rnorm(100))
+#' clustering_seeded_mfi(
+#'     rnorm(100),
+#'     seed = 123,
+#'     transform_fun = function(x) asinh(x / 1e3),
+#'     featurename = "Test Marker"
+#' )
+#' }
+clustering_seeded_mfi <- function(values, seed = 42, transform_fun = function(x) {
+                                      x
+                                  }, featurename = NA) {
     set.seed(seed)
+
+    # Apply transformation before clustering
     clustering <- stats::kmeans(transform_fun(values), centers = 2)
-    mfis <- sort(tapply(values, clustering$cluster, median))
-    mfis_sd <- sort(tapply(values, clustering$cluster, sd))
+
+    # Compute median and standard deviation per cluster on original scale
+    mfis <- sort(tapply(values, clustering$cluster, stats::median))
+    mfis_sd <- sort(tapply(values, clustering$cluster, stats::sd))
+
+    # Format output as a single-row tibble
     mfis_tib <- tibble::tibble(
         "feature" = featurename,
         "negative" = mfis[1],
@@ -325,40 +435,86 @@ clustering_seeded_mfi <- function(values, seed, transform_fun, featurename) {
 
     return(mfis_tib)
 }
-clustering_seeded_mfi_multicolor <- function(values, seed = 42, transform_fun, featurename) {
+
+
+#' Clustered MFI Extraction for Multiple Marker Channels
+#'
+#' This function performs seeded k-means clustering (k = 2) on transformed multi-channel
+#' fluorescence values to separate negative and positive cell populations. It computes
+#' median, standard deviation, and interquartile range (IQR) of the untransformed
+#' values for each marker, returning a tidy `tibble` with one row per marker.
+#'
+#' The cluster with the lower total median signal across all markers is considered
+#' the negative population.
+#'
+#' @param values A numeric matrix or data.frame of untransformed expression values.
+#'   Columns represent marker channels; rows are cells.
+#' @param seed Integer. Random seed to ensure reproducibility. Default is `42`.
+#' @param transform_fun Function. Transformation to apply prior to clustering
+#'   (e.g., `asinh(x / 1e3)`).
+#'
+#' @return A `tibble` with columns:
+#' \describe{
+#'   \item{`feature`}{Channel name (from `colnames(values)`)}
+#'   \item{`negative`, `positive`}{Clustered median intensities (original scale)}
+#'   \item{`negative.sd`, `positive.sd`}{Standard deviations within clusters}
+#'   \item{`negative.iqr`, `positive.iqr`}{Interquartile ranges within clusters}
+#' }
+#'
+#' @keywords relativisation
+#' @examples
+#' \dontrun{
+#' df <- data.frame(
+#'     marker1 = rnorm(100, mean = 100, sd = 20),
+#'     marker2 = rnorm(100, mean = 200, sd = 30)
+#' )
+#' clustering_seeded_mfi_multicolor(df)
+#' clustering_seeded_mfi_multicolor(df, seed = 123, transform_fun = function(x) asinh(x / 1e3))
+#'}
+clustering_seeded_mfi_multicolor <- function(values,
+                                             seed = 42,
+                                             transform_fun = function(x) {
+                                                 x
+                                             }) {
+    cluster <- NULL # linting
     set.seed(seed)
+
+    # Cluster cells (rows) using transformed data
     clustering <- stats::kmeans(transform_fun(values), centers = 2)
+
+    # Add cluster assignments to original data
     values_copy <- data.table::data.table(values)
     values_copy[, cluster := clustering$cluster]
-    # calculate median per column grouped by cluster with data.table
-    medians <- values_copy[, lapply(.SD, median), by = cluster]
+
+    # calculate median per column (marker) grouped by cluster with data.table
+    medians <- values_copy[, lapply(.SD, stats::median), by = cluster]
+
+    # Define the "negative" cluster as the one with the lowest sum of medians
     index_negative_median <- which.min(apply(medians, 1, sum))
     clusternumber_negative_median <- medians[["cluster"]][index_negative_median]
 
+    # Format medians
     melted_medians <- data.table::melt(medians, id.vars = "cluster")
     melted_medians[, cluster := ifelse(cluster == clusternumber_negative_median, "negative", "positive")]
     cast_medians <- data.table::dcast(melted_medians, variable ~ cluster)
 
-    sds <- values_copy[, lapply(.SD, sd), by = cluster]
+    # Format standard deviations
+    sds <- values_copy[, lapply(.SD, stats::sd), by = cluster]
     melted_sds <- data.table::melt(sds, id.vars = "cluster")
     melted_sds[, cluster := ifelse(cluster == clusternumber_negative_median, "negative.sd", "positive.sd")]
     cast_sds <- data.table::dcast(melted_sds, variable ~ cluster)
 
-    iqrs <- values_copy[, lapply(.SD, IQR), by = cluster]
+    # Format IQRs
+    iqrs <- values_copy[, lapply(.SD, stats::IQR), by = cluster]
     melted_iqrs <- data.table::melt(iqrs, id.vars = "cluster")
     melted_iqrs[, cluster := ifelse(cluster == clusternumber_negative_median, "negative.iqr", "positive.iqr")]
     cast_iqrs <- data.table::dcast(melted_iqrs, variable ~ cluster)
 
-    joint <- dplyr::left_join(
-        cast_medians,
-        cast_sds,
-        by = "variable"
-    ) |>
-        dplyr::left_join(
-            cast_iqrs,
-            by = "variable"
-        ) |>
+    # Join all summaries
+    joint <- dplyr::left_join(cast_medians, cast_sds, by = "variable") |>
+        dplyr::left_join(cast_iqrs, by = "variable") |>
         tibble::as_tibble()
+
     colnames(joint)[1] <- "feature"
     # # A tibble: 10 × 5
     #    variable     negative positive negative.sd positive.sd
@@ -368,19 +524,43 @@ clustering_seeded_mfi_multicolor <- function(values, seed = 42, transform_fun, f
     #  3 Blue - 610-A     39.2     449.        94.6       172.
     return(joint)
 }
-#' Extract Single Stain Median Fluorescence Intensity (MFI)
-#' This function extracts the median fluorescence intensity (MFI) from single-stain FCS files.
-#' @param loaded_fcs_singlestain A list of cytosets containing the loaded FCS files.
-#' @param transform_fun A function to transform the fluorescence values. Default is `function(x) { asinh(x / 1e3) }`.
-#' The reported MFIs are calculated as the median of the UNtransformed values. Transformation is only used to cluster the negative and positive populations.
-#' @return A data frame with the extracted MFIs. E.g.:
-#' \preformatted{
-#'   feature negative positive unstained
-#'  <chr>      <dbl>    <dbl>     <dbl>
-#' 1 FITC-A      530.   58567.     576.
-#' 2 PE-A        526.  149506.     511.
+
+
+#' Extract MFIs from Single-Stain Cytometry Samples
+#'
+#' This function extracts the median fluorescence intensity (MFI) for each single-stain sample
+#' using seeded k-means clustering (k=2) to separate positive and negative populations. It also identifies
+#' unstained samples (i.e., samples with no non-empty channels) and records their median values.
+#'
+#' @param loaded_fcs_singlestain A named list of cytosets or cytoframes containing single-stain FCS data.
+#'   Each element should contain a single sample with one non-empty marker channel, or none (for unstained).
+#' The channels must have "empty" as their description if not filled.
+#' @param transform_fun Function applied to the data before clustering.
+#' Default: `function(x) asinh(x / 1e3)`. Does not affect reported MFIs, only through the clustering.
+#' @param seed Integer random seed for reproducible k-means clustering. Default is `42`.
+#'
+#' @return A named list of `tibble`s, one per input file, each with columns:
+#' \describe{
+#'   \item{`feature`}{The marker channel name (e.g., `"FITC-A"`).}
+#'   \item{`negative`, `positive`}{MFI values per cluster, if applicable.}
+#'   \item{`unstained`}{Median intensity if the sample is unstained (no non-empty channels).}
 #' }
+#'
 #' @export
+#' @keywords relativisation
+#' @examples
+#' set.seed(42)
+#' fs_ss <- simulate_cd3()
+#' tmpdir <- local_tempdir_time()
+#' flowCore::write.flowSet(fs_ss, tmpdir)
+#' loaded_fcs <- load_mfi_files(
+#'     fcs_dir = tmpdir,
+#'     regex_singlestain = "(-(CD3-.*)|(none))\\.fcs$",
+#'     gating_set_file = NULL,
+#'     gate_extract = NULL
+#' )
+#' extract_singlestain_mfi_wrapper(loaded_fcs)
+#' extract_relevant_mfis_singlestain(loaded_fcs)
 extract_relevant_mfis_singlestain <- function(loaded_fcs_singlestain,
                                               transform_fun = function(x) {
                                                   x
@@ -388,24 +568,29 @@ extract_relevant_mfis_singlestain <- function(loaded_fcs_singlestain,
                                               seed = 42) {
     sapply(names(loaded_fcs_singlestain), function(f_x) {
         ff_x <- flowWorkspace::cytoframe_to_flowFrame(loaded_fcs_singlestain[[f_x]][[1]])
+
+        # Identify non-empty marker channels (all empty channels are named "empty")
         nonempty_channel <- which(flowCore::markernames(ff_x) != "empty")
 
-        # Check if there is more than one non-empty channel
+        # Sanity check: more than one non-empty channel is unexpected for single-stain data
         if (length(nonempty_channel) > 1) {
             warning("More than one non-empty channel in ", f_x)
-            return(empty_tibble)
+            return(empty_tibble())
         }
 
-        # If no non-empty channel, it is the unstained sample
+        # Handle unstained sample (no active marker channel)
         if (length(nonempty_channel) == 0) {
-            mfis <- apply(flowCore::exprs(ff_x), 2, median)
+            mfis <- apply(flowCore::exprs(ff_x), 2, stats::median)
             mfis_tib <- tibble::tibble(
                 "feature" = names(mfis),
-                "unstained" = mfis,
+                "unstained" = mfis
             )
         } else {
             # Cluster the relevant channel into two populations and return the median of both
+            # Extract expression values from the single stained channel
             values_nonempty <- flowCore::exprs(ff_x)[, names(nonempty_channel)]
+
+            # Apply seeded k-means to separate negative and positive
             mfis_tib <- clustering_seeded_mfi(
                 values = values_nonempty,
                 seed = seed,
@@ -418,38 +603,76 @@ extract_relevant_mfis_singlestain <- function(loaded_fcs_singlestain,
     }, simplify = FALSE)
 }
 
+
 #' Extract Multi-Stain Median Fluorescence Intensity (MFI)
-#' This function extracts the median fluorescence intensity (MFI) from multi-stained FCS files.
-#' @param loaded_fcs_multistain A list of cytosets containing the loaded FCS files.
-#' @param transform_fun A function to transform the fluorescence values. Default is `function(x) { asinh(x / 1e3) }`.
-#' The reported MFIs are calculated as the median of the UNtransformed values. Transformation is only used to cluster the negative and positive populations.
-#' @param relevant_columns A character vector specifying the relevant columns for multi-staining. Default is c("FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A", "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A").
-#' @return A data frame with the extracted MFIs. E.g.:
-#' \preformatted{
-#'  feature negative positive negative.sd positive.sd
-#' <chr>      <dbl>    <dbl>     <dbl>      <dbl>
-#' 1 FITC-A      530.   58567.     576.      576.
-#' 2 PE-A        526.  149506.     511.      511.
+#'
+#' Extracts median fluorescence intensities (MFIs) and associated standard deviations
+#' for multiple markers from multi-stained flow cytometry FCS files. This is done by
+#' applying k-means clustering (k = 2) on transformed marker intensities to separate
+#' negative and positive populations. The MFIs are reported on the original (untransformed) scale.
+#'
+#' @param loaded_fcs_multistain A list of cytosets containing the loaded multi-stained FCS files.
+#' @param transform_fun A transformation function applied prior to clustering. The transformation
+#'   helps separate populations. Default is `function(x) asinh(x / 1e3)`. Does not affect reported MFIs.
+#' @param relevant_columns A character vector specifying the marker channels to extract
+#'   from the multi-stained files. If missing, all columns are used
+#' @param seed Integer seed for reproducible k-means clustering. Default is `42`.
+#'
+#' @return A `tibble` with one row per sample and feature, containing columns:
+#' \describe{
+#'   \item{`sample`}{File name or sample ID.}
+#'   \item{`feature`}{Marker/channel name (e.g., `"FITC-A"`).}
+#'   \item{`negative`, `positive`}{Clustered MFI values on original scale.}
+#'   \item{`negative.sd`, `positive.sd`}{Standard deviations within clusters.}
+#'   \item{`negative.iqr`, `positive.iqr`}{(Optional) Interquartile ranges if computed.}
 #' }
+#'
 #' @export
+#' @keywords relativisation
+#' @examples
+#' set.seed(42)
+#' fs_ss <- simulate_cd3()
+#' tmpdir <- local_tempdir_time()
+#' flowCore::write.flowSet(fs_ss, tmpdir)
+#' loaded_fcs_multistain <- load_mfi_files(
+#'     fcs_dir = tmpdir,
+#'     regex_singlestain = "(_15-MasterMix)\\.fcs$",
+#'     gating_set_file = NULL,
+#'     gate_extract = NULL
+#' )
+#' extract_relevant_mfis_multistain(
+#'     loaded_fcs_multistain
+#' )
 extract_relevant_mfis_multistain <- function(loaded_fcs_multistain,
                                              transform_fun = function(x) {
                                                  asinh(x / 1e3)
                                              },
-                                             relevant_columns,
+                                             relevant_columns = NA,
                                              seed = 42) {
+    # Warn if multiple multistained samples were passed (usually only one is expected)
     if (length(loaded_fcs_multistain) > 1) {
-        warning("More than one multistain sample found, returning the MFI of each multistain_column by filename. This is NOT intended!")
+        warning("More than one multistain sample found; returning MFIs per sample. This is NOT intended!")
     }
+
+    # Process each multistain sample individually
     multistain_mfis <- lapply(loaded_fcs_multistain, function(ff_x) {
-        values_relevantcols <- flowCore::exprs(flowWorkspace::cytoframe_to_flowFrame(ff_x[, relevant_columns][[1]]))
+        if (all(is.na(relevant_columns))) {
+            relevant_columns <- flowCore::colnames(ff_x[[1]])
+        }
+        # Extract expression values for relevant columns
+        values_relevantcols <- flowCore::exprs(
+            flowWorkspace::cytoframe_to_flowFrame(ff_x[, relevant_columns][[1]])
+        )
+
+        # Cluster and extract MFIs using k-means
         clustering_seeded_mfi_multicolor(
             values = values_relevantcols,
             seed = seed,
             transform_fun = transform_fun
         )
     }) |>
-        data.table::rbindlist(idcol = "sample") |>
+        data.table::rbindlist(idcol = "sample") |> # Add sample ID column
         tibble::as_tibble()
+
     return(multistain_mfis)
 }

@@ -1,6 +1,6 @@
 Package: cytobench
-Title: Bench of tools for cytometry data
-Version: 0.5.3.004
+Title: Bench of Tools for Cytometry Data and Relativisation
+Version: 1.0.0
 Authors@R: 
     person("Gunther", "Glehr", , "gunthergl@gmx.net", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-1495-9162"))
@@ -14,15 +14,34 @@ Imports:
     tibble,
     dplyr,
     tidyr,
-    magrittr,
     stats,
-    xml2
+    ggpointdensity, 
+    patchwork,
+    withr, 
+    cluster, 
+    ConsensusClusterPlus,
+    ggh4x, 
+    distances, 
+    FlowSOM, 
+    flowWorkspace, 
+    ggplot2, 
+    ggpubr, 
+    mlr3, 
+    mlr3tuning, 
+    pacman, 
+    paradox, 
+    pROC, 
+    qs, 
+    scattermore, 
+    stringr, 
+    hexbin, 
+    feather
 Suggests: 
-    feather,
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0),
-    cytoKal
+    testthat (>= 3.0.0)
+Depends: 
+    R (>= 4.1.0)
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

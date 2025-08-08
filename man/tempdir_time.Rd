@@ -2,10 +2,28 @@
 % Please edit documentation in R/tempdir_time.R
 \name{tempdir_time}
 \alias{tempdir_time}
-\title{Create a temporary directory with a timestamp.}
+\title{Create Timestamped Temporary Directory}
 \usage{
-tempdir_time()
+tempdir_time(dir = "removeme", ...)
+}
+\arguments{
+\item{dir}{Base directory to append the timestamp to. Defaults to \code{"removeme"}. You might want
+to use \code{withr::local_tempdir()} to create a temporary directory that is automatically
+cleaned up after the session ends (Useful for testing).}
+
+\item{...}{Additional arguments passed to \code{dir.create()}, such as \code{showWarnings} or \code{recursive}.}
+}
+\value{
+A character string containing the full path to the newly created timestamped directory.
+The directory is created immediately on disk.
 }
 \description{
-Create a temporary directory with a timestamp.
+Creates a new temporary directory by appending a timestamp to the default \code{tempdir()}.
+This is useful for generating isolated working directories in pipelines or scripts.
 }
+\examples{
+tmp <- tempdir_time()
+list.files(tmp) # should be empty
+
+}
+\keyword{misc}

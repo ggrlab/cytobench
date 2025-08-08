@@ -12,14 +12,14 @@ n_cells_per_x(
 )
 }
 \arguments{
-\item{dt}{A data.table containing the data.}
+\item{dt}{A \code{data.table} or \code{data.frame} containing cell-level data with grouping columns.}
 
-\item{which}{A character vector specifying the columns to group by. Default is c("cluster", "metaCluster").}
+\item{which}{Character vector. The grouping variables to summarize (e.g., \code{c("cluster", "metaCluster")}).}
 
-\item{id_cols}{A character vector specifying the ID columns. Default is c("sample").}
+\item{id_cols}{Character vector. Identifier columns to group by (e.g., \code{"sample"}).}
 
-\item{which_levels}{A list specifying the levels for each grouping column. Default is NULL.
-If NULL, the levels are inferred from the data by:
+\item{which_levels}{Optional named list of levels per grouping variable.
+If \code{NULL}, the levels are inferred from the data by:
 \enumerate{
 \item Converting the unique values of the column to numeric.
 \item Taking the maximum value (max_level_numeric)
@@ -27,11 +27,15 @@ If NULL, the levels are inferred from the data by:
 }}
 }
 \value{
+A named list. Each entry corresponds to one grouping variable from \code{which},
+containing a wide-format data frame with counts per level (e.g., one row per sample, one column per cluster).
+
 A data frame in wide format with the counts of cells per specified grouping.
 }
 \description{
-This function calculates the number of cells per specified grouping (e.g., cluster or metaCluster)
-and returns a wide-format data frame with the counts.
+Computes the number of cells for each combination of ID columns (e.g., sample)
+and grouping variables (e.g., cluster, metaCluster), returning wide-format tables
+for each grouping. Ensures that all levels are represented even if missing in a sample.
 }
 \examples{
 # Example usage:
@@ -42,3 +46,4 @@ dt <- data.table::data.table(
 )
 n_cells_per_x(dt)
 }
+\keyword{flowsom}

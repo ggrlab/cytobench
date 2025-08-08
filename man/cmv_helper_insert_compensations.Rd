@@ -2,12 +2,12 @@
 % Please edit documentation in R/cmv_helper_insert_compensations.R
 \name{cmv_helper_insert_compensations}
 \alias{cmv_helper_insert_compensations}
-\title{Insert multiple compensations into a fcs file}
+\title{Insert Multiple Compensations into an FCS File}
 \usage{
 cmv_helper_insert_compensations(
   fcs_filename,
-  named_compensation_files = list(manual = NA, DCtubes_auto = NA, singlestain_auto = NA,
-    singlestain_manual = NA),
+  named_compensation_files = list(manual = NULL, DCtubes_auto = NULL, singlestain_auto =
+    NULL, singlestain_manual = NULL),
   outdir = file.path("res", "CT_UnappliedCompensations"),
   sub_filename = c("intermediate/CT", ""),
   spillover_keyword = "$SPILLOVER",
@@ -15,19 +15,68 @@ cmv_helper_insert_compensations(
 )
 }
 \arguments{
-\item{fcs_filename}{The path to the fcs file to insert the compensations into}
+\item{fcs_filename}{Character. Path to the FCS file into which compensations should be inserted.}
 
-\item{named_compensation_files}{A named list of files containing the compensation files. The names are the compensation types.}
+\item{named_compensation_files}{Named list of directories. Each directory must contain two files:
+a "spillover" matrix and an "autofluorescence" vector file. Files are assigned with regex.
+The list names define the compensation types  (e.g., \code{"manual"}, \code{"DCtubes_auto"}).
+Default provides placeholders for the CMV paper compensations. Empty values (\code{NULL}) indicate
+that this compensation type should not be inserted.}
 
-\item{outdir}{The directory to save the fcs files with the inserted compensations. If NA, the function returns the flowFrame object with the inserted compensations.}
+\item{outdir}{Character or NA. Directory to save the updated FCS file. If \code{NA}, the function
+returns the modified \code{flowFrame} instead of saving.}
 
-\item{sub_filename}{A vector of two strings to substitute in the fcs_filename. The first string is substituted by the second string. The final files are saved in \code{file.path(outdir, sub(sub_filename[1], sub_filename[2], fcs_filename))}}
+\item{sub_filename}{Character vector of length 2. If provided, performs a \code{sub()} on the input filename
+to determine the output path: \code{file.path(outdir, sub(sub_filename[1], sub_filename[2], fcs_filename))}.
+May be NA.}
 
-\item{spillover_keyword}{The keyword in the fcs file containing the original spillover matrix.}
+\item{spillover_keyword}{Character. Keyword used to locate the original spillover matrix within the FCS metadata.
+Defaults to \code{"$SPILLOVER"}. Necessary for ordering the new spillover matrices correctly and
+behaves as automatic check if all necessary columns of the new spillover matrices are present.
 
-\item{verbose}{Whether to print out the path of the saved fcs file}
+The ordering of the spillover matrix must be exactly the same as the ordering of the markers in the expression matrix, otherwise KALUZA(!!) will apply the wrong compensation values.}
+
+\item{verbose}{Logical. If \code{TRUE}, prints the output path and inserted compensation types.}
+}
+\value{
+If \code{outdir} is \code{NA}, returns the updated \code{flowFrame}. Otherwise, writes the modified FCS file and returns invisible.
 }
 \description{
-This function is a helper function to INSERT the compensation into the fcs files of the CMV data from
-Glehr et al. \link{TO BE SUBMITTED}.
+This helper function inserts multiple compensation matrices and autofluorescence vectors into
+the metadata of an FCS file, following the structure used in the CMV dataset
+(Glehr et al., (TO BE SUBMITTED)). These values can later be retrieved conveniently
+with the \code{read.FCS_custom_spillover()} function. They can be directly \emph{applied} with
+\code{cmv_helper_compensation()}.
 }
+\examples{
+\dontrun{
+cytobench::cmv_helper_insert_compensations(
+    file.path("intermediate", "CS", file_x),
+    named_compensation_files = list(
+        # 1. Manual compensation, separately for single-stain and panel samples
+        # The manual compensation used  "DCtubes_auto" compensation as basis
+        "manual" = comp_manual,
+        # 2. Autocompensation, calculated on regular Duraclone Compensation tubes
+        "DCtubes_auto" = file.path(
+            "intermediate", "compensation.panel.autocomp_DCtubes", device_x, sample_id
+        ),
+        # 3. Autocompensation, calculated on a sample-by-sample basis using single-stain samples
+        "singlestain_auto" = file.path(
+            "intermediate", "compensation.singlestain.autocomp", device_x, sample_id
+        ),
+        # 4. Manual compensation, done on a sample-by-sample
+        #    basis using concattenated single-stain samples
+        # The manual compensation used "singlestain_auto" compensation as basis
+        "singlestain_manual" = file.path(
+            "intermediate",
+            "compensation.singlestain.manualcomp",
+            device_x, sample_id
+        )
+    ),
+    outdir = outdir,
+    sub_filename = c("intermediate/CS", ""),
+    verbose = TRUE
+)
+}
+}
+\keyword{relativisation}

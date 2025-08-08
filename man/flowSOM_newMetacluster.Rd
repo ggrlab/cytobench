@@ -2,35 +2,75 @@
 % Please edit documentation in R/flowSOM_newMetacluster.R
 \name{flowSOM_newMetacluster}
 \alias{flowSOM_newMetacluster}
-\title{Predict new cells using a flowsom result}
+\title{Predict and Reassign MetaClusters Based on a FlowSOM Result}
 \usage{
 flowSOM_newMetacluster(
   flowsom_result,
-  clustered_df,
+  clustered_df = NULL,
   n_metacluster = NULL,
-  update_flowsom = TRUE
+  update_flowsom = TRUE,
+  missing_seed = 3711283,
+  title = local_tempdir_time(),
+  ...
 )
 }
 \arguments{
-\item{flowsom_result}{Result of flowSOM_optimal() or flowSOM()}
+\item{flowsom_result}{A \code{FlowSOM} result object, as returned by \code{flowSOM()} or \code{flowSOM_optimal()}.}
 
-\item{clustered_df}{\enumerate{
-\item The data.frame including the clustered cells. The column "cluster" must be present and
-should be the cluster assignment from the FlowSOM ("flowsom_result").
-\item Alternatively: The data.frame including the number of clustered cells. The columns "cluster_1", "cluster_2", ..., "cluster_n".
-The function will then calculate the metaClusters for each of the clusters and return the number of cells per metaCluster.
-}}
+\item{clustered_df}{A \code{data.frame} that either:
+\itemize{
+\item Contains a \code{"cluster"} column mapping each cell to a cluster (e.g., from a previous FlowSOM run), or
+\item Contains wide-format columns \code{"cluster_1"}, \code{"cluster_2"}, ..., representing counts of cells per cluster.
+}
+If provided, the function returns an updated version with newly assigned meta-clusters.}
 
-\item{n_metacluster}{If not NULL, the number of metaclusters will be changed to this number in flowsom_result.}
+\item{n_metacluster}{Optional. If provided, the FlowSOM result is updated to use this number of meta-clusters.}
+
+\item{update_flowsom}{Logical. If \code{TRUE}, the \code{flowsom_result} will be updated in place with the new meta-clustering.}
+
+\item{missing_seed}{Numeric.
+If \code{flowsom_result} does not contain a "seed" element, this seed will be used for re-metaclustering.}
+
+\item{title}{\code{ConsensusClusterPlus:ConsensusClusterPlus()}: character value for output directory. Directory is created only if plot is not NULL or writeTable is TRUE. This title can be an abosulte or relative path.
+
+If kept as \code{local_tempdir_time()}, a temporary directory is created with the current
+timestamp which is automatically REMOVED after the function call.}
+
+\item{...}{Further arguments passed to \code{ConsensusClusterPlus::ConsensusClusterPlus()}.}
 }
 \value{
-A list with two elements:
-\enumerate{
-\item "cells_clusters_from_train": The data.frame with the new metaClusters. If the input was a data.frame with the number of cells per cluster,
-the output will be a data.frame with the number of cells per metaCluster. (Identical to 2))
-\item "ncells_per_x": A data.frame in wide format with the counts of cells per specified grouping.
+A named list with:
+\describe{
+\item{\code{flowsom_newdata}}{The (optionally updated) \code{flowsom_result} with meta-clusters.}
+\item{\code{cells_clusters_from_train}}{Input \code{clustered_df} with meta-cluster annotations (if \code{clustered_df} was provided).}
+\item{\code{ncells_per_x}}{A summary \code{data.frame} (or list of \code{data.frame}s) with counts per meta-cluster (and cluster if applicable).}
 }
 }
 \description{
-Predict the (meta-) clusters for all cells using a flowsom result.
+This function reassigns or updates meta-cluster labels for either:
+(1) individual cells with known cluster assignments, or
+(2) pre-aggregated cluster-level counts across samples.
 }
+\details{
+Optionally, a new number of meta-clusters can be specified, triggering recomputation via
+\code{ConsensusClusterPlus}. The function also optionally updates the \code{FlowSOM} object to reflect
+the new meta-clustering.
+}
+\examples{
+ff_example <- example_processed()
+fsom <- do_flowsom_TESTING(ff_example)
+testthat::expect_true(fsom$map$nMetaclusters == 10)
+n_metaclusters <- 3
+res <- flowSOM_predict(
+    flowsom_result = fsom,
+    flowset = flowCore::flowSet(ff_example),
+    n_metacluster = n_metaclusters
+)
+
+res_norecluster <- flowSOM_newMetacluster(
+    flowsom_result = fsom,
+    clustered_df = res[["ncells_per_x"]][["cluster"]],
+    n_metacluster = n_metaclusters
+)
+}
+\keyword{flowsom}

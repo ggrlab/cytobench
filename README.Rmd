@@ -87,11 +87,12 @@ usethis::use_readme_md()
 usethis::use_github_action("check-standard")
 usethis::use_github_action("test-coverage")
 
-```
-
-```bash
-git remote add origin_devel git@git.uni-regensburg.de:packages/cytobench.git
-git push -u origin_devel main
+# I have not set pkgdown yet (because I have a private repo - 2025-08-05)
+# gitcreds::gitcreds_set()
+# usethis::use_pkgdown_github_pages()
+usethis::use_pkgdown()
+usethis::use_news_md()
+usethis::use_cran_comments()
 ```
 
 ```
@@ -105,9 +106,4 @@ usethis::use_import_from("data.table", ".N")
 usethis::use_import_from("data.table", ".NGRP")
 usethis::use_import_from("data.table", ".SD")
 usethis::use_import_from("data.table", "data.table")
-usethis::use_import_from("stats", "median")
-usethis::use_package("xml2")
-usethis::use_vignette("Kaluza_protocols")
-usethis::use_package("feather", type="Suggests")
-
 ```

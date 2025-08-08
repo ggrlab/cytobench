@@ -2,36 +2,57 @@
 % Please edit documentation in R/extract_mfi.R
 \name{extract_relevant_mfis_multistain}
 \alias{extract_relevant_mfis_multistain}
-\title{Extract Multi-Stain Median Fluorescence Intensity (MFI)
-This function extracts the median fluorescence intensity (MFI) from multi-stained FCS files.}
+\title{Extract Multi-Stain Median Fluorescence Intensity (MFI)}
 \usage{
 extract_relevant_mfis_multistain(
   loaded_fcs_multistain,
   transform_fun = function(x) {
      asinh(x/1000)
  },
-  relevant_columns,
+  relevant_columns = NA,
   seed = 42
 )
 }
 \arguments{
-\item{loaded_fcs_multistain}{A list of cytosets containing the loaded FCS files.}
+\item{loaded_fcs_multistain}{A list of cytosets containing the loaded multi-stained FCS files.}
 
-\item{transform_fun}{A function to transform the fluorescence values. Default is \code{function(x) { asinh(x / 1e3) }}.
-The reported MFIs are calculated as the median of the UNtransformed values. Transformation is only used to cluster the negative and positive populations.}
+\item{transform_fun}{A transformation function applied prior to clustering. The transformation
+helps separate populations. Default is \code{function(x) asinh(x / 1e3)}. Does not affect reported MFIs.}
 
-\item{relevant_columns}{A character vector specifying the relevant columns for multi-staining. Default is c("FITC-A", "PE-A", "ECD-A", "PC5.5-A", "PC7-A", "APC-A", "AF700-A", "AA750-A", "PB-A", "KrO-A").}
+\item{relevant_columns}{A character vector specifying the marker channels to extract
+from the multi-stained files. If missing, all columns are used}
+
+\item{seed}{Integer seed for reproducible k-means clustering. Default is \code{42}.}
 }
 \value{
-A data frame with the extracted MFIs. E.g.:
-\preformatted{
- feature negative positive negative.sd positive.sd
-<chr>      <dbl>    <dbl>     <dbl>      <dbl>
-1 FITC-A      530.   58567.     576.      576.
-2 PE-A        526.  149506.     511.      511.
+A \code{tibble} with one row per sample and feature, containing columns:
+\describe{
+\item{\code{sample}}{File name or sample ID.}
+\item{\code{feature}}{Marker/channel name (e.g., \code{"FITC-A"}).}
+\item{\code{negative}, \code{positive}}{Clustered MFI values on original scale.}
+\item{\code{negative.sd}, \code{positive.sd}}{Standard deviations within clusters.}
+\item{\code{negative.iqr}, \code{positive.iqr}}{(Optional) Interquartile ranges if computed.}
 }
 }
 \description{
-Extract Multi-Stain Median Fluorescence Intensity (MFI)
-This function extracts the median fluorescence intensity (MFI) from multi-stained FCS files.
+Extracts median fluorescence intensities (MFIs) and associated standard deviations
+for multiple markers from multi-stained flow cytometry FCS files. This is done by
+applying k-means clustering (k = 2) on transformed marker intensities to separate
+negative and positive populations. The MFIs are reported on the original (untransformed) scale.
 }
+\examples{
+set.seed(42)
+fs_ss <- simulate_cd3()
+tmpdir <- local_tempdir_time()
+flowCore::write.flowSet(fs_ss, tmpdir)
+loaded_fcs_multistain <- load_mfi_files(
+    fcs_dir = tmpdir,
+    regex_singlestain = "(_15-MasterMix)\\\\.fcs$",
+    gating_set_file = NULL,
+    gate_extract = NULL
+)
+extract_relevant_mfis_multistain(
+    loaded_fcs_multistain
+)
+}
+\keyword{relativisation}

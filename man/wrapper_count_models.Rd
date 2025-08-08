@@ -16,40 +16,41 @@ wrapper_count_models(
   hparam_n_evaluations = 1000,
   learners_classification = list(mlr3::lrn("classif.ranger", predict_type = "prob",
     predict_sets = c("train", "test"), max.depth = paradox::to_tune(2, 20), num.trees =
-    paradox::to_tune(c(500, 1000, 1500, 2000)))),
+    paradox::to_tune(c(500, 1000, 1500, 2000)), use_weights = "error")),
   learners_regression = list(mlr3::lrn("regr.ranger", predict_sets = c("train", "test"),
     max.depth = paradox::to_tune(2, 20), num.trees = paradox::to_tune(c(500, 1000, 1500,
-    2000)))),
+    2000)), use_weights = "error")),
   dv_class_positive = NULL,
   measures = NULL,
-  hpoptimized_final_trainsets = c("train", "validation")
+  hpoptimized_final_trainsets = c("train", "validation"),
+  verbose = TRUE
 )
 }
 \arguments{
-\item{df_list}{A list of dataframes with the same columns. Each dataframe is used to create a task.
+\item{df_list}{A list of dataframes with the same OUTCOME columns but otherwise different columns are allowed. Each dataframe is used to create a task.
 Only one of the dataframes is used in the final model, based on the validation performance.}
 
 \item{tvt_col}{The column in each dataframe that defines the training, validation and test set.
 Training is used to train models on each task, validation to select the best model and df of df_list.
 The final model is applied to all samples. Default is "tvt".}
 
-\item{outdir}{The directory where the results are saved. Default is "res_count_models".
-If NA, no results are saved.}
+\item{outdir}{The directory where the results are saved. Default is "res_count_models". If NA, no results are saved.}
 
-\item{dvs_potential}{The potential dependent variables in the dataframes. For each of them, one final
-model is trained. Default is the first column name of the first dataframe.}
+\item{dvs_potential}{The potential dependent variables. For each of them, one final model is trained. Default is the first column name of the first dataframe.}
 
 \item{ivs}{The independent variables in the dataframes. Default is all columns except the first one.
 If ivs_regex is given, this is ignored.}
 
-\item{ivs_regex}{A regular expression to select the independent variables WITHIN EACH dataframe. This is in contrast to ivs, which must be the same for all dataframes.
-If given, ivs is ignored. Default is "\link{cC}luster".}
+\item{ivs_regex}{A regular expression to select the independent variables WITHIN EACH dataframe.
+This is in contrast to ivs, which must be the same for all dataframes.
+If given, ivs is ignored. Default is \code{"[cC]luster"} (This would fit columns like
+'cluster_1', 'cluster_2', 'metaCluster_1', 'metaCluster_2', etc.).}
 
-\item{dvs_multiclass}{The dependent variables that are multi-class. Default is c("ABO", "A_AB", "B_AB", "abo_removedAB").}
+\item{dvs_multiclass}{Dependent variables treated as multi-class. Default: c("ABO", "A_AB", "B_AB", "abo_removedAB").}
 
-\item{seed}{The seed for the random hyperparameter optimization. Default is 2372876.}
+\item{seed}{Random seed for reproducibility. Default: 2372876.}
 
-\item{hparam_n_evaluations}{The number of random hyperparameters to test for each learner. Default is 1000.}
+\item{hparam_n_evaluations}{Number of random hyperparameter configurations. Default: 1000.}
 
 \item{learners_classification}{A list of classification learners. Default is a ranger learner with 2-20 depth and 500, 1000, 1500, 2000 trees.}
 
@@ -59,7 +60,9 @@ If given, ivs is ignored. Default is "\link{cC}luster".}
 
 \item{measures}{The performance measures for the hyperparameter optimization. If NULL, the default measures are used.}
 
-\item{hpoptimized_final_trainsets}{The sets that are used to train the final model. Default is c("train", "validation").}
+\item{hpoptimized_final_trainsets}{Sets used for final model training. Default: c("train", "validation").}
+
+\item{verbose}{Logical. If TRUE, prints progress messages. Default: TRUE.}
 }
 \description{
 Use the list of dataframes in df_list to create hyperparameter-optimized models for all potential dependent variables
@@ -68,7 +71,7 @@ The idea is to have a list of dataframes with different independent variables (e
 and to select the best set of features based on the validation performance.
 
 The independent variables are given either as character vector "ivs" or as a regular expression
-"ivs_regex" to select the columns from df_list[\link{1}].
+"ivs_regex" to select the columns from \code{df_list[[1]]}.
 
 The dvs are separated into binary, multi-class and continuous outcomes. Multi-class variables
 have to be defined in dvs_multiclass.
@@ -89,3 +92,53 @@ learners_classification holds all learners for classification tasks, learners_re
 
 The final model is then applied to all the samples together.
 }
+\examples{
+ff_example <- example_processed()
+fsom <- do_flowsom_TESTING(ff_example)
+res <- flowSOM_predict(
+    flowsom_result = fsom,
+    flowset = flowCore::flowSet(ff_example)
+)
+fake_clusterings <- lapply(res[["ncells_per_x"]], function(x) {
+    tmp <- lapply(1:25, function(y) {
+        x[1, -1] <- as.list(sample(1000, ncol(x) - 1))
+        return(x)
+    }) |> do.call(what = rbind)
+    set.seed(40)
+    tmp[["tvt"]] <- sample(
+        c("train", "validation", "test", "prospective"),
+        nrow(tmp),
+        replace = TRUE
+    )
+    tmp[["sample"]] <- sample(c("A", "B"), nrow(tmp), replace = TRUE)
+    return(tmp)
+})
+lapply(fake_clusterings, function(x) {
+    dplyr::count(x, tvt, sample)
+})
+allowed_clusterings <- c("cluster", "metaCluster")
+finalmodels_predictions <- wrapper_count_models(
+    df_list = fake_clusterings[allowed_clusterings],
+    tvt_col = "tvt",
+    # outdir = file.path(outdir_base, basename(metaclustering_dir), training_device),
+    outdir = local_tempdir_time(),
+    dvs_potential = c("sample"),
+    dvs_multiclass = c(),
+    ivs_regex = "[cC]luster",
+    hparam_n_evaluations = 3,
+    seed = 1372873,
+    learners_classification = list(
+        mlr3::lrn(
+            "classif.ranger",
+            predict_type = "prob", predict_sets = c("train", "test"),
+            max.depth = paradox::to_tune(2, 20), # minimum and maximum depth
+            num.trees = paradox::to_tune(c(500, 1000, 1500, 2000)),
+            importance = "impurity"
+        )
+    ),
+    dv_class_positive = c("sample" = "B"),
+    measures = mlr3::msr("classif.logloss")
+)
+}
+\keyword{cytometry}
+\keyword{models}

@@ -6,18 +6,35 @@
 #' @param file_x Character. Path to the input FCS file.
 #' @param n_cells Integer. Number of cells to subsample. Default is 10,000.
 #' @param seed Integer. Seed for random number generation to ensure reproducibility. Default is 427764.
-#' @param outdir Character. Directory where the subsampled FCS file will be saved. Default is "res/a01/02_subsampled/random_<n_cells>".
+#' @param outdir
+#' Character. Directory where the subsampled FCS file will be saved. Default is "res/a01/02_subsampled/random_<n_cells>".
 #' @param indir Character. Directory where the original FCS file is located. Default is "res/a04/01_gated".
 #' @param verbose Logical. If TRUE, prints progress messages. Default is TRUE.
 #'
 #' @return None. The function writes the subsampled FCS file to the specified output directory.
 #'
-#' @examples
-#' \dontrun{
-#' subsample_fcs("path/to/input.fcs", n_cells = 5000, seed = 12345, outdir = "output/directory", indir = "input/directory", verbose = TRUE)
-#' }
-#'
 #' @export
+#' @keywords cytometry
+#' @examples
+#' ff_dt <- simulate_ff(columns = c("FL1", "FL2", "FL3"), flowcore = TRUE)
+#' tmpdir <- local_tempdir_time()
+#' flowCore::write.FCS(ff_dt, file.path(tmpdir, "test.fcs"))
+#' list.files(tmpdir)
+#' # Run the subsampling function
+#' subsample_fcs(
+#'     file_x = file.path(tmpdir, "test.fcs"),
+#'     n_cells = 100,
+#'     seed = 42,
+#'     outdir = file.path(tmpdir, "subsampled"),
+#'     indir = tmpdir,
+#'     verbose = FALSE
+#' )
+#' ff <- flowCore::read.FCS(file.path(tmpdir, "subsampled", "test.fcs"))
+#' if (nrow(ff) != 100) {
+#'     stop("Subsampling did not return the expected number of cells.")
+#' }
+#' unlink(tmpdir, recursive = TRUE) # Clean up the temporary directory
+#'
 subsample_fcs <- function(file_x,
                           n_cells = 10000,
                           seed = 427764,
@@ -57,9 +74,11 @@ subsample_fcs <- function(file_x,
 #'
 #' @examples
 #' # Assuming `ff` is a FlowFrame object with flow cytometry data
+#' ff <- simulate_ff()
 #' subsampled_ff <- subsample_ff(ff, n_cells = 5000, seed = 12345)
 #'
 #' @export
+#' @keywords cytometry
 subsample_ff <- function(flowframe,
                          n_cells = 10000,
                          seed = 427764) {

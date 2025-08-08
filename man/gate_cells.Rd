@@ -2,7 +2,7 @@
 % Please edit documentation in R/gate_cells.R
 \name{gate_cells}
 \alias{gate_cells}
-\title{Gate Cells Based on Compensated FCS and Gating Set Files}
+\title{Gate Cells Using Predefined Gating Sets}
 \usage{
 gate_cells(
   flowset,
@@ -13,35 +13,46 @@ gate_cells(
 )
 }
 \arguments{
-\item{gatename}{Character or Numeric. Name or index of the gate to extract data from. Default is "/Singlets/CD45+/CD3+".}
+\item{flowset}{A \code{flowSet} or list of \code{flowFrame} objects representing compensated samples.
+These FCS files are expected to contain the compensation matrix, but not have compensation applied.}
 
-\item{verbose}{Logical. If TRUE, prints progress messages. Default is TRUE.}
+\item{gatingset}{A named list of \code{GatingSet} objects, one per sample, or a single global \code{GatingSet}.}
 
-\item{dir_fcs_compensated}{Character. Directory containing compensated FCS files. Note that any compensation in these files is NOT applied.}
+\item{gatename}{Character or numeric. Name or index of the population to extract.
+Default is \code{"/Singlets/CD45+/CD3+"}. If numeric, the nth gate will be selected.}
 
-\item{dir_gatingsets_compensated}{Character. Directory containing compensated gating set files.
-The gating set files are matched to each FCS file based on the sID (sampleID) from FCS and Gating \emph{directory} name.}
+\item{verbose}{Logical. Print progress information? Default: \code{TRUE}.}
 
-\item{pattern_files}{Character. Pattern to match FCS files. Default is "panel".}
-
-\item{outdir}{Character. Output directory to save results. Default is NA, then no output is saved.}
-
-\item{filename_ungated_into}{Character. String to replace "\emph{ungated}" in the filename. Default is "\emph{cd3}".}
-
-\item{exclude_pops}{Character vector. Populations to exclude from the final counts. Default is "/Singlets/Lymphocytes", "/Singlets/Monocytes", "/Singlets/Granulocytes".}
+\item{inplace}{Logical. If \code{TRUE}, modifies the \code{flowset} in place. Otherwise, a new \code{flowSet} is created.}
 }
 \value{
-A data.table containing the counts and percentages of gated populations. Usually you would use "outdir" as a side effect to save the data.
+A list with two elements:
+\describe{
+\item{\code{counts}}{A \code{data.table} of per-population counts, frequencies, and MFIs across all samples.}
+\item{\code{flowset_gated}}{The updated \code{flowSet}, with each sample replaced by its gated \code{flowFrame}.}
+}
 }
 \description{
-This function processes compensated FCS files and their corresponding gating set files to gate cells based on specified criteria.
+This function applies existing \code{GatingSet} objects to a \code{flowSet} (usually of compensated FCS files),
+extracts gated populations (e.g., CD3+ cells), and optionally computes population statistics
+such as counts, frequencies, and median fluorescence intensities (MFIs).
+}
+\details{
+\itemize{
+\item Assumes FCS filenames and gating set names match by sample ID (\code{sampleNames()}).
+\item If only one gating set is given, it is applied to all samples (useful for batch gating).
+\item Compensation is NOT applied again, assuming it's already been handled.
+\item All columns are temporarily treated as marker names to enable MFI extraction across the full feature set.
+}
 }
 \examples{
 \dontrun{
-gate_cells(
-    dir_fcs_compensated = "path/to/compensated/fcs",
-    dir_gatingsets_compensated = "path/to/gatingsets",
-    outdir = "path/to/output"
+gate_x <- flowWorkspace::load_gating_set("path/to/gating_set.xml")
+gated <- cytobench::gate_cells(
+    flowset = flowCore::read.flowSet(file_x),
+    gatingset = gate_x,
+    gatename = "/Singlets/Lymphocytes",
 )
 }
 }
+\keyword{cytometry}

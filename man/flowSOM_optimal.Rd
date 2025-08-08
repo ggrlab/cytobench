@@ -2,12 +2,12 @@
 % Please edit documentation in R/flowSOM_optimal.R
 \name{flowSOM_optimal}
 \alias{flowSOM_optimal}
-\title{flowSOM clustering with optimal number of clusters}
+\title{FlowSOM Clustering with Optimal Number of MetaClusters}
 \usage{
 flowSOM_optimal(
   fs_train,
-  colsToUse,
-  transform = TRUE,
+  colsToUse = NULL,
+  transform = FALSE,
   transformList = NULL,
   outdir = NULL,
   seed = 3711283,
@@ -17,33 +17,60 @@ flowSOM_optimal(
 )
 }
 \arguments{
-\item{fs_train}{The training set of the cytometry data.}
+\item{fs_train}{A \code{flowSet} or \code{cytoset} representing the cytometry training data.}
 
-\item{colsToUse}{The columns to use for clustering.}
+\item{colsToUse}{Character vector. Column names (channels/markers) to include in clustering.}
 
-\item{transform}{Whether to transform the data using transformList}
+\item{transform}{Logical. Whether to apply \code{transformList} before clustering (default \code{TRUE}).}
 
-\item{transformList}{The list of transformations to apply to the data. E.g.
+\item{transformList}{A \code{transformList} (typically from \code{flowCore::transformList}) defining the transformations to apply.
+If \code{transform = TRUE}, this will be applied during clustering.E.g.
 
+\code{
 fc_transforms <- sapply(colsToUse, function(cn_x) {
-flowCore::arcsinhTransform(
-a = 0,
-b = 1 / pre_rescale_asinh[\link{"navios"}][\link{cn_x}],
-c = 0
-)
+    flowCore::arcsinhTransform(
+        a = 0,
+        b = 1 / pre_rescale_asinh[["navios"]][[cn_x]],
+        c = 0
+    )
 }, simplify = FALSE)
-fc_transformlist_asinh <- flowCore::transformList(names(fc_transforms), fc_transforms)}
+fc_transformlist_asinh <- flowCore::transformList(names(fc_transforms), fc_transforms)
+}}
 
-\item{outdir}{The directory to save the FlowSOM results.}
+\item{outdir}{Optional. Directory path to save the FlowSOM result object and associated PDF plots.}
 
-\item{seed}{The seed for the random number generator.}
+\item{seed}{Integer. Random seed for reproducibility. Default is \code{3711283}.}
 
-\item{scale}{Whether to scale the data.}
+\item{scale}{Logical. Whether to scale data (default \code{TRUE}). Scaling is applied prior to SOM training.}
 
-\item{maxMeta}{The maximal number of metaclusters. If NULL, the number of clusters is FIXED by nClus.}
+\item{maxMeta}{Integer. Maximum number of meta-clusters to consider. If \code{NULL}, defaults to a FIXED number via \code{nClus} argument.}
 
-\item{...}{Further parameters to FlowSOM}
+\item{...}{Additional arguments passed to \code{FlowSOM::FlowSOM()}.}
+}
+\value{
+An object of class \code{"flowSOM_optimal"}, which includes:
+\describe{
+\item{\code{fs_res_train}}{The FlowSOM result object with meta-clustering annotations.}
+\item{...}{Additional elements returned by \code{flowSOM_predict()}, including predicted cluster and meta-cluster labels.}
+}
 }
 \description{
-Clusters the cells using the FlowSOM algorithm with the optimal number of clusters (determined by ConsensusClusterPlus), by setting maxMeta.
+Runs the FlowSOM algorithm on a cytometry dataset and determines an optimal number
+of meta-clusters using \code{ConsensusClusterPlus}. Automatically generates and optionally
+saves plots and the clustering result. Can also return per-cell cluster predictions.
 }
+\examples{
+ff_example <- example_processed()
+fsom <- flowSOM_optimal(
+    flowCore::flowSet(ff_example),
+    # Input options:
+    compensate = FALSE,
+    transform = FALSE,
+    scale = FALSE,
+    # SOM options:
+    colsToUse = c(9, 12, 14:18), xdim = 3, ydim = 3,
+    # Metaclustering options:
+    nClus = 5
+)
+}
+\keyword{flowsom}

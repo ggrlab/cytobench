@@ -13,10 +13,15 @@
 #'                       the original fsom object is used.
 #' @param channels If channels are given, return the result of FlowSOM::TestOutliers()
 #' @export
+#' @keywords flowsom
+#' @examples
+#' ff_example <- example_processed()
+#' fsom <- do_flowsom_TESTING(ff_example)
+#' outliers <- flowSOM_is.outlier(fsom)
 flowSOM_is.outlier <- function(fsom,
-                             madAllowed = 4,
-                             fsomReference = NULL,
-                             channels = NULL) {
+                               madAllowed = 4,
+                               fsomReference = NULL,
+                               channels = NULL) {
     # https://github.com/SofieVG/FlowSOM/blob/master/R/3_buildMST.R#L239
     if (!all(is.null(channels))) {
         return(
@@ -29,7 +34,7 @@ flowSOM_is.outlier <- function(fsom,
         )
     }
 
-    # The following is a copy of the FlowSOM::TestOutliers() function, 
+    # The following is a copy of the FlowSOM::TestOutliers() function,
     # the comments were mostly added by me.
     fsom <- FlowSOM::UpdateFlowSOM(fsom)
     # If no reference FlowSOM object is provided, use the original fsom object

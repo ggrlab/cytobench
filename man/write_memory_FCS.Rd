@@ -2,26 +2,33 @@
 % Please edit documentation in R/write_memory_FCS.R
 \name{write_memory_FCS}
 \alias{write_memory_FCS}
-\title{Write FCS File to Memory}
+\title{Write FCS File to Temporary Memory}
 \usage{
 write_memory_FCS(ff)
 }
 \arguments{
-\item{ff}{A flowFrame object to be written to a file.}
+\item{ff}{A \href{https://rdrr.io/bioc/flowCore/man/flowFrame-class.html}{\code{flowFrame}} object to be written to a file.}
 }
 \value{
-A character string representing the path to the written FCS file.
+A character string with the file path to the written FCS file.
 }
 \description{
-This function attempts to write a flowFrame object to a temporary file in memory.
-If writing to the default memory location fails, it creates a new temporary directory
-and writes the file there.
+Attempts to write a \code{flowFrame} object to a temporary in-memory file.
+If writing to \verb{/dev/shm/} fails (e.g., on systems without this memory mount),
+the function falls back to a newly created temporary directory on disk.
+}
+\details{
+This function is useful for workflows requiring in-memory processing or
+quick temporary storage of FCS files without polluting the working directory.
 }
 \examples{
-\dontrun{
-  library(flowCore)
-  ff <- read.FCS("path/to/your/file.fcs")
-  fcs_path <- write_memory.FCS(ff)
-  print(fcs_path)
+ff <- simulate_ff()
+tmp <- write_memory_FCS(ff)
+reread_ff <- flowCore::read.FCS(tmp)
+identical(reread_ff, ff)
+nrow(reread_ff) == nrow(ff)
+print(
+    summary(flowCore::exprs(ff) - flowCore::exprs(reread_ff))
+)
 }
-}
+\keyword{cytometry}

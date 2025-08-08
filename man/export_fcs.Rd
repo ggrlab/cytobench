@@ -2,7 +2,7 @@
 % Please edit documentation in R/export_fcs.R
 \name{export_fcs}
 \alias{export_fcs}
-\title{Export fcs files}
+\title{Export Flow Cytometry Data as FCS Files}
 \usage{
 export_fcs(
   matrix_list,
@@ -18,21 +18,20 @@ export_fcs(
 )
 }
 \arguments{
-\item{matrix_list}{List of matrices, should all have the same number of columns.}
+\item{matrix_list}{A named list of matrices or \code{data.table}s, all with the same number of columns.}
 
-\item{safety_scaling}{An .fcs file is generated from the maximum cells (high and low). This safety scaling
-is soleily for the range of the .fcs files. This does not change any cell values.}
+\item{safety_scaling}{Numeric. A scaling factor applied to the max/min range template. Does not modify actual data.
+Default is \code{1.20} (20\% safety buffer).}
 
-\item{safety_shift}{CAREFUL! Introducing a value here is changing all cell values. It adds this value
-to all cells. This is "necessary" as Kaluza cannot visualize negative values on a
-linear scale in .fcs files.}
+\item{safety_shift}{Numeric. CAREFUL - MODIFIES DATA AT SAVE!
+An additive shift applied to all cell values before export.
+Necessary to avoid negative values in linear scale visualizations in tools like Kaluza. Default is \code{0}.}
 
-\item{outdir}{Where should the list of matrices be written to. Filenames come from names(matrix_list).}
+\item{outdir}{Character. Output directory for the \code{.fcs} files. Filenames are derived from \code{names(matrix_list)}.}
 
-\item{use.names}{Should the column names of each matrix be used when concattenating
-the extreme .fcs?}
+\item{use.names}{Logical. If \code{TRUE}, retains column names during the concatenation of extreme samples.}
 
-\item{verbose}{Verbose output?}
+\item{verbose}{Logical. Whether to print progress messages. Default is \code{TRUE}.}
 
 \item{new_colnames_to}{In our usecase, there is often the case where we have:
 
@@ -73,19 +72,36 @@ c(
 Every value which is called "marker" will be used as a marker name setting
 flowCore::markernames() IN ORDER! The other values are ignored.}
 
-\item{extreme_template}{If you have an extreme sample which you want to use as a template for all other samples,
+\item{extreme_template}{A matrix or \code{flowFrame} to use as a shared max/min template across all samples.
+
+If you have an extreme sample which you want to use as a template for all other samples,
 you can provide it here. Usually, this would be the returned fcs_extreme_copy from a
 previous run of this function.
 Essentially, it needs at least 2 cells (high and low) as "extreme" values.
 The cells are replaced by the actual cells given in the matrix_list.}
 
-\item{cytname}{The name of the cytometer. This is a custom keyword that we use to track the source. It is e.g. used by Kaluza to identify the default parameters for the cytometer.}
+\item{cytname}{Character.
+The name of the cytometer. Stored in the \verb{$CYT} keyword, used by Kaluza for default instrument settings.
+You can use this to 1) track the source of the data and 2) have one cytname for each extreme template you used.}
 }
 \value{
-fcs_extreme_copy:
+A \code{flowFrame} (\code{fcs_extreme_copy}) representing the extreme template.
 A copy of the extreme_template which was used to save all samples. The fcs-file
 ranges for all samples come from this extreme sample.
 }
 \description{
-Export a list of matrices, usually \code{data.table}s.
+This function exports a list of matrices or \code{data.table}s as \code{.fcs} files using
+\code{flowCore::flowFrame()} and \code{flowCore::write.FCS()}. It ensures FCS-compatible formatting,
+adds optional safety scaling and shifting, handles marker names, and builds a shared
+extreme template sample to define channel ranges for all files.
 }
+\details{
+This is particularly useful for exporting flow cytometry data for use in software like Kaluza,
+which reads the metadata to set up the plots. Especially the maximum and minimum channel
+values are important for Kaluza to visualize the data correctly.
+}
+\examples{
+ff <- simulate_ff()
+export_fcs(list("s1.csv" = flowCore::exprs(ff)), outdir = local_tempdir_time())
+}
+\keyword{cytometry}
