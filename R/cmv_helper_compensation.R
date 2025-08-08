@@ -62,7 +62,7 @@ cmv_helper_compensation <- function(ff_unapplied_compensations,
     }
 
     # Apply spillover and autofluorescence compensation
-    ff_compensated <- cytoKal::compensation_autofluorescence_kaluza(
+    ff_compensated <- compensation_autofluorescence_kaluza(
         ff_unapplied_compensations,
         spillmat = params_spillover_autofluorescence[["spillover"]],
         autofluorescence_vector = params_spillover_autofluorescence[["autofluorescence_proportional"]],

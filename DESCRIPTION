@@ -1,6 +1,6 @@
 Package: cytobench
 Title: Bench of Tools for Cytometry Data and Relativisation
-Version: 0.6.0.9000
+Version: 1.0.0
 Authors@R: 
     person("Gunther", "Glehr", , "gunthergl@gmx.net", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-1495-9162"))
@@ -39,8 +39,7 @@ Imports:
 Suggests: 
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0),
-    cytoKal
+    testthat (>= 3.0.0)
 Depends: 
     R (>= 4.1.0)
 Config/testthat/edition: 3
