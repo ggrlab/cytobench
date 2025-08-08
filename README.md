@@ -26,11 +26,6 @@ You can install the development version of cytobench like so:
 devtools::install_github("ggrlab/cytobench")
 ```
 
-``` r
-# install.packages("devtools")
-devtools::install_github("ggrlab/cytobench")
-```
-
 ## Functionality
 
 There are multiple functionalities in the `cytobench` package, I would
