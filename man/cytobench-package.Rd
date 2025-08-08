@@ -6,7 +6,7 @@
 \alias{cytobench-package}
 \title{cytobench: Bench of Tools for Cytometry Data and Relativisation}
 \description{
-Export .fcs files to be readable within Kaluza. Rescale data with references.
+cytobench provides a comprehensive toolkit for preprocessing, normalization, and analysis of flow cytometry data. Especially designed for performing relativisation of flow cytometry data, FlowSOM convenience functions and further convenience functions for flow cytometry data analysis.
 }
 \author{
 \strong{Maintainer}: Gunther Glehr \email{gunthergl@gmx.net} (\href{https://orcid.org/0000-0002-1495-9162}{ORCID})

@@ -28,7 +28,7 @@ devtools::check()           # Check package
 devtools::install()         # Install package
 pkgdown::clean_site(force=TRUE)       # Build pkgdown site
 pkgdown::build_site()       # Build pkgdown site
-
+devtools::build_readme()
 
 devtools::spell_check()     # Check spelling in documentation. Allowed wordlist is in inst/WORDLIST
 urlchecker::url_check()     # Check URLs in documentation

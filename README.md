@@ -1,26 +1,87 @@
 
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
 # cytobench
 
+<!-- [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![CRAN status](https://www.r-pkg.org/badges/version/cytobench)](https://CRAN.R-project.org/package=cytobench) -->
+
 <!-- badges: start -->
+
+[![R-CMD-check](https://github.com/ggrlab/cytobench/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ggrlab/cytobench/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-The goal of cytobench is to ...
+Cytobench provides a comprehensive toolkit for preprocessing,
+normalization, and analysis of flow cytometry data. Especially designed
+for performing relativisation of flow cytometry data, FlowSOM
+convenience functions and further convenience functions for flow
+cytometry data analysis.
 
 ## Installation
 
-You can install the development version of cytobench from [GitHub](https://github.com/) with:
+You can install the development version of cytobench like so:
 
 ``` r
 # install.packages("devtools")
 devtools::install_github("ggrlab/cytobench")
 ```
 
-## Example
-
-This is a basic example which shows you how to solve a common problem:
-
 ``` r
-library(cytobench)
-## basic example code
+# install.packages("devtools")
+devtools::install_github("ggrlab/cytobench")
 ```
 
+## Functionality
+
+There are multiple functionalities in the `cytobench` package, I would
+suggest to check the function documentations and tests.
+
+## What did I do
+
+``` r
+# for VSCode
+install.packages("languageserver")
+
+pacman::p_load("devtools")
+# sudo apt install libharfbuzz-dev libfribidi-dev
+usethis::create_tidy_package(
+    "/home/gugl/clonedgit/packages/cytobench"
+)
+usethis::use_tidy_style(strict=TRUE)
+
+usethis::use_git()
+```
+
+``` bash
+git remote add origin git@github.com:ggrlab/cytobench.git
+git branch -M main
+git push -u origin main
+```
+
+``` r
+usethis::use_tidy_github()
+# usethis::use_tidy_upkeep_issue()
+usethis::use_readme_md()
+
+
+usethis::use_github_action("check-standard")
+usethis::use_github_action("test-coverage")
+
+# I have not set pkgdown yet (because I have a private repo - 2025-08-05)
+# gitcreds::gitcreds_set()
+# usethis::use_pkgdown_github_pages()
+usethis::use_pkgdown()
+usethis::use_news_md()
+usethis::use_cran_comments()
+```
+
+    ##### data.table imports
+    usethis::use_import_from("data.table", ":=")
+    usethis::use_import_from("data.table", ".BY")
+    usethis::use_import_from("data.table", ".EACHI")
+    usethis::use_import_from("data.table", ".GRP")
+    usethis::use_import_from("data.table", ".I")
+    usethis::use_import_from("data.table", ".N")
+    usethis::use_import_from("data.table", ".NGRP")
+    usethis::use_import_from("data.table", ".SD")
+    usethis::use_import_from("data.table", "data.table")

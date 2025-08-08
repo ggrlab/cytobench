@@ -4,7 +4,7 @@ Version: 1.0.0
 Authors@R: 
     person("Gunther", "Glehr", , "gunthergl@gmx.net", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-1495-9162"))
-Description: Export .fcs files to be readable within Kaluza. Rescale data with references.
+Description: cytobench provides a comprehensive toolkit for preprocessing, normalization, and analysis of flow cytometry data. Especially designed for performing relativisation of flow cytometry data, FlowSOM convenience functions and further convenience functions for flow cytometry data analysis.
 License: MIT + file LICENSE
 Imports: 
     Biobase,
