@@ -1,6 +1,6 @@
 Package: cytobench
 Title: Bench of Tools for Cytometry Data and Relativisation
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: 
     person("Gunther", "Glehr", , "gunthergl@gmx.net", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-1495-9162"))

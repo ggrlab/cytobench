@@ -81,7 +81,7 @@ gate_cells <- function(flowset,
 
         # Select appropriate gating set
         if (is.null(global_gating)) {
-            gating_x <- gatingset[fcs_x_sID]
+            gating_x <- gatingset[[fcs_x_sID]]
             if (length(gating_x) != 1) {
                 stop("No unique gate file found for ", fcs_x_sID, " in ", paste0(names(gatingset), collapse = ", "))
             }
