@@ -97,7 +97,6 @@ extract_mfi <- function(fcs_dir = "data-raw/s001",
                         ...) {
     joint_df <- tryCatch(
         {
-            browser()
             loaded_fcs <- load_mfi_files(
                 fcs_dir = fcs_dir,
                 regex_singlestain = regex_singlestain,
