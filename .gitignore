@@ -15,3 +15,4 @@ data-raw/MX.compensated-manual.navios.s050
 tests/testthat/testdata/
 **removeme**
 docs
+testdata_nogit/

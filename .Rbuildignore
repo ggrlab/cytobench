@@ -11,3 +11,4 @@ removeme.R
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
+^testdata_nogit$

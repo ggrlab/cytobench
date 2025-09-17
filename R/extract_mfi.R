@@ -97,6 +97,7 @@ extract_mfi <- function(fcs_dir = "data-raw/s001",
                         ...) {
     joint_df <- tryCatch(
         {
+            browser()
             loaded_fcs <- load_mfi_files(
                 fcs_dir = fcs_dir,
                 regex_singlestain = regex_singlestain,
@@ -245,7 +246,37 @@ load_mfi_files <- function(fcs_dir = "data-raw/s001",
     dir_files <- dir_files[grepl(regex_singlestain, dir_files)]
 
     # Load the FCS files into a list of cytosets
-    loaded_fcs <- sapply(dir_files, flowWorkspace::load_cytoset_from_fcs, simplify = FALSE)
+    loaded_fcs <- tryCatch(
+        {
+            sapply(dir_files, flowWorkspace::load_cytoset_from_fcs, simplify = FALSE)
+        },
+        error = function(e) {
+            # In one file (R2_d017_s017_comp-manual_ungated_none_Inf_navios_11-none.fcs),
+            # I had the following error:
+            #   Error: bad lexical cast: source type value could not be interpreted as target
+            # Testing with flowCore::read.FCS gives a warning:
+            #   > a <- sapply(dir_files, flowCore::read.FCS, simplify = FALSE)
+            # uneven number of tokens: 343
+            # The last keyword is dropped.
+            # uneven number of tokens: 343
+            # The last keyword is dropped.
+            # Solution: Rewriting the files into new fcs files.
+            warning("Error loading FCS files directly, rewriting them first: ", e$message)
+            current_tmpdir <- tempdir()
+            dir.create(file.path(current_tmpdir, "fcs_rewrite"), showWarnings = FALSE)
+            sapply(dir_files, function(x) {
+                ff <- flowCore::read.FCS(x)
+                flowCore::write.FCS(ff, filename = file.path(current_tmpdir, "fcs_rewrite", basename(x)))
+            })
+            res <- sapply(
+                file.path(current_tmpdir, "fcs_rewrite", basename(dir_files)),
+                flowWorkspace::load_cytoset_from_fcs,
+                simplify = FALSE
+            )
+            unlink(file.path(current_tmpdir, "fcs_rewrite"), recursive = TRUE)
+            return(res)
+        }
+    )
 
     # Check if a gating set file is provided
     if (!all(is.null(gating_set_file))) {
@@ -470,7 +501,7 @@ clustering_seeded_mfi <- function(values, seed = 42, transform_fun = function(x)
 #' )
 #' clustering_seeded_mfi_multicolor(df)
 #' clustering_seeded_mfi_multicolor(df, seed = 123, transform_fun = function(x) asinh(x / 1e3))
-#'}
+#' }
 clustering_seeded_mfi_multicolor <- function(values,
                                              seed = 42,
                                              transform_fun = function(x) {
