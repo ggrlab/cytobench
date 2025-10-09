@@ -10,7 +10,7 @@ gate_cells(
   gatename = "/Singlets/CD45+/CD3+",
   verbose = TRUE,
   inplace = FALSE,
-  return_cytoset = FALSE
+  return_x = c("flowset", "cytoset", "gatinghierarchy")
 )
 }
 \arguments{
@@ -26,7 +26,7 @@ Default is \code{"/Singlets/CD45+/CD3+"}. If numeric, the nth gate will be selec
 
 \item{inplace}{Logical. If \code{TRUE}, modifies the \code{flowset} in place. Otherwise, a new \code{flowSet} is created.}
 
-\item{return_cytoset}{Logical. If \code{TRUE}, returns a \code{cytoSet} instead of a \code{flowSet}. Default: \code{FALSE}.}
+\item{return_x}{Character vector. Specifies the type of object to return. Options are "flowset", "cytoset", and "gatinghierarchy". Default: \code{c("flowset", "cytoset", "gatinghierarchy")}. First element is used.}
 }
 \value{
 A list with two elements:

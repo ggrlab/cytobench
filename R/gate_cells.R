@@ -100,6 +100,7 @@ gate_cells <- function(flowset,
         ff_path_tmp <- write_memory_FCS(fcs_x)
         # Load the cytoset from the FCS file
         cs <- flowWorkspace::load_cytoset_from_fcs(ff_path_tmp)
+        flowWorkspace::sampleNames(cs) <- fcs_x_sID
 
         # Apply the gating set (compensation assumed applied already)
         # and suppress messages
@@ -150,7 +151,6 @@ gate_cells <- function(flowset,
         # This only extracts for the columns in flowCore::markernames()
         pop_mfis <- flowWorkspace::gh_pop_get_stats(tmp_gates, type = flowWorkspace::pop.MFI)
         counts_dt_MFI <- dplyr::left_join(counts_dt, pop_mfis, by = "pop")
-        counts_dt_MFI[["sample"]] <- fcs_x_sID
 
         # Combine the counts with the complete counts
         if (all(is.na(counts_complete))) {
@@ -164,12 +164,13 @@ gate_cells <- function(flowset,
             gatename <- flowWorkspace::gs_get_pop_paths(gating_x)[[gatename]]
         }
         # Extract the gatename (e.g. CD3+) population data
-        extracted <- flowWorkspace::gh_pop_get_data(applied_gates, gatename)
         if (return_x[1] == "gatinghierarchy") {
             data_set[[fcs_i]] <- applied_gates
             next
         }
+        extracted <- flowWorkspace::gh_pop_get_data(applied_gates, gatename)
         extracted <- flowWorkspace::realize_view(extracted)
+
         if (return_x[1] == "cytoset") {
             data_set[[fcs_i]] <- extracted
         } else {
