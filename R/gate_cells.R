@@ -11,6 +11,7 @@
 #'        Default is `"/Singlets/CD45+/CD3+"`. If numeric, the nth gate will be selected.
 #' @param verbose Logical. Print progress information? Default: `TRUE`.
 #' @param inplace Logical. If `TRUE`, modifies the `flowset` in place. Otherwise, a new `flowSet` is created.
+#' @param return_x Character vector. Specifies the type of object to return. Options are "flowset", "cytoset", and "gatinghierarchy". Default: `c("flowset", "cytoset", "gatinghierarchy")`. First element is used.
 #'
 #' @return A list with two elements:
 #' \describe{
@@ -39,7 +40,8 @@ gate_cells <- function(flowset,
                        gatingset,
                        gatename = "/Singlets/CD45+/CD3+",
                        verbose = TRUE,
-                       inplace = FALSE) {
+                       inplace = FALSE,
+                       return_x = c("flowset", "cytoset", "gatinghierarchy")) {
     global_gating <- NULL
     if (length(gatingset) <= 1) {
         global_gating <- gatingset
@@ -72,6 +74,11 @@ gate_cells <- function(flowset,
     counts_complete <- NA
 
     # Process each (compensated) FCS sample
+    if (return_x[1] != "flowset") {
+        data_set <- list()
+    } else {
+        data_set <- flowset
+    }
     for (fcs_i in seq_along(flowset)) {
         fcs_x <- flowset[[fcs_i]]
         fcs_x_sID <- flowCore::sampleNames(flowset)[fcs_i]
@@ -158,14 +165,21 @@ gate_cells <- function(flowset,
         }
         # Extract the gatename (e.g. CD3+) population data
         extracted <- flowWorkspace::gh_pop_get_data(applied_gates, gatename)
+        if (return_x[1] == "gatinghierarchy") {
+            data_set[[fcs_i]] <- applied_gates
+            next
+        }
         extracted <- flowWorkspace::realize_view(extracted)
-        extracted_ff <- flowWorkspace::cytoframe_to_flowFrame(extracted)
-
-        flowset[[fcs_i]] <- extracted_ff
+        if (return_x[1] == "cytoset") {
+            data_set[[fcs_i]] <- extracted
+        } else {
+            data_set[[fcs_i]] <- flowWorkspace::cytoframe_to_flowFrame(extracted)
+        }
     }
+    names(data_set) <- flowCore::sampleNames(flowset)
 
     return(list(
         counts = counts_complete,
-        flowset_gated = flowset
+        flowset_gated = data_set
     ))
 }

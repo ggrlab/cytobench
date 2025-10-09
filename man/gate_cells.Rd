@@ -9,7 +9,8 @@ gate_cells(
   gatingset,
   gatename = "/Singlets/CD45+/CD3+",
   verbose = TRUE,
-  inplace = FALSE
+  inplace = FALSE,
+  return_cytoset = FALSE
 )
 }
 \arguments{
@@ -24,6 +25,8 @@ Default is \code{"/Singlets/CD45+/CD3+"}. If numeric, the nth gate will be selec
 \item{verbose}{Logical. Print progress information? Default: \code{TRUE}.}
 
 \item{inplace}{Logical. If \code{TRUE}, modifies the \code{flowset} in place. Otherwise, a new \code{flowSet} is created.}
+
+\item{return_cytoset}{Logical. If \code{TRUE}, returns a \code{cytoSet} instead of a \code{flowSet}. Default: \code{FALSE}.}
 }
 \value{
 A list with two elements:
