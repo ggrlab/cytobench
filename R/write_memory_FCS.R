@@ -31,6 +31,11 @@ write_memory_FCS <- function(ff) {
             # Attempt to write the FCS file to /dev/shm (shared memory, fast I/O)
             ffpath <- "/dev/shm/removeme.fcs"
             flowCore::write.FCS(ff, ffpath)
+            reg.finalizer(
+                e = .GlobalEnv,
+                f = function(e) unlink(ffpath, recursive = TRUE, force = TRUE),
+                onexit = TRUE
+            )
             return(ffpath)
         },
         error = function(e) {
@@ -39,6 +44,11 @@ write_memory_FCS <- function(ff) {
             dir.create(new_tmpdir) # Actually create the directory
             ffpath <- file.path(new_tmpdir, "removeme.fcs")
             flowCore::write.FCS(ff, ffpath)
+            reg.finalizer(
+                e = .GlobalEnv,
+                f = function(e) unlink(new_tmpdir, recursive = TRUE, force = TRUE),
+                onexit = TRUE
+            )
             return(ffpath)
         }
     )
