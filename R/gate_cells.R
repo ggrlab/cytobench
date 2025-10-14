@@ -177,8 +177,9 @@ gate_cells <- function(flowset,
             data_set[[fcs_i]] <- flowWorkspace::cytoframe_to_flowFrame(extracted)
         }
     }
-    names(data_set) <- flowCore::sampleNames(flowset)
-
+    if (return_x[1] != "flowset") {
+        names(data_set) <- flowCore::sampleNames(flowset)
+    }
     return(list(
         counts = counts_complete,
         flowset_gated = data_set
