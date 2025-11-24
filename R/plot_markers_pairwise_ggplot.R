@@ -4,30 +4,12 @@
 #' Axes are asinh-transformed and scaled using marker-specific cofactors. This is particularly useful
 #' for visual QC of compensation, cofactor choices and signal separation.
 #'
-#' @param ff A `flowFrame` containing the cytometry data.
-#' @param cofactor_namedvec
-#' A named numeric vector providing default cofactors per marker. The names
-#' of the vector should be the same as the marker names in the flowFrame object.
-#' @param special_cofactor_list
-#' A named list with overrides for specific marker combinations.
-#' Each name should be `"markerX_markerY"`, with values being a
-#' numeric vector of length 2: `c(cofactor_x, cofactor_y)`.
-#' @param transform_fun A function used to transform intensity values (default: `asinh`).
-#' @param transform_fun_name Character label for the transformation function (used in axis labels).
+#' @inheritParams plot_markers_pairwise
 #' @param geom Character.
 #' One of `"hex"` (default), `"points"`, or `"pointdensity"` -
 #' determines the ggplot2 geometry used. Hex is usually still the fastest.
-#' @param bins Number of bins (resolution) in each 2D plot (default: 50).
-#' @param diag_plot Logical. Whether to include labeled marker names along the diagonal (default: FALSE).
-#' @param debugplots Logical. If TRUE, plots text placeholders instead of actual data - useful for layout testing.
-#' @param axis_full_labels Logical. If TRUE, axis labels include marker names and cofactor formulas.
-#' @param n_cells Number of cells to downsample from `ff` (default: `Inf` = use all).
-#' @param count_transform Function to transform hexbin/point counts (e.g. `log10(count + 1)`).
-#' @param add_ggplot_elements A list of ggplot layers to add to each panel (e.g. `list(ggplot2::theme_minimal())`).
 #'
 #' @return A `patchwork` object: a composite grid of all marker pairwise comparisons.
-#'
-#' @export
 #'
 #' @examples
 #' fs <- simulate_fs(
@@ -72,22 +54,22 @@
 #' )
 #' print(p3)
 #' @keywords cytometry
-plot_markers_pairwise_ggplot <- function(ff,
-                                  cofactor_namedvec,
-                                  special_cofactor_list,
-                                  transform_fun = asinh,
-                                  transform_fun_name = "asinh",
-                                  geom = c("hex", "points", "pointdensity"),
-                                  bins = 50,
-                                  diag_plot = FALSE,
-                                  debugplots = FALSE,
-                                  axis_full_labels = TRUE,
-                                  n_cells = Inf,
-                                  count_transform = function(x) log10(x + 1),
-                                  add_ggplot_elements = list()) {
+plot_markers_pairwise_ggplot <- function(df,
+                                         cofactor_namedvec,
+                                         special_cofactor_list = list(),
+                                         transform_fun = asinh,
+                                         transform_fun_name = "asinh",
+                                         geom = c("hex", "points", "pointdensity"),
+                                         bins = 50,
+                                         diag_plot = FALSE,
+                                         debugplots = FALSE,
+                                         axis_full_labels = TRUE,
+                                         count_transform = function(x) log10(x + 1),
+                                         verbose = FALSE,
+                                         add_ggplot_elements = list()) {
     x <- y <- density <- count <- NULL # LINTR
     # Generate blank diagonal marker name plots
-    marker_names <- names(flowCore::markernames(ff))
+    marker_names <- names(cofactor_namedvec)
     xy_plots <- list()
     xy_plots_rotated <- list()
     for (marker_x in marker_names) {
@@ -103,11 +85,6 @@ plot_markers_pairwise_ggplot <- function(ff,
     all_combos <- utils::combn(marker_names, 2, simplify = FALSE)
     all_combos_str <- lapply(all_combos, paste0, collapse = "_")
 
-    # Extract data and optionally downsample
-    exprs_dt <- data.table::as.data.table(flowCore::exprs(ff))
-    if (!is.infinite(n_cells)) {
-        exprs_dt <- exprs_dt[sample(.N, min(.N, n_cells))]
-    }
 
     # Start assembling plot matrix
     plots_all_patchwork <- list()
@@ -140,8 +117,8 @@ plot_markers_pairwise_ggplot <- function(ff,
                         ggplot2::theme_void()
                 } else {
                     dt <- tibble::tibble(
-                        x = transform_fun(exprs_dt[[marker_x]] / cofactor_x),
-                        y = transform_fun(exprs_dt[[marker_y]] / cofactor_y)
+                        x = transform_fun(df[[marker_x]] / cofactor_x),
+                        y = transform_fun(df[[marker_y]] / cofactor_y)
                     )
                     p <- ggplot2::ggplot(dt, ggplot2::aes(x = x, y = y))
 
