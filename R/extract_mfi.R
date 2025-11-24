@@ -107,6 +107,7 @@ extract_mfi <- function(fcs_dir = "data-raw/s001",
             extract_singlestain_mfi_wrapper(loaded_fcs, transform_fun = transform_fun, relevant_columns = multistain_columns)
         },
         error = function(e) {
+            warning(e$message)
             tibble::tibble(
                 "feature" = NA,
                 "negative" = NA,
@@ -135,6 +136,7 @@ extract_mfi <- function(fcs_dir = "data-raw/s001",
             )
         },
         error = function(e) {
+            warning(e$message)
             return(tibble::tibble(
                 "sample" = NA,
                 "feature" = NA,
@@ -681,7 +683,7 @@ extract_relevant_mfis_multistain <- function(loaded_fcs_multistain,
                                              seed = 42) {
     # Warn if multiple multistained samples were passed (usually only one is expected)
     if (length(loaded_fcs_multistain) > 1) {
-        warning("More than one multistain sample found; returning MFIs per sample. This is NOT intended!")
+        warning("More than one multistain sample found; returning MFIs per sample.")
     }
 
     # Process each multistain sample individually
