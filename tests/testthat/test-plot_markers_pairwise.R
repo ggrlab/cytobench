@@ -309,7 +309,7 @@ test_that("Plot markers pairwise title", {
 
     pdf(file.path(tmpdir, "removeme2.pdf"), height = 5, width = 5)
     plot_markers_pairwise(
-        example_ff[, 1:2],
+        example_ff,
         engine = "base", 
         title_global = "Global title, e.g. sample ID"
     )

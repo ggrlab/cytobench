@@ -15,6 +15,8 @@
 #' `engine = "base"`. Width of the first column (marker names) relative to other columns (scatterplots).
 #' @param firstrow_height
 #' `engine = "base"`. Height of the first row (marker names) relative to other rows (scatterplots).
+#' @param cex_title
+#' `engine = "base"`. Character expansion factor for the global title.
 #' @param method.args
 #' A list of additional arguments to pass to the density calculation method in
 #' `ggpointdensity:::StatPointdensity$compute_group()`.
@@ -40,6 +42,7 @@ plot_markers_pairwise_base <- function(df,
                                        title_global = NULL,
                                        firstcol_width = 0.15,
                                        firstrow_height = 0.15,
+                                       cex_title = 2,
                                        # arguments for pointdensity
                                        method.args = list(),
                                        adjust = 1,
@@ -191,4 +194,5 @@ plot_markers_pairwise_base <- function(df,
             }
         }
     }
+    mtext(title_global, side = 3, line = -5, outer = TRUE, cex = cex_title)
 }

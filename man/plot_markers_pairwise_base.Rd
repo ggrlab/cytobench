@@ -18,6 +18,7 @@ plot_markers_pairwise_base(
   title_global = NULL,
   firstcol_width = 0.15,
   firstrow_height = 0.15,
+  cex_title = 2,
   method.args = list(),
   adjust = 1,
   count_transform = function(x) x,
@@ -60,6 +61,8 @@ Speed concerns:
 \item{firstcol_width}{\code{engine = "base"}. Width of the first column (marker names) relative to other columns (scatterplots).}
 
 \item{firstrow_height}{\code{engine = "base"}. Height of the first row (marker names) relative to other rows (scatterplots).}
+
+\item{cex_title}{\code{engine = "base"}. Character expansion factor for the global title.}
 
 \item{method.args}{A list of additional arguments to pass to the density calculation method in
 \code{ggpointdensity:::StatPointdensity$compute_group()}.
