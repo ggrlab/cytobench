@@ -25,6 +25,8 @@
 #' Number of cells/rows to downsample randomly (default: `Inf` = use all).
 #' @param count_transform
 #' Function to transform hexbin/pointdensity counts or density estimates (e.g. `log10(count + 1)`).
+#' @param title_global
+#' Character. An optional global title for the entire plot.
 #' @param bins `engine = "ggplot"`. Number of bins (resolution) in each 2D plot (default: 50). (hex geom)
 #' @param diag_plot
 #' Logical, `engine = "ggplot"`. Whether to include labeled marker names along the diagonal (default: FALSE).
@@ -91,6 +93,7 @@ plot_markers_pairwise <- function(
     verbose = FALSE,
     engine = c("ggplot", "base"),
     n_cells = Inf,
+    title_global = NULL,
     # Arguments specific to ggplot engine
     geom = c("hex", "points", "pointdensity"),
     bins = 50,
@@ -130,6 +133,7 @@ plot_markers_pairwise <- function(
             transform_fun = transform_fun,
             transform_fun_name = transform_fun_name,
             geom = geom,
+            title_global = title_global,
             ...
         )
     } else if (engine[1] == "ggplot") {
@@ -146,6 +150,7 @@ plot_markers_pairwise <- function(
             axis_full_labels = axis_full_labels,
             count_transform = count_transform,
             add_ggplot_elements = add_ggplot_elements,
+            title_global = title_global,
             ...
         )
     }

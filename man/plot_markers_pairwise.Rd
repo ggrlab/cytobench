@@ -13,6 +13,7 @@ plot_markers_pairwise(
   verbose = FALSE,
   engine = c("ggplot", "base"),
   n_cells = Inf,
+  title_global = NULL,
   geom = c("hex", "points", "pointdensity"),
   bins = 50,
   diag_plot = FALSE,
@@ -41,6 +42,8 @@ numeric vector of length 2: \code{c(cofactor_x, cofactor_y)}.}
 \item{engine}{Character. One of \code{"ggplot"} (default) or \code{"base"} - determines the plotting engine used.}
 
 \item{n_cells}{Number of cells/rows to downsample randomly (default: \code{Inf} = use all).}
+
+\item{title_global}{Character. An optional global title for the entire plot.}
 
 \item{geom}{Character.
 One of \code{"hex"} (default), \code{"points"}, or \code{"pointdensity"} -

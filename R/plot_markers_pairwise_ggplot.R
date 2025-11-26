@@ -66,7 +66,8 @@ plot_markers_pairwise_ggplot <- function(df,
                                          axis_full_labels = TRUE,
                                          count_transform = function(x) log10(x + 1),
                                          verbose = FALSE,
-                                         add_ggplot_elements = list()) {
+                                         add_ggplot_elements = list(),
+                                         title_global = NULL) {
     x <- y <- density <- count <- NULL # LINTR
     # Generate blank diagonal marker name plots
     marker_names <- names(cofactor_namedvec)
@@ -194,11 +195,15 @@ plot_markers_pairwise_ggplot <- function(df,
         ncol_wrapper <- length(marker_names)
     }
 
-    patchwork::wrap_plots(
+    plot_wrapped <- patchwork::wrap_plots(
         plotlist_wrapper,
         ncol = ncol_wrapper,
         byrow = TRUE,
         widths = c(0.15, rep(1, ncol_wrapper - 1)),
         heights = c(0.15, rep(1, ncol_wrapper - 1))
     )
+    if (!is.null(title_global)) {
+        plot_wrapped <- plot_wrapped + patchwork::plot_annotation(title = title_global)
+    }
+    plot_wrapped
 }

@@ -17,7 +17,8 @@ plot_markers_pairwise_ggplot(
   axis_full_labels = TRUE,
   count_transform = function(x) log10(x + 1),
   verbose = FALSE,
-  add_ggplot_elements = list()
+  add_ggplot_elements = list(),
+  title_global = NULL
 )
 }
 \arguments{
@@ -48,6 +49,8 @@ determines the ggplot2 geometry used. Hex is usually still the fastest.}
 \item{verbose}{Logical. If TRUE, prints progress messages to the console.}
 
 \item{add_ggplot_elements}{\code{engine = "ggplot"}. A list of ggplot layers to add to each panel (e.g. \code{list(ggplot2::theme_minimal())}).}
+
+\item{title_global}{Character. An optional global title for the entire plot.}
 }
 \value{
 A \code{patchwork} object: a composite grid of all marker pairwise comparisons.

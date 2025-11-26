@@ -11,11 +11,13 @@ plot_markers_pairwise_base(
   transform_fun = asinh,
   transform_fun_name = "asinh",
   verbose = FALSE,
-  parargs = list(mfrow = c(ncol(df_mat), ncol(df_mat)) - 1, mar = c(3, 3, 0, 0), oma =
-    c(0, 0, 0, 0), xaxs = "i", yaxs = "i"),
+  parargs = list(mar = c(3, 3, 0, 0), xaxs = "i", yaxs = "i"),
   mgp = c(2, 1, 0),
   geom = c("points", "pointdensity"),
   col = grDevices::rgb(0, 0, 0, 0.2),
+  title_global = NULL,
+  firstcol_width = 0.15,
+  firstrow_height = 0.15,
   method.args = list(),
   adjust = 1,
   count_transform = function(x) x,
@@ -36,7 +38,9 @@ numeric vector of length 2: \code{c(cofactor_x, cofactor_y)}.}
 
 \item{verbose}{Logical. If TRUE, prints progress messages to the console.}
 
-\item{parargs}{\code{engine = "base"}. A list of graphical parameters to pass to \code{par()} for base R plotting.}
+\item{parargs}{\code{engine = "base"}. A list of graphical parameters to pass to \code{par()} for base R plotting in the
+INDIVIDUAL scatterplots! Take care not to override layout parameters - this will likely lead to
+wrongly arranged plots.}
 
 \item{mgp}{\code{engine = "base"}. A numeric vector of length 3 specifying the margin line for the axis title, labels, and line.}
 
@@ -51,7 +55,14 @@ Speed concerns:
 
 \item{col}{Color for points in scatterplots (default: semi-transparent black). Is overridden when using \code{geom = "pointdensity"}.}
 
-\item{method.args}{A list of additional arguments to pass to the density calculation method in \code{ggpointdensity:::StatPointdensity$compute_group()}.
+\item{title_global}{Character. An optional global title for the entire plot.}
+
+\item{firstcol_width}{\code{engine = "base"}. Width of the first column (marker names) relative to other columns (scatterplots).}
+
+\item{firstrow_height}{\code{engine = "base"}. Height of the first row (marker names) relative to other rows (scatterplots).}
+
+\item{method.args}{A list of additional arguments to pass to the density calculation method in
+\code{ggpointdensity:::StatPointdensity$compute_group()}.
 See \code{?ggpointdensity::geom_pointdensity} for details.}
 
 \item{adjust}{See \code{?ggpointdensity::geom_pointdensity} for details.}
