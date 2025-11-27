@@ -19,7 +19,8 @@ plot_markers_pairwise_ggplot(
   verbose = FALSE,
   add_ggplot_elements = list(),
   title_global = NULL,
-  modelines = FALSE
+  modelines = FALSE,
+  kwargs_hdr = list()
 )
 }
 \arguments{
@@ -54,6 +55,9 @@ determines the ggplot2 geometry used. Hex is usually still the fastest.}
 \item{title_global}{Character. An optional global title for the entire plot.}
 
 \item{modelines}{Logical. If TRUE, adds red lines at the modes of each marker in the scatterplots.}
+
+\item{kwargs_hdr}{A list of additional arguments to pass to \code{hdrcde::hdr.2d()} when computing mode lines.
+Only used if \code{modelines = TRUE}.}
 }
 \value{
 A \code{patchwork} object: a composite grid of all marker pairwise comparisons.

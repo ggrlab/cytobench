@@ -2,19 +2,28 @@ test_that("Plot markers pairwise: Add mode-lines", {
     cn <- c(
         "FITC-A", "PE-A", "ECD-A"
     )
-    example_ff <- flowCore::flowFrame(
-        matrix(
-            rnorm(1000 * length(cn), mean = 1000, sd = 100),
-            ncol = length(cn),
-            dimnames = list(NULL, cn)
-        )
-    )
+    tmpmat <- matrix(
+        c(
+            rnorm(500 * length(cn), mean = 1000, sd = 100),
+            rnorm(1000 * length(cn), mean = 0, sd = 100)
+        ),
+        ncol = length(cn),
+        byrow = TRUE
+    ) %*% diag(c(3, 1, 1))
+    tmpmat[, 1] <- tmpmat[, 1] + 1e5
+    colnames(tmpmat) <- cn
+    example_ff <- flowCore::flowFrame(exprs = tmpmat)
     tmpdir <- local_tempdir_time()
+
+    #### Here I have to care that
+    # 1) hdrcde is installed
+    # 2) The mode lines are drawn in the "major" population (bottom-left at around x=0, y=0)
 
     p0 <- plot_markers_pairwise(
         example_ff,
-        title_global = "Global title, e.g. sample ID", 
-        modelines = TRUE
+        title_global = "Global title, e.g. sample ID",
+        modelines = TRUE,
+        kwargs_hdr = list(prob = 0.99)
     )
     pdf(file.path(tmpdir, "removeme.pdf"), height = 45, width = 45)
     print(p0)
@@ -23,9 +32,10 @@ test_that("Plot markers pairwise: Add mode-lines", {
     pdf(file.path(tmpdir, "removeme2.pdf"), height = 5, width = 5)
     plot_markers_pairwise(
         example_ff,
-        engine = "base", 
-        title_global = "Global title, e.g. sample ID", 
-        modelines = TRUE
+        engine = "base",
+        title_global = "Global title, e.g. sample ID",
+        modelines = TRUE,
+        kwargs_hdr = list(prob = 0.99)
     )
     dev.off()
 
@@ -343,7 +353,7 @@ test_that("Plot markers pairwise title", {
     pdf(file.path(tmpdir, "removeme2.pdf"), height = 5, width = 5)
     plot_markers_pairwise(
         example_ff,
-        engine = "base", 
+        engine = "base",
         title_global = "Global title, e.g. sample ID"
     )
     dev.off()

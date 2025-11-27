@@ -68,7 +68,8 @@ plot_markers_pairwise_ggplot <- function(df,
                                          verbose = FALSE,
                                          add_ggplot_elements = list(),
                                          title_global = NULL,
-                                         modelines = FALSE) {
+                                         modelines = FALSE,
+                                         kwargs_hdr = list()) {
     x <- y <- density <- count <- NULL # LINTR
     # Generate blank diagonal marker name plots
     marker_names <- names(cofactor_namedvec)
@@ -169,13 +170,16 @@ plot_markers_pairwise_ggplot <- function(df,
                     }
                 }
                 if (modelines) {
-                    if (!require(hdrcde)) {
+                    if (!"hdrcde" %in% rownames(installed.packages())) {
                         stop("Package 'hdrcde' is required for adding mode lines. Please install it or set modelines = FALSE.")
                     }
-                    modes <- hdrcde::hdr.2d(
-                        transform_fun(df[[marker_x]] / cofactor_x), 
-                        transform_fun(df[[marker_y]] / cofactor_y),
-                         prob = .9)$mode
+                    modes <- do.call(hdrcde::hdr.2d, c(
+                        list(
+                            x = transform_fun(df[[marker_x]] / cofactor_x),
+                            y = transform_fun(df[[marker_y]] / cofactor_y)
+                        ),
+                        kwargs_hdr
+                    ))$mode
                     names(modes) <- c(marker_x, marker_y)
                     p <- p +
                         ggplot2::geom_vline(xintercept = modes[marker_x], color = "red") +

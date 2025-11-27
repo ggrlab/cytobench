@@ -20,6 +20,7 @@ plot_markers_pairwise_base(
   firstrow_height = 0.15,
   cex_title = 2,
   modelines = TRUE,
+  kwargs_hdr = list(),
   method.args = list(),
   adjust = 1,
   count_transform = function(x) x,
@@ -66,6 +67,9 @@ Speed concerns:
 \item{cex_title}{\code{engine = "base"}. Character expansion factor for the global title.}
 
 \item{modelines}{Logical. If TRUE, adds red lines at the modes of each marker in the scatterplots.}
+
+\item{kwargs_hdr}{A list of additional arguments to pass to \code{hdrcde::hdr.2d()} when computing mode lines.
+Only used if \code{modelines = TRUE}.}
 
 \item{method.args}{A list of additional arguments to pass to the density calculation method in
 \code{ggpointdensity:::StatPointdensity$compute_group()}.

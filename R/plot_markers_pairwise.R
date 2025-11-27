@@ -29,6 +29,9 @@
 #' Character. An optional global title for the entire plot.
 #' @param modelines
 #' Logical. If TRUE, adds red lines at the modes of each marker in the scatterplots.
+#' @param kwargs_hdr
+#' A list of additional arguments to pass to `hdrcde::hdr.2d()` when computing mode lines.
+#' Only used if `modelines = TRUE`.
 #' @param bins `engine = "ggplot"`. Number of bins (resolution) in each 2D plot (default: 50). (hex geom)
 #' @param diag_plot
 #' Logical, `engine = "ggplot"`. Whether to include labeled marker names along the diagonal (default: FALSE).
@@ -97,6 +100,7 @@ plot_markers_pairwise <- function(
     n_cells = Inf,
     title_global = NULL,
     modelines = TRUE,
+    kwargs_hdr = list(),
     # Arguments specific to ggplot engine
     geom = c("hex", "points", "pointdensity"),
     bins = 50,
@@ -138,6 +142,7 @@ plot_markers_pairwise <- function(
             geom = geom,
             title_global = title_global,
             modelines = modelines,
+            kwargs_hdr = kwargs_hdr,
             ...
         )
     } else if (engine[1] == "ggplot") {
@@ -156,6 +161,7 @@ plot_markers_pairwise <- function(
             add_ggplot_elements = add_ggplot_elements,
             title_global = title_global,
             modelines = modelines,
+            kwargs_hdr = kwargs_hdr,
             ...
         )
     }

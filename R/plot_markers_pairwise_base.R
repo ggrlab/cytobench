@@ -44,6 +44,7 @@ plot_markers_pairwise_base <- function(df,
                                        firstrow_height = 0.15,
                                        cex_title = 2,
                                        modelines = TRUE,
+                                       kwargs_hdr = list(),
                                        # arguments for pointdensity
                                        method.args = list(),
                                        adjust = 1,
@@ -64,11 +65,11 @@ plot_markers_pairwise_base <- function(df,
         df_mat <- transform_fun(df_mat)
     }
     if (modelines) {
-        if (!require(hdrcde)) {
+        if (!"hdrcde" %in% rownames(installed.packages())) {
             stop("Package 'hdrcde' is required for adding mode lines. Please install it or set modelines = FALSE.")
         }
         combo_modes <- lapply(all_combos, function(xy) {
-            modes <- hdrcde::hdr.2d(df_mat[, xy[1]], df_mat[, xy[2]], prob = .9)$mode
+            modes <- do.call(hdrcde::hdr.2d, c(list(x = df_mat[, xy[1]], y = df_mat[, xy[2]]), kwargs_hdr))$mode
             names(modes) <- xy
             return(modes)
         })

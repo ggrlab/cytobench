@@ -15,6 +15,7 @@ plot_markers_pairwise(
   n_cells = Inf,
   title_global = NULL,
   modelines = TRUE,
+  kwargs_hdr = list(),
   geom = c("hex", "points", "pointdensity"),
   bins = 50,
   diag_plot = FALSE,
@@ -47,6 +48,9 @@ numeric vector of length 2: \code{c(cofactor_x, cofactor_y)}.}
 \item{title_global}{Character. An optional global title for the entire plot.}
 
 \item{modelines}{Logical. If TRUE, adds red lines at the modes of each marker in the scatterplots.}
+
+\item{kwargs_hdr}{A list of additional arguments to pass to \code{hdrcde::hdr.2d()} when computing mode lines.
+Only used if \code{modelines = TRUE}.}
 
 \item{geom}{Character.
 One of \code{"hex"} (default), \code{"points"}, or \code{"pointdensity"} -
