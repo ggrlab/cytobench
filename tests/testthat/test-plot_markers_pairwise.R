@@ -1,3 +1,37 @@
+test_that("Plot markers pairwise: Add mode-lines", {
+    cn <- c(
+        "FITC-A", "PE-A", "ECD-A"
+    )
+    example_ff <- flowCore::flowFrame(
+        matrix(
+            rnorm(1000 * length(cn), mean = 1000, sd = 100),
+            ncol = length(cn),
+            dimnames = list(NULL, cn)
+        )
+    )
+    p0 <- plot_markers_pairwise(
+        example_ff,
+        title_global = "Global title, e.g. sample ID", 
+        modelines = TRUE
+    )
+    tmpdir <- local_tempdir_time()
+    pdf(file.path(tmpdir, "removeme.pdf"), height = 45, width = 45)
+    print(p0)
+    dev.off()
+
+    pdf(file.path(tmpdir, "removeme2.pdf"), height = 5, width = 5)
+    plot_markers_pairwise(
+        example_ff,
+        engine = "base", 
+        title_global = "Global title, e.g. sample ID", 
+        modelines = TRUE
+    )
+    dev.off()
+
+    testthat::expect_true(TRUE) # run through test
+})
+
+
 test_that("Plot markers pairwise performance", {
     cn <- c(
         "FITC-A", "PE-A", "ECD-A"

@@ -43,6 +43,7 @@ plot_markers_pairwise_base <- function(df,
                                        firstcol_width = 0.15,
                                        firstrow_height = 0.15,
                                        cex_title = 2,
+                                       modelines = TRUE,
                                        # arguments for pointdensity
                                        method.args = list(),
                                        adjust = 1,
@@ -61,6 +62,12 @@ plot_markers_pairwise_base <- function(df,
     if (!missing(cofactor_namedvec)) {
         df_mat[, names(cofactor_namedvec)] <- df_mat[, names(cofactor_namedvec)] %*% (diag(1 / cofactor_namedvec))
         df_mat <- transform_fun(df_mat)
+    }
+    if (modelines) {
+        if (!require(modeest)) {
+            stop("Package 'modeest' is required for adding mode lines. Please install it or set modelines = FALSE.")
+        }
+        modes <- apply(df_mat, 2, modeest::mlv1)
     }
 
     markernames <- colnames(df_mat)
@@ -189,6 +196,9 @@ plot_markers_pairwise_base <- function(df,
                         )
                     } else {
                         stop("Unknown geom: ", geom[1])
+                    }
+                    if (modelines) {
+                        abline(v = modes[marker_x], h = modes[marker_y], col = "red")
                     }
                 }
             }

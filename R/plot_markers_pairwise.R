@@ -27,6 +27,8 @@
 #' Function to transform hexbin/pointdensity counts or density estimates (e.g. `log10(count + 1)`).
 #' @param title_global
 #' Character. An optional global title for the entire plot.
+#' @param modelines
+#' Logical. If TRUE, adds red lines at the modes of each marker in the scatterplots.
 #' @param bins `engine = "ggplot"`. Number of bins (resolution) in each 2D plot (default: 50). (hex geom)
 #' @param diag_plot
 #' Logical, `engine = "ggplot"`. Whether to include labeled marker names along the diagonal (default: FALSE).
@@ -94,6 +96,7 @@ plot_markers_pairwise <- function(
     engine = c("ggplot", "base"),
     n_cells = Inf,
     title_global = NULL,
+    modelines = TRUE,
     # Arguments specific to ggplot engine
     geom = c("hex", "points", "pointdensity"),
     bins = 50,
@@ -134,6 +137,7 @@ plot_markers_pairwise <- function(
             transform_fun_name = transform_fun_name,
             geom = geom,
             title_global = title_global,
+            modelines = modelines,
             ...
         )
     } else if (engine[1] == "ggplot") {
@@ -151,6 +155,7 @@ plot_markers_pairwise <- function(
             count_transform = count_transform,
             add_ggplot_elements = add_ggplot_elements,
             title_global = title_global,
+            modelines = modelines,
             ...
         )
     }

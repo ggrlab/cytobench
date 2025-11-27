@@ -19,6 +19,7 @@ plot_markers_pairwise_base(
   firstcol_width = 0.15,
   firstrow_height = 0.15,
   cex_title = 2,
+  modelines = TRUE,
   method.args = list(),
   adjust = 1,
   count_transform = function(x) x,
@@ -63,6 +64,8 @@ Speed concerns:
 \item{firstrow_height}{\code{engine = "base"}. Height of the first row (marker names) relative to other rows (scatterplots).}
 
 \item{cex_title}{\code{engine = "base"}. Character expansion factor for the global title.}
+
+\item{modelines}{Logical. If TRUE, adds red lines at the modes of each marker in the scatterplots.}
 
 \item{method.args}{A list of additional arguments to pass to the density calculation method in
 \code{ggpointdensity:::StatPointdensity$compute_group()}.

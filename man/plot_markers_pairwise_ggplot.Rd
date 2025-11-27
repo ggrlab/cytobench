@@ -18,7 +18,8 @@ plot_markers_pairwise_ggplot(
   count_transform = function(x) log10(x + 1),
   verbose = FALSE,
   add_ggplot_elements = list(),
-  title_global = NULL
+  title_global = NULL,
+  modelines = FALSE
 )
 }
 \arguments{
@@ -51,6 +52,8 @@ determines the ggplot2 geometry used. Hex is usually still the fastest.}
 \item{add_ggplot_elements}{\code{engine = "ggplot"}. A list of ggplot layers to add to each panel (e.g. \code{list(ggplot2::theme_minimal())}).}
 
 \item{title_global}{Character. An optional global title for the entire plot.}
+
+\item{modelines}{Logical. If TRUE, adds red lines at the modes of each marker in the scatterplots.}
 }
 \value{
 A \code{patchwork} object: a composite grid of all marker pairwise comparisons.

@@ -67,7 +67,8 @@ plot_markers_pairwise_ggplot <- function(df,
                                          count_transform = function(x) log10(x + 1),
                                          verbose = FALSE,
                                          add_ggplot_elements = list(),
-                                         title_global = NULL) {
+                                         title_global = NULL,
+                                         modelines = FALSE) {
     x <- y <- density <- count <- NULL # LINTR
     # Generate blank diagonal marker name plots
     marker_names <- names(cofactor_namedvec)
@@ -167,7 +168,16 @@ plot_markers_pairwise_ggplot <- function(df,
                             ggplot2::ylab(paste0(transform_fun_name, "(z/", cofactor_y, ")"))
                     }
                 }
-
+                if (modelines) {
+                    if (!require(modeest)) {
+                        stop("Package 'modeest' is required for adding mode lines. Please install it or set modelines = FALSE.")
+                    }
+                    mode_x <- modeest::mlv1(transform_fun(df[[marker_x]] / cofactor_x))
+                    mode_y <- modeest::mlv1(transform_fun(df[[marker_y]] / cofactor_y))
+                    p <- p +
+                        ggplot2::geom_vline(xintercept = mode_x, color = "red") +
+                        ggplot2::geom_hline(yintercept = mode_y, color = "red")
+                }
                 if (length(add_ggplot_elements) != 0) {
                     for (element in add_ggplot_elements) {
                         p <- p + element
