@@ -9,12 +9,13 @@ test_that("Plot markers pairwise: Add mode-lines", {
             dimnames = list(NULL, cn)
         )
     )
+    tmpdir <- local_tempdir_time()
+
     p0 <- plot_markers_pairwise(
         example_ff,
         title_global = "Global title, e.g. sample ID", 
         modelines = TRUE
     )
-    tmpdir <- local_tempdir_time()
     pdf(file.path(tmpdir, "removeme.pdf"), height = 45, width = 45)
     print(p0)
     dev.off()

@@ -169,14 +169,17 @@ plot_markers_pairwise_ggplot <- function(df,
                     }
                 }
                 if (modelines) {
-                    if (!require(modeest)) {
-                        stop("Package 'modeest' is required for adding mode lines. Please install it or set modelines = FALSE.")
+                    if (!require(hdrcde)) {
+                        stop("Package 'hdrcde' is required for adding mode lines. Please install it or set modelines = FALSE.")
                     }
-                    mode_x <- modeest::mlv1(transform_fun(df[[marker_x]] / cofactor_x))
-                    mode_y <- modeest::mlv1(transform_fun(df[[marker_y]] / cofactor_y))
+                    modes <- hdrcde::hdr.2d(
+                        transform_fun(df[[marker_x]] / cofactor_x), 
+                        transform_fun(df[[marker_y]] / cofactor_y),
+                         prob = .9)$mode
+                    names(modes) <- c(marker_x, marker_y)
                     p <- p +
-                        ggplot2::geom_vline(xintercept = mode_x, color = "red") +
-                        ggplot2::geom_hline(yintercept = mode_y, color = "red")
+                        ggplot2::geom_vline(xintercept = modes[marker_x], color = "red") +
+                        ggplot2::geom_hline(yintercept = modes[marker_y], color = "red")
                 }
                 if (length(add_ggplot_elements) != 0) {
                     for (element in add_ggplot_elements) {

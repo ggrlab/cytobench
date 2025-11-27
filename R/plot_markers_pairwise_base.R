@@ -64,10 +64,15 @@ plot_markers_pairwise_base <- function(df,
         df_mat <- transform_fun(df_mat)
     }
     if (modelines) {
-        if (!require(modeest)) {
-            stop("Package 'modeest' is required for adding mode lines. Please install it or set modelines = FALSE.")
+        if (!require(hdrcde)) {
+            stop("Package 'hdrcde' is required for adding mode lines. Please install it or set modelines = FALSE.")
         }
-        modes <- apply(df_mat, 2, modeest::mlv1)
+        combo_modes <- lapply(all_combos, function(xy) {
+            modes <- hdrcde::hdr.2d(df_mat[, xy[1]], df_mat[, xy[2]], prob = .9)$mode
+            names(modes) <- xy
+            return(modes)
+        })
+        names(combo_modes) <- all_combos_str
     }
 
     markernames <- colnames(df_mat)
@@ -198,7 +203,7 @@ plot_markers_pairwise_base <- function(df,
                         stop("Unknown geom: ", geom[1])
                     }
                     if (modelines) {
-                        abline(v = modes[marker_x], h = modes[marker_y], col = "red")
+                        abline(v = combo_modes[[xy_str]][marker_x], h = combo_modes[[xy_str]][marker_y], col = "red")
                     }
                 }
             }
