@@ -225,7 +225,7 @@ plot_gating_simple <- function(
                 dt_joint,
                 ggplot2::aes(x = .data[[x_y[1]]], y = .data[[x_y[2]]], col = gatingstatus)
             ) +
-                ggplot2::scale_color_manual(values = c("pregate" = "black", "postgate" = "red"))
+                ggplot2::scale_color_manual(values = c("pregate" = "red", "postgate" = "black"))
         }
         p <- p +
             gg_layer + # user-provided/ default point layer
