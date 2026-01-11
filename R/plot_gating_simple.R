@@ -152,6 +152,7 @@ plot_gating_simple <- function(
         }
     )
 
+
     # ---- Determine which populations to plot ----
     if (!is.null(populations)) {
         paths <- populations
@@ -159,6 +160,9 @@ plot_gating_simple <- function(
         paths <- flowWorkspace::gh_get_pop_paths(gh)[-1] # drop root
     }
 
+    dt_full <- flowWorkspace::gh_pop_get_data(gh, "/", returnType = "flowFrame") |>
+        flowCore::exprs() |>
+        data.table::as.data.table()
     # ---- Helper: build one plot for a given population path ----
     build_plot <- function(path_x) {
         # Get gate and parent; skip if unavailable
@@ -186,11 +190,13 @@ plot_gating_simple <- function(
         x_y <- names(gate_params)
 
         # Realize pre- and post-gate data views and extract the two columns
-        dt_gated <- flowWorkspace::gh_pop_get_data(gh, parent_path)[, x_y, drop = FALSE] |>
-            flowWorkspace::realize_view() |>
-            flowCore::exprs() |>
-            data.table::as.data.table()
-        dt_gated[, gatingstatus := ifelse(flowWorkspace::gh_pop_get_indices(gh, path_x), "postgate", "pregate") |> factor(levels = c("pregate", "postgate"))]
+        dt_full[, pregate := flowWorkspace::gh_pop_get_indices(gh, parent_path)]
+        dt_full[, postgate := flowWorkspace::gh_pop_get_indices(gh, path_x)]
+        dt_gated <- dt_full[pregate == TRUE]
+        dt_gated[, gatingstatus := "pregate"]
+        dt_gated[postgate == TRUE, gatingstatus := "postgate"]
+        dt_gated[, gatingstatus := factor(gatingstatus, levels = c("pregate", "postgate"))]
+        dt_gated <- dt_gated[, c(x_y, "gatingstatus"), with = FALSE]
 
         # Prepare axis transforms if available; warn if missing
         x_trans <- trans_map[[x_y[1]]]
