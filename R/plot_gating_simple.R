@@ -186,21 +186,11 @@ plot_gating_simple <- function(
         x_y <- names(gate_params)
 
         # Realize pre- and post-gate data views and extract the two columns
-        dt_pregate <- flowWorkspace::gh_pop_get_data(gh, parent_path)[, x_y, drop = FALSE] |>
+        dt_gated <- flowWorkspace::gh_pop_get_data(gh, parent_path)[, x_y, drop = FALSE] |>
             flowWorkspace::realize_view() |>
             flowCore::exprs() |>
             data.table::as.data.table()
-        dt_postgate <- flowWorkspace::gh_pop_get_data(gh, path_x)[, x_y, drop = FALSE] |>
-            flowWorkspace::realize_view() |>
-            flowCore::exprs() |>
-            data.table::as.data.table()
-
-        # Bind rows with status indicator
-        dt_joint <- data.table::rbindlist(
-            list("pregate" = dt_pregate, "postgate" = dt_postgate),
-            idcol = "gatingstatus"
-        ) |>
-            dplyr::mutate(gatingstatus = factor(gatingstatus, levels = c("pregate", "postgate")))
+        dt_gated[, gatingstatus := ifelse(flowWorkspace::gh_pop_get_indices(gh, path_x), "postgate", "pregate") |> factor(levels = c("pregate", "postgate"))]
 
         # Prepare axis transforms if available; warn if missing
         x_trans <- trans_map[[x_y[1]]]
@@ -215,19 +205,10 @@ plot_gating_simple <- function(
         }
 
         # Build plot
-        if (isTRUE(facet)) {
-            p <- ggplot2::ggplot(
-                dt_joint,
-                ggplot2::aes(x = .data[[x_y[1]]], y = .data[[x_y[2]]])
-            )
-        } else {
-            p <- ggplot2::ggplot(
-                dt_joint,
-                ggplot2::aes(x = .data[[x_y[1]]], y = .data[[x_y[2]]], col = gatingstatus)
-            ) +
-                ggplot2::scale_color_manual(values = c("pregate" = "red", "postgate" = "black"))
-        }
-        p <- p +
+        p <- ggplot2::ggplot(
+            dt_gated,
+            ggplot2::aes(x = .data[[x_y[1]]], y = .data[[x_y[2]]], col = gatingstatus)
+        ) +
             gg_layer + # user-provided/ default point layer
             ggpubr::theme_pubr() + # clean theme
             ggplot2::scale_x_continuous(trans = x_trans) +
@@ -236,7 +217,14 @@ plot_gating_simple <- function(
 
         # Facet or overplot depending on user choice
         if (isTRUE(facet)) {
-            p <- p + ggplot2::facet_grid(. ~ gatingstatus)
+            # If I am faceting, the POST-gate data must be duplicated with a PRE-gate label
+            # Otherwise, the "pregate" facet would only show cells that did NOT pass the gate
+            p$data <- rbind(p$data, p$data[gatingstatus == "postgate"][, gatingstatus := "pregate"])
+            p <- p + ggplot2::facet_grid(. ~ gatingstatus) +
+                ggplot2::scale_color_manual(values = c("pregate" = "black", "postgate" = "black"))
+        } else {
+            p <- p +
+                ggplot2::scale_color_manual(values = c("pregate" = "red", "postgate" = "black"))
         }
 
         p
