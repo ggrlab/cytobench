@@ -131,7 +131,10 @@ plot_gating_simple <- function(
 
     # ---- Obtain forward and inverse transformations per channel ----
     gh_copy <- flowWorkspace::gs_clone(gh)[[1]]
-    gh_copy <- flowWorkspace::transform(gh_copy, transformlist)
+    if (!is.null(transformlist)) {
+        gh_copy <- flowWorkspace::transform(gh_copy, transformlist)
+    }
+
     transforms_fwd <- flowWorkspace::gh_get_transformations(gh_copy)
     transforms_inv <- flowWorkspace::gh_get_transformations(gh_copy, inverse = TRUE)
     rm(gh_copy)
