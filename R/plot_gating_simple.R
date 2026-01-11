@@ -179,7 +179,9 @@ plot_gating_simple <- function(
             if (!verbose) {
                 message(path_x, "': gate is not 2D (found ", length(gate_params), " params). Using the first column as second axis.")
             }
-            gate_params <- c(gate_params, flowWorkspace::colnames(gh)[1])
+            alternativeparam <- setdiff(flowWorkspace::colnames(gh), names(gate_params))
+            gate_params <- c(gate_params, alternativeparam[1])
+            names(gate_params)[length(gate_params)] <- alternativeparam[1]
         }
         x_y <- names(gate_params)
 
@@ -213,10 +215,19 @@ plot_gating_simple <- function(
         }
 
         # Build plot
-        p <- ggplot2::ggplot(
-            dt_joint,
-            ggplot2::aes(x = .data[[x_y[1]]], y = .data[[x_y[2]]])
-        ) +
+        if (isTRUE(facet)) {
+            p <- ggplot2::ggplot(
+                dt_joint,
+                ggplot2::aes(x = .data[[x_y[1]]], y = .data[[x_y[2]]])
+            )
+        } else {
+            p <- ggplot2::ggplot(
+                dt_joint,
+                ggplot2::aes(x = .data[[x_y[1]]], y = .data[[x_y[2]]], col = gatingstatus)
+            ) +
+                ggplot2::scale_color_manual(values = c("pregate" = "black", "postgate" = "red"))
+        }
+        p <- p +
             gg_layer + # user-provided/ default point layer
             ggpubr::theme_pubr() + # clean theme
             ggplot2::scale_x_continuous(trans = x_trans) +
