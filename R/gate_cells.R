@@ -127,8 +127,10 @@ gate_cells <- function(flowset,
         all_cn_as_markernames <- all_cn_as_markernames[unique(names(all_cn_as_markernames))]
         # Extract the population MFIs
         tmp_gates <- flowWorkspace::gs_clone(applied_gates)
-        flowCore::markernames(tmp_gates) <- all_cn_as_markernames
+        # The following is necessary to keep the transformations. Not cloned by gs_clone
+        tmp_gates@transformation <- applied_gates@transformation
 
+        flowCore::markernames(tmp_gates) <- all_cn_as_markernames
         # Get the counts and percentages for each population
         counts_freqs <- lapply(c("count", "percent"), function(statistic) {
             flowWorkspace::gs_pop_get_stats(
@@ -149,7 +151,26 @@ gate_cells <- function(flowset,
 
         # Extract the population MFIs
         # This only extracts for the columns in flowCore::markernames()
-        pop_mfis <- flowWorkspace::gh_pop_get_stats(tmp_gates, type = flowWorkspace::pop.MFI)
+        pop_mfis <- tryCatch(
+            {
+                flowWorkspace::gh_pop_get_stats(
+                    tmp_gates,
+                    type = flowWorkspace::pop.MFI,
+                    inverse.transform = TRUE
+                )
+            },
+            error = function(e) {
+                warning(
+                    "Error due to inverse.transform in extracting MFIs for sample ",
+                    fcs_x_sID, ": ", e$message
+                )
+                flowWorkspace::gh_pop_get_stats(
+                    tmp_gates,
+                    type = flowWorkspace::pop.MFI,
+                    inverse.transform = FALSE
+                )
+            }
+        )
         counts_dt_MFI <- dplyr::left_join(counts_dt, pop_mfis, by = "pop")
 
         # Combine the counts with the complete counts
