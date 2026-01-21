@@ -75,7 +75,7 @@ flowSOM_predict <- function(flowsom_result,
     )
     # # 3.3 Save the predicted clusters
     # if (!is.null(outdir)) {
-    #     qs::qsave(cells_clusters_from_train, file.path(outdir, "r2-FlowSOM_predicted_withTrain.qs"))
+    #     qs2::qsave(cells_clusters_from_train, file.path(outdir, "r2-FlowSOM_predicted_withTrain.qs"))
     # }
     ### 4. Extract the number of cells per cluster
     # id_cols <- c("tvt", "sample")

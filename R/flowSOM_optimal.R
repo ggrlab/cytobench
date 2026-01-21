@@ -95,7 +95,7 @@ flowSOM_optimal <- function(fs_train,
     # 3. Save result and FlowSOM plots if requested
     if (!is.null(outdir)) {
         dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
-        qs::qsave(fs_res_train, file.path(outdir, "r1-FlowSOM_result_train.qs"))
+        qs2::qsave(fs_res_train, file.path(outdir, "r1-FlowSOM_result_train.qs"))
 
         grDevices::pdf(file.path(outdir, "p1-FlowSOM.pdf"), width = 10, height = 10)
         FlowSOM::PlotStars(

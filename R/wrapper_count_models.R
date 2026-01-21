@@ -321,7 +321,7 @@ wrapper_count_models <- function(df_list,
 
     # Save tuned learners
     if (!is.null(outdir)) {
-        qs::qsave(learners_tuned, file = file.path(outdir, "learners_tuned.qs"))
+        qs2::qsave(learners_tuned, file = file.path(outdir, "learners_tuned.qs"))
     }
 
     # Select best-performing strategy for each outcome
@@ -403,7 +403,7 @@ wrapper_count_models <- function(df_list,
 
     # Save final models
     if (!is.null(outdir)) {
-        qs::qsave(final_models, file = file.path(outdir, "final_models.qs"))
+        qs2::qsave(final_models, file = file.path(outdir, "final_models.qs"))
     }
 
     ### Finally, apply the models to all samples - including the test set.
