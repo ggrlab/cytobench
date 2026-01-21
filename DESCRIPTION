@@ -1,11 +1,17 @@
 Package: cytobench
 Title: Bench of Tools for Cytometry Data and Relativisation
-Version: 1.0.21
+Version: 1.0.22
 Authors@R: 
     person("Gunther", "Glehr", , "gunthergl@gmx.net", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-1495-9162"))
 Description: cytobench provides a comprehensive toolkit for preprocessing, normalization, and analysis of flow cytometry data. Especially designed for performing relativisation of flow cytometry data, FlowSOM convenience functions and further convenience functions for flow cytometry data analysis.
 License: MIT + file LICENSE
+biocViews: 
+    Software,
+    FlowCytometry,
+    DataNormalization,
+    Clustering,
+    Visualization
 Imports: 
     Biobase,
     flowCore,
