@@ -193,3 +193,24 @@ test_that("FlowSOM optimal, defaults", {
     testthat::expect_true(fsom$fs_res_train$map$nMetaclusters == 10)
     testthat::expect_equal(dim(fsom$fs_res_train$ConsensusClusterPlus_MAP), c(100, 10))
 })
+
+test_that("FlowSOM optimal, outdir", {
+    ff_example <- example_processed()
+    tmpdir <- local_tempdir_time()
+    testthat::expect_warning(
+        suppressMessages(
+            fsom <- flowSOM_optimal(
+                flowCore::flowSet(ff_example),
+                # Metaclustering options:
+                nClus = 10,
+                outdir = tmpdir
+            )
+        ),
+        "By using nClus, I am ignoring the parameter maxMeta"
+    )
+    loaded_fsomresult2 <- qs2::qs_read(file.path(tmpdir, "r1-FlowSOM_result_train.qs2"))
+
+    testthat::expect_equivalent(loaded_fsomresult2, fsom$fs_res_train)
+    testthat::expect_true(fsom$fs_res_train$map$nMetaclusters == 10)
+    testthat::expect_equal(dim(fsom$fs_res_train$ConsensusClusterPlus_MAP), c(100, 10))
+})
