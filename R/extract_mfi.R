@@ -444,6 +444,7 @@ extract_singlestain_mfi_wrapper <- function(loaded_fcs,
 #'     featurename = "Test Marker"
 #' )
 #' }
+#' @export
 clustering_seeded_mfi <- function(values, seed = 42, transform_fun = function(x) {
                                       x
                                   }, featurename = NA) {
