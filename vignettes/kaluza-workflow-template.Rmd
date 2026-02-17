@@ -25,6 +25,16 @@ Not every study needs every stage. Skip what doesn't apply.
 
 ---
 
+
+## Examples in the wild: 
+/home/gugl/clonedgit/datasrc/cytometry/ukr/GroupEggenhofer/2026-02-16_DataAnalysis_MarseilleJulia/src/01_loadKaluza.R
+
+Most below is AI generated, so do NOT trust it. (2026-02-17)
+
+
+
+
+
 ## 1. Read
 
 ```r
