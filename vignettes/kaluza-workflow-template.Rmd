@@ -1,0 +1,155 @@
+---
+title: "Kaluza Workflow Template"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Kaluza Workflow Template}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Standard Kaluza-to-Gated-FCS Workflow
+
+This template documents the recurring pattern used across studies when processing
+Kaluza cytometry data. Copy and adapt the relevant sections for your project
+script — the building blocks come from `cytobench`; the orchestration stays in
+your script where it belongs.
+
+## Typical stages
+
+```
+read Kaluza  -->  compensate  -->  rename channels  -->  save compensated
+     -->  gate subpopulations  -->  export gated  -->  QC plots
+```
+
+Not every study needs every stage. Skip what doesn't apply.
+
+---
+
+## 1. Read
+
+```r
+# Read Kaluza protocols + FCS data
+protocols <- sapply(analysis_dirs, simplify = FALSE, cytoKal::read_protocol)
+
+# Dataset 1: tiny read, used only as a naming reference
+ds1 <- cytoKal::read_analysis_fcs(
+    analysis_path,
+    do_compensation = FALSE, compensation_autofluorescence = FALSE,
+    af_absolute = FALSE,
+    read_fcs_arguments = list(dataset = 1, which.lines = 1:3),
+    first_n = 1
+)
+
+# Dataset 2: full events, the real data
+ds2 <- cytoKal::read_analysis_fcs(
+    analysis_path,
+    do_compensation = FALSE, compensation_autofluorescence = FALSE,
+    af_absolute = FALSE,
+    read_fcs_arguments = list(dataset = 2)
+)
+```
+
+## 2. Compensate
+
+```r
+spillovers      <- lapply(protocol[["spillover_AF"]], \(x) x$spillover_mat)
+autofluorescence <- lapply(protocol[["spillover_AF"]], \(x) x$autofluorescence_proportion)
+
+ds2_compensated <- sapply(names(ds2), simplify = FALSE, function(sample_x) {
+    cytobench::compensation_autofluorescence_kaluza(
+        flowframe       = ds2[[sample_x]],
+        spillmat        = spillovers[[sample_x]],
+        autofluorescence = autofluorescence[[sample_x]],
+        calculate_absolute_values_from_ff = TRUE
+    )
+})
+```
+
+## 3. Rename channels (optional)
+
+Use `rename_by_ds1_position()` when dataset-2 channels need the human-readable
+names from dataset 1. This is a **positional** rename — it assumes channels are
+in the same order in both datasets. If your panel re-ordered channels in Kaluza,
+use a name-based mapping instead.
+
+```r
+ds2_renamed <- lapply(ds2_compensated, function(ff) {
+    cytobench::rename_by_ds1_position(ff, ds1_reference = ds1[[1]])
+})
+
+# Audit the mapping
+name_map <- cytobench::build_name_map(
+    ds1_reference  = ds1[[1]],
+    ds2_original   = ds2[[1]],
+    ds2_renamed    = ds2_renamed[[1]]
+)
+data.table::fwrite(name_map, file.path(outdir, "name_maps.csv"))
+```
+
+## 4. Save compensated FCS
+
+```r
+cytobench::save_ff_list(ds2_renamed, outdir = file.path("res", "01_compensated", analysis_name))
+```
+
+## 5. Gate
+
+```r
+gated <- cytobench::gate_cells(
+    flowset    = flowCore::flowSet(ds2_renamed),
+    gatingset  = protocol$gatingsets,
+    gatename   = "/Singlets/CD45+",
+    return_x   = "gatinghierarchy"
+)
+
+# Extract gated flowFrames
+gated_ff_list <- lapply(gated$flowset_gated, function(x) {
+    tmp <- flowWorkspace::gs_pop_get_data(x, "/Singlets/CD45+")
+    tmp <- flowWorkspace::realize_view(tmp)
+    flowWorkspace::cytoframe_to_flowFrame(tmp[[1]])
+})
+```
+
+## 6. Export gated FCS
+
+```r
+cytobench::save_ff_list(gated_ff_list, outdir = file.path(outdir, "fcs"))
+```
+
+## 7. QC plots
+
+```r
+plots <- lapply(names(gated$flowset_gated), function(x) {
+    cytobench::plot_gating_simple(
+        gated$flowset_gated[[x]][[1]],
+        transformlist = transformlist,
+        populations   = c("/Singlets/CD45+")
+    )[[1]] + ggplot2::ggtitle(x)
+})
+
+pdf(file.path(outdir, "plots", "gating_overview.pdf"), width = 10, height = 7)
+print(plots)
+dev.off()
+```
+
+---
+
+## Key `cytobench` helpers used
+
+| Function | Purpose |
+|---|---|
+| `compensation_autofluorescence_kaluza()` | Compensate + AF correction |
+| `rename_by_ds1_position()` | Positional channel rename from ds1 reference |
+| `build_name_map()` | Audit rename mapping |
+| `save_ff_list()` | Write a named list of flowFrames to FCS files |
+| `gate_cells()` | Apply gating sets to a flowSet |
+| `plot_gating_simple()` | Quick gating QC plots |
+
+## What stays in your script
+
+- Paths, directory layout, file discovery
+- Transform definitions (cofactors vary per cytometer/panel)
+- Which gate to extract (study-specific)
+- Any sanity checks (e.g. comparing to a Kaluza export)
+- Post-gating analyses (pseudorelativisation, clustering, etc.)
+- Custom plot layouts (patchwork arrangements, etc.)
