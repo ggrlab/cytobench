@@ -32,21 +32,13 @@ Not every study needs every stage. Skip what doesn't apply.
 protocols <- sapply(analysis_dirs, simplify = FALSE, cytoKal::read_protocol)
 
 # Dataset 1: tiny read, used only as a naming reference
-ds1 <- cytoKal::read_analysis_fcs(
-    analysis_path,
-    do_compensation = FALSE, compensation_autofluorescence = FALSE,
-    af_absolute = FALSE,
-    read_fcs_arguments = list(dataset = 1, which.lines = 1:3),
-    first_n = 1
-)
-
-# Dataset 2: full events, the real data
-ds2 <- cytoKal::read_analysis_fcs(
-    analysis_path,
-    do_compensation = FALSE, compensation_autofluorescence = FALSE,
-    af_absolute = FALSE,
-    read_fcs_arguments = list(dataset = 2)
-)
+fflist <- cytoKal::read_analysis_fcs(
+        kaluzafile,
+        do_compensation = FALSE,
+        compensation_autofluorescence = FALSE,
+        read_fcs_arguments = list(truncate_max_range = FALSE),
+        af_absolute = FALSE
+    )
 ```
 
 ## 2. Compensate
@@ -55,14 +47,21 @@ ds2 <- cytoKal::read_analysis_fcs(
 spillovers      <- lapply(protocol[["spillover_AF"]], \(x) x$spillover_mat)
 autofluorescence <- lapply(protocol[["spillover_AF"]], \(x) x$autofluorescence_proportion)
 
-ds2_compensated <- sapply(names(ds2), simplify = FALSE, function(sample_x) {
-    cytobench::compensation_autofluorescence_kaluza(
-        flowframe       = ds2[[sample_x]],
-        spillmat        = spillovers[[sample_x]],
-        autofluorescence = autofluorescence[[sample_x]],
-        calculate_absolute_values_from_ff = TRUE
-    )
-})
+ff_comp <- mapply(
+    SIMPLIFY = FALSE,
+    function(ff, spillover, autofluorescence) {
+        ff <- cytobench::compensation_autofluorescence_kaluza(
+            flowframe = ff,
+            spillmat = spillover,
+            autofluorescence = autofluorescence,
+            calculate_absolute_values_from_ff = TRUE
+        )
+    },
+    ff = fflist,
+    spillover = spillovers,
+    autofluorescence = autofluorescence
+)
+
 ```
 
 ## 3. Rename channels (optional)
