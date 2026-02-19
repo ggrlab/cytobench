@@ -38,4 +38,5 @@ test_that("Plotting densities BASEPLOT", {
     plot_densities_base(fs_dt, markers = c("CD4", "CD8"))
     plot_densities_base(fs_dt, markers = c("CD4", "CD4"))
     plot_densities_base(fs_dt, markers = c("CD4"), column_color = "File")
+    testthat::expect_true(TRUE)
 })

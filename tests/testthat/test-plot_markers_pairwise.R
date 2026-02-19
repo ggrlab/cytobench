@@ -360,3 +360,55 @@ test_that("Plot markers pairwise title", {
 
     testthat::expect_true(TRUE) # run through test
 })
+devtools::load_all()
+test_that("Plot markers pairwise with density", {
+    cn <- c(
+        "FITC-A", "PE-A", "ECD-A"
+    )
+    example_ff <- flowCore::flowFrame(
+        matrix(
+            rnorm(1000 * length(cn), mean = 1000, sd = 100),
+            ncol = length(cn),
+            dimnames = list(NULL, cn)
+        )
+    )
+    tmpdir <- local_tempdir_time()
+
+    pdf(file.path(tmpdir, "removeme2.pdf"), height = 5, width = 5)
+    plot_markers_pairwise(
+        example_ff,
+        engine = "base",
+        title_global = "Global title, e.g. sample ID",
+        diagonal_densityplot = TRUE,
+        geom = "points"
+    )
+    dev.off()
+
+    testthat::expect_true(TRUE) # run through test
+})
+
+
+test_that("Check layoutcreation", {
+    cn <- c("FITC-A", "PE-A", "ECD-A")
+    expected_nodiag <- matrix(
+        c(0, 1, 2, 3, 4, 5, 6, 0, 7),
+        nrow = 3,
+        dimnames = list(
+            c("namecol", "PE-A", "ECD-A"),
+            c("namecol", "FITC-A", "PE-A")
+        )
+    )
+    expected_diag <- matrix(
+        c(0:3, 4:7, 8, 0, 9, 10, 11, 0, 0, 12),
+        nrow = 4,
+        dimnames = list(
+            c("namecol", "FITC-A", "PE-A", "ECD-A"),
+            c("namecol", "FITC-A", "PE-A", "ECD-A")
+        )
+    )
+    layout_nodiag <- create_layout(cn)
+    testthat::expect_equal(layout_nodiag, expected = expected_nodiag)
+
+    layout_diag <- create_layout(cn, diagonal_densityplot = TRUE)
+    testthat::expect_equal(layout_diag, expected = expected_diag)
+})

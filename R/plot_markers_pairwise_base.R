@@ -45,6 +45,7 @@ plot_markers_pairwise_base <- function(df,
                                        cex_title = 2,
                                        modelines = TRUE,
                                        kwargs_hdr = list(),
+                                       diagonal_densityplot = FALSE,
                                        # arguments for pointdensity
                                        method.args = list(),
                                        adjust = 1,
@@ -55,15 +56,26 @@ plot_markers_pairwise_base <- function(df,
         geom <- "points"
         warning("geom = 'hex' not implemented in base engine; using 'points' instead")
     }
-    # All pairwise combinations of markers
-    all_combos <- utils::combn(colnames(df), 2, simplify = FALSE)
-    all_combos_str <- lapply(all_combos, paste0, collapse = "_")
 
     df_mat <- as.matrix(df)
     if (!missing(cofactor_namedvec)) {
         df_mat[, names(cofactor_namedvec)] <- df_mat[, names(cofactor_namedvec)] %*% (diag(1 / cofactor_namedvec))
         df_mat <- transform_fun(df_mat)
     }
+    layoutmat <- create_layout(markernames = colnames(df), diagonal_densityplot = diagonal_densityplot)
+    # Create all_combos from layoutmat where the value is > 0 and the row and column are not "namecol"
+    # all_combos <- utils::combn(colnames(df), 2, simplify = FALSE)
+    all_combos <- list()
+    for (x in colnames(layoutmat)) {
+        for (y in rownames(layoutmat)) {
+            if (x == "namecol" || y == "namecol" || layoutmat[y, x] <= 0) {
+                next
+            }
+            all_combos[[length(all_combos) + 1]] <- c(x, y)
+        }
+    }
+    all_combos_str <- lapply(all_combos, paste0, collapse = "_")
+
     if (modelines) {
         if (!"hdrcde" %in% rownames(installed.packages())) {
             stop("Package 'hdrcde' is required for adding mode lines. Please install it or set modelines = FALSE.")
@@ -71,33 +83,13 @@ plot_markers_pairwise_base <- function(df,
         combo_modes <- lapply(all_combos, function(xy) {
             modes <- do.call(hdrcde::hdr.2d, c(list(x = df_mat[, xy[1]], y = df_mat[, xy[2]]), kwargs_hdr))$mode
             names(modes) <- xy
+            if (xy[1] == xy[2]) {
+                modes <- modes[1] # for diagonal plots, only one mode exists
+            }
             return(modes)
         })
         names(combo_modes) <- all_combos_str
     }
-
-    markernames <- colnames(df_mat)
-    layoutmat <- matrix(0, nrow = length(markernames) + 1, ncol = length(markernames) + 1)
-    rownames(layoutmat) <- c("namecol", markernames)
-    colnames(layoutmat) <- c("namecol", markernames)
-    n <- colnames(layoutmat)
-    plotcount <- 0
-    for (j in 0:length(markernames)) {
-        for (i in 0:length(markernames)) {
-            if (i == j || i == 1) {
-                next
-            }
-            if ((n[i + 1] == "namecol" || n[j + 1] == "namecol")) {
-                plotcount <- plotcount + 1
-                layoutmat[i + 1, j + 1] <- plotcount
-            } else if (j < i) {
-                plotcount <- plotcount + 1
-                layoutmat[i + 1, j + 1] <- plotcount
-            }
-        }
-    }
-    layoutmat <- layoutmat[-2, ]
-    layoutmat <- layoutmat[, -ncol(layoutmat)]
 
     # > layoutmat
     #         namecol FITC-A PE-A
@@ -105,7 +97,7 @@ plot_markers_pairwise_base <- function(df,
     # PE-A          1      4    0
     # ECD-A         2      5    7
 
-    layout(mat = layoutmat, widths = c(firstcol_width, rep(1, length(markernames) - 1)), heights = c(firstrow_height, rep(1, length(markernames) - 1)))
+    layout(mat = layoutmat, widths = c(firstcol_width, rep(1, ncol(layoutmat) - 1)), heights = c(firstrow_height, rep(1, nrow(layoutmat) - 1)))
     # layout.show(max(layoutmat))
 
     plot_n <- 0
@@ -131,7 +123,8 @@ plot_markers_pairwise_base <- function(df,
                     cat(marker_x, "vs", marker_y, ": ")
                 }
                 xy_str <- paste0(marker_x, "_", marker_y)
-                if (marker_x == marker_y || !xy_str %in% all_combos_str) {
+                if (!xy_str %in% all_combos_str) {
+                    next
                 } else {
                     if (verbose) {
                         cat("plotting\n")
@@ -159,56 +152,121 @@ plot_markers_pairwise_base <- function(df,
                         names(xylab) <- c("x", "y")
                     }
                     plot_n <- plot_n + 1
-                    if (geom[1] == "points") {
-                        scattermore::scattermoreplot(
-                            vals_x, vals_y,
-                            xlab = xylab["x"],
-                            ylab = xylab["y"],
-                            frame.plot = TRUE,
-                            mgp = mgp,
-                            col = col,
-                            ...
-                        )
-                    } else if (geom[1] == "pointdensity") {
-                        if (length(vals_x) > 20000) {
-                            method_densitycalc <- "kde2d"
-                        } else {
-                            method_densitycalc <- "neighbors"
+                    cat("Add plot ", plot_n, ": ", marker_x, " vs ", marker_y, "\n")
+                    if (marker_x == marker_y) {
+                        tmpdt <- data.table::data.table(x = vals_x)
+                        colnames(tmpdt) <- marker_x
+                        plot_densities_base(densities_dt = tmpdt)
+                        if (modelines) {
+                            abline(v = combo_modes[[xy_str]][marker_x], col = "red")
                         }
-                        points_density <- ggpointdensity:::StatPointdensity$compute_group(
-                            data.frame(x = vals_x, y = vals_y),
-                            # compute_group() uses get_limits() and dimension() of ggplot scales.
-                            # Therefore, implement dummy scales here:
-                            scales = list(
-                                x = list(get_limits = function() range(vals_x), dimension = function() range(vals_x)),
-                                y = list(get_limits = function() range(vals_y), dimension = function() range(vals_y))
-                            ),
-                            method = method_densitycalc,
-                            method.args = method.args,
-                            adjust = adjust
-                        )
-                        points_density_transformed <- count_transform(points_density$density)
-                        colfunc <- grDevices::colorRampPalette(viridis::viridis(2))(n_colors)
-                        # https://github.com/LKremer/ggpointdensity/blob/master/R/geom_pointdensity.R
-                        scattermore::scattermoreplot(
-                            vals_x, vals_y,
-                            xlab = xylab["x"],
-                            ylab = xylab["y"],
-                            frame.plot = TRUE,
-                            mgp = mgp,
-                            # col = colfunc(count_transform(points_density$density)),
-                            col = colfunc[cut(points_density_transformed, breaks = n_colors)],
-                            ...
-                        )
                     } else {
-                        stop("Unknown geom: ", geom[1])
-                    }
-                    if (modelines) {
-                        abline(v = combo_modes[[xy_str]][marker_x], h = combo_modes[[xy_str]][marker_y], col = "red")
+                        if (geom[1] == "points") {
+                            scattermore::scattermoreplot(
+                                vals_x, vals_y,
+                                xlab = xylab["x"],
+                                ylab = xylab["y"],
+                                frame.plot = TRUE,
+                                mgp = mgp,
+                                col = col,
+                                ...
+                            )
+                        } else if (geom[1] == "pointdensity") {
+                            if (length(vals_x) > 20000) {
+                                method_densitycalc <- "kde2d"
+                            } else {
+                                method_densitycalc <- "neighbors"
+                            }
+                            points_density <- ggpointdensity:::StatPointdensity$compute_group(
+                                data.frame(x = vals_x, y = vals_y),
+                                # compute_group() uses get_limits() and dimension() of ggplot scales.
+                                # Therefore, implement dummy scales here:
+                                scales = list(
+                                    x = list(get_limits = function() range(vals_x), dimension = function() range(vals_x)),
+                                    y = list(get_limits = function() range(vals_y), dimension = function() range(vals_y))
+                                ),
+                                method = method_densitycalc,
+                                method.args = method.args,
+                                adjust = adjust
+                            )
+                            points_density_transformed <- count_transform(points_density$density)
+                            colfunc <- grDevices::colorRampPalette(viridis::viridis(2))(n_colors)
+                            # https://github.com/LKremer/ggpointdensity/blob/master/R/geom_pointdensity.R
+                            scattermore::scattermoreplot(
+                                vals_x, vals_y,
+                                xlab = xylab["x"],
+                                ylab = xylab["y"],
+                                frame.plot = TRUE,
+                                mgp = mgp,
+                                # col = colfunc(count_transform(points_density$density)),
+                                col = colfunc[cut(points_density_transformed, breaks = n_colors)],
+                                ...
+                            )
+                        } else {
+                            stop("Unknown geom: ", geom[1])
+                        }
+                        if (modelines) {
+                            abline(v = combo_modes[[xy_str]][marker_x], h = combo_modes[[xy_str]][marker_y], col = "red")
+                        }
                     }
                 }
             }
         }
     }
     mtext(title_global, side = 3, line = -5, outer = TRUE, cex = cex_title)
+}
+
+create_layout <- function(markernames, diagonal_densityplot = FALSE) {
+    layoutmat <- matrix(
+        0,
+        nrow = length(markernames) + 1,
+        ncol = length(markernames) + 1,
+        dimnames = list(
+            c("namecol", markernames),
+            c("namecol", markernames)
+        )
+    )
+
+    plotcount <- 0
+    n <- colnames(layoutmat)
+    p <- length(markernames)
+
+    for (j in 0:p) {
+        for (i in 0:p) {
+            # In the non-diagonal case, skip i==1 (first marker row)
+            #  because that row gets removed later.
+            # In the diagonal case, we keep ALL rows so don't skip.
+            if (!diagonal_densityplot && i == 1) {
+                next
+            }
+
+            if (i == j) {
+                if (diagonal_densityplot && i > 0 && j > 0) {
+                    # diagonal density plot cell
+                    plotcount <- plotcount + 1
+                    layoutmat[i + 1, j + 1] <- plotcount
+                }
+                next
+            }
+
+            row_name <- n[i + 1]
+            col_name <- n[j + 1]
+
+            if (row_name == "namecol" || col_name == "namecol") {
+                plotcount <- plotcount + 1
+                layoutmat[i + 1, j + 1] <- plotcount
+            } else if (j < i) {
+                plotcount <- plotcount + 1
+                layoutmat[i + 1, j + 1] <- plotcount
+            }
+        }
+    }
+
+    if (!diagonal_densityplot) {
+        # drop first marker row and last column
+        layoutmat <- layoutmat[-2, , drop = FALSE]
+        layoutmat <- layoutmat[, -ncol(layoutmat), drop = FALSE]
+    }
+
+    layoutmat
 }

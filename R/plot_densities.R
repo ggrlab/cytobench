@@ -427,6 +427,7 @@ plot_densities_base <- function(densities_dt,
             groupings = column_color,
             ...
         )
+        cat("Calculated densities_dt\n")
     }
 
     if (!column_marker %in% colnames(densities_dt)) {
@@ -438,7 +439,7 @@ plot_densities_base <- function(densities_dt,
 
 
     if (is.null(column_color)) {
-        color_map <- "black"
+        color_map <- c("all" = "black")
     } else {
         color_values <- unique(as.character(densities_dt[[column_color]]))
         if (is.null(color_map)) {
@@ -448,15 +449,13 @@ plot_densities_base <- function(densities_dt,
             )
         }
     }
-    if (is.null(names(color_map))) {
-        color_map <- list(NULL)
-    }
 
     marker_values <- unique(as.character(densities_dt[[column_marker]]))
     panel_count <- 0L
     for (marker_x in marker_values) {
         for (color_x in names(color_map)) {
-            if (is.null(color_x)) {
+            cat("Plotted marker ", marker_x, " with color ", color_x, "\n")
+            if (color_x == "all") {
                 # All the same color
                 dt_plot <- densities_dt[get(column_marker) == marker_x]
                 panel_title <- paste0(column_marker, ": ", marker_x)
