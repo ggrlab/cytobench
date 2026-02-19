@@ -364,3 +364,162 @@ plot_densities <- function(densities_dt,
         ggplot2::ylab("Density") +
         ggplot2::xlab("Transformed MFI")
 }
+
+
+
+#' Plot expression density curves
+#'
+#' Visualizes kernel density estimates produced by [calc_densities()] as
+#' multiple base R plots, split by marker and optional color group.
+#'
+#' @param densities_dt A data.table as returned by [calc_densities()].
+#' @param column_marker Character scalar giving the column used to split
+#'   markers into separate plots (default: `"marker"`).
+#' @param column_color Optional character scalar giving a column used for
+#'   coloring and grouping densities (e.g. `"File"`).
+#' @param line_colors Optional named character vector of colors used when
+#'   `column_color` is provided.
+#' @param ribbon_alpha Numeric in `[0, 1]` controlling ribbon transparency.
+#' @param main_prefix Optional character scalar prepended to each plot title.
+#' @param ...
+#' Additional arguments passed to [calc_densities()] if `densities_dt` is not already in
+#' density format (i.e. missing `x` and `y` columns). This allows users to pass grouping
+#' and transformation parameters directly when providing raw expression data. See
+#'  [calc_densities()] for details on accepted arguments.
+#'
+#' @return Invisibly returns a list with metadata about the generated plots.
+#' @examples
+#' library(data.table)
+#'
+#' dt <- data.table(
+#'     File = rep(c("A", "B"), each = 200),
+#'     CD4  = rnorm(400),
+#'     CD8  = rnorm(400, mean = 0.5)
+#' )
+#'
+#' dens <- calc_densities(dt, groupings = "File")
+#'
+#' # Colored by File
+#' plot_densities_base(dens, column_color = "File")
+#'
+#' # Uncolored (aggregated view). This looks super weird because the densities
+#' # are computed per File, but then all plotted together without grouping.
+#' plot_densities_base(dens)
+#'
+#' @export
+plot_densities_base <- function(densities_dt,
+                                column_marker = "marker",
+                                column_color = NULL,
+                                color_map = NULL,
+                                ribbon_alpha = 0.2,
+                                main_prefix = NULL,
+                                ...) {
+    if (!all(c("x", "y") %in% colnames(densities_dt))) {
+        # Then I ASSUME that calc_densities has not been called yet, and that the user
+        # is passing the original long data.table with expression values. So I will call
+        # calc_densities here.
+        densities_dt <- calc_densities(
+            dt = densities_dt,
+            groupings = column_color,
+            ...
+        )
+    }
+
+    if (!column_marker %in% colnames(densities_dt)) {
+        stop("column_marker not found in densities_dt: ", column_marker)
+    }
+    if (!is.null(column_color) && !column_color %in% colnames(densities_dt)) {
+        stop("column_color not found in densities_dt: ", column_color)
+    }
+
+
+    if (is.null(column_color)) {
+        color_map <- "black"
+    } else {
+        color_values <- unique(as.character(densities_dt[[column_color]]))
+        if (is.null(color_map)) {
+            color_map <- stats::setNames(
+                grDevices::hcl.colors(length(color_values), palette = "Dark 3"),
+                color_values
+            )
+        }
+    }
+    if (is.null(names(color_map))) {
+        color_map <- list(NULL)
+    }
+
+    marker_values <- unique(as.character(densities_dt[[column_marker]]))
+    panel_count <- 0L
+    for (marker_x in marker_values) {
+        for (color_x in names(color_map)) {
+            if (is.null(color_x)) {
+                # All the same color
+                dt_plot <- densities_dt[get(column_marker) == marker_x]
+                panel_title <- paste0(column_marker, ": ", marker_x)
+                current_color <- "black"
+            } else {
+                dt_plot <- densities_dt[get(column_marker) == marker_x & get(column_color) == color_x]
+                panel_title <- paste0(column_marker, ": ", marker_x, " | ", column_color, ": ", color_x)
+                current_color <- color_map[[color_x]]
+            }
+
+            if (!is.null(main_prefix)) {
+                panel_title <- paste0(main_prefix, " | ", panel_title)
+            }
+
+            plotted <- plot_density_base_single(
+                dt_plot = dt_plot,
+                panel_title = panel_title,
+                color = current_color,
+                ribbon_alpha = ribbon_alpha
+            )
+            if (isTRUE(plotted)) {
+                panel_count <- panel_count + 1L
+            }
+        }
+    }
+
+    invisible(
+        list(
+            n_plots = panel_count,
+            markers = marker_values,
+            column_color = column_color
+        )
+    )
+}
+
+plot_density_base_single <- function(dt_plot, panel_title, color, ribbon_alpha = .2) {
+    dt_plot <- dt_plot[is.finite(dt_plot[["x"]]) & is.finite(dt_plot[["y"]]), , drop = FALSE]
+    if (nrow(dt_plot) == 0) {
+        warning("Skipping panel with no finite x/y values: ", panel_title)
+        return(FALSE)
+    }
+    dt_plot <- dt_plot[order(dt_plot[["x"]]), , drop = FALSE]
+
+    x_vals <- dt_plot[["x"]]
+    y_vals <- dt_plot[["y"]]
+    y_max <- max(y_vals, na.rm = TRUE)
+    if (!is.finite(y_max) || y_max <= 0) {
+        y_max <- 1
+    }
+
+    graphics::plot(
+        x_vals,
+        y_vals,
+        type = "n",
+        ylim = c(0, y_max),
+        xlab = "Transformed MFI",
+        ylab = "Density",
+        main = panel_title,
+        yaxs = "i",
+        yaxt = "n"
+    )
+    graphics::polygon(
+        x = c(x_vals, rev(x_vals)),
+        y = c(rep(0, length(x_vals)), rev(y_vals)),
+        col = grDevices::adjustcolor(color, alpha.f = ribbon_alpha),
+        border = NA
+    )
+    graphics::lines(x_vals, y_vals, col = color, lwd = 2)
+    TRUE
+}

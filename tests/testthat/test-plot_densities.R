@@ -28,3 +28,14 @@ test_that("Plotting densities", {
     )
     plot_densities(densities)
 })
+
+test_that("Plotting densities BASEPLOT", {
+    fs <- simulate_fs(n_samples = 3, ncells = 250, columns = c("CD4", "CD8"))
+    fs_dt <- flowCore::fsApply(fs, function(x) data.table::as.data.table(flowCore::exprs(x))) |>
+        data.table::rbindlist(idcol = "File")
+
+    plot_densities_base(fs_dt, markers = c("CD4"))
+    plot_densities_base(fs_dt, markers = c("CD4", "CD8"))
+    plot_densities_base(fs_dt, markers = c("CD4", "CD4"))
+    plot_densities_base(fs_dt, markers = c("CD4"), column_color = "File")
+})
