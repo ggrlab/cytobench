@@ -19,7 +19,8 @@
 #'                      If NULL, no transformation is applied.
 #' @param density_n Integer; number of points for kernel density estimation (default: 500).
 #' @param dfcol_grouping_samples
-#' Column name (character) in `df` used for device/sample grouping (default: `"Device"`).
+#' Character scalar naming the column in `df` used for grouping/coloring
+#' samples (default: `"Device"`).
 #' @param relevant_columns
 #' Character vector of markers to include in the plot. If NULL, all markers are included.
 #' @param limit_density_quantile
@@ -28,6 +29,11 @@
 #' Set to `NA` to disable.
 #'
 #' @return A `ggplot2` object showing density curves across markers, devices, and samples.
+#'
+#' @details
+#' The function expects that every element of `ff_gated` has a unique name and that
+#' these names match entries in `df$File`. Densities are computed per `File`, then
+#' joined with metadata (`File`, grouping column, `Sample`) for faceting and coloring.
 #' @export
 #' @examples
 #' fs <- cytobench::simulate_fs(n_samples = 3, ncells = 250, columns = c("CD4", "CD8"))
@@ -75,14 +81,14 @@ plot_densities_ff <- function(
         relevant_columns <- flowCore::colnames(ff_gated[[1]])
     }
 
-    # Use all columns (channels/markers) if no subset is given
+    # Backward-compatible second guard: use all columns when no marker subset is given
     if (all(is.null(relevant_columns))) {
         relevant_columns <- flowCore::colnames(ff_gated[[1]])
     }
 
-    # Convert single transform function to named list if needed
-    transformlist <- transformlist_named(transformlist, relevant_columns)
-    # Apply identity function to unused columns to keep them unchanged
+    # Normalize transform input to a named list keyed by marker
+    transformlist <- cyCompare::transformlist_named(transformlist, relevant_columns)
+    # Keep non-selected columns unchanged via identity transforms
     for (col_x in flowCore::colnames(ff_gated[[1]])[!flowCore::colnames(ff_gated[[1]]) %in% relevant_columns]) {
         transformlist[[col_x]] <- identity
     }
@@ -102,7 +108,7 @@ plot_densities_ff <- function(
         limit_density_quantile = limit_density_quantile
     )
 
-    # Merge metadata: File, Device, Sample
+    # Keep only metadata fields needed for annotation in the final plot
     df_part <- data.table::data.table(df)
     df_part <- df_part[, c("File", dfcol_grouping_samples[[1]], "Sample"), with = FALSE]
     densities <- densities[df_part, on = "File"]
@@ -187,6 +193,8 @@ compute_density <- function(x, transform_x = NULL, density_n = 500) {
 #' @param limit_density_quantile Optional numeric in `(0, 1]`. If provided,
 #'   density values are capped at this quantile within each marker to suppress
 #'   extreme peaks.
+#' @param density_n Integer specifying the number of points used for each kernel
+#'   density estimate (passed to [compute_density()]).
 #'
 #' @return A [data.table::data.table] with columns:
 #' \describe{
@@ -279,15 +287,13 @@ calc_densities <- function(dt,
 #' @param column_color Optional character scalar giving a column used for
 #'   coloring and grouping densities (e.g. `"File"`).
 #' @param ...
-#' Additional arguments passed to [calc_densities()] if `densities_dt` is not already in
-#' density format (i.e. missing `x` and `y` columns). This allows users to pass grouping
-#' and transformation parameters directly when providing raw expression data. See
-#'  [calc_densities()] for details on accepted arguments.
+#' Additional arguments passed to [calc_densities()] when `densities_dt` is not
+#' already in density format (i.e. missing `x` and `y` columns). This allows
+#' users to pass grouping and transformation parameters directly when providing
+#' raw expression data. See [calc_densities()] for accepted arguments.
 #'
 #' @return A [ggplot2::ggplot] object.
-#' @examples
-#' library(data.table)
-#'
+# If x/y are missing, interpret input as raw expression data and compute densities.
 #' dt <- data.table(
 #'     File = rep(c("A", "B"), each = 200),
 #'     CD4  = rnorm(400),
@@ -377,20 +383,18 @@ plot_densities <- function(densities_dt,
 #'   markers into separate plots (default: `"marker"`).
 #' @param column_color Optional character scalar giving a column used for
 #'   coloring and grouping densities (e.g. `"File"`).
-#' @param line_colors Optional named character vector of colors used when
+#' @param color_map Optional named character vector of colors used when
 #'   `column_color` is provided.
 #' @param ribbon_alpha Numeric in `[0, 1]` controlling ribbon transparency.
 #' @param main_prefix Optional character scalar prepended to each plot title.
 #' @param ...
-#' Additional arguments passed to [calc_densities()] if `densities_dt` is not already in
-#' density format (i.e. missing `x` and `y` columns). This allows users to pass grouping
-#' and transformation parameters directly when providing raw expression data. See
-#'  [calc_densities()] for details on accepted arguments.
+#' Additional arguments passed to [calc_densities()] when `densities_dt` is not
+#' already in density format (i.e. missing `x` and `y` columns). This allows
+#' users to pass grouping and transformation parameters directly when providing
+#' raw expression data. See [calc_densities()] for accepted arguments.
 #'
 #' @return Invisibly returns a list with metadata about the generated plots.
-#' @examples
-#' library(data.table)
-#'
+# If x/y are missing, interpret input as raw expression data and compute densities.
 #' dt <- data.table(
 #'     File = rep(c("A", "B"), each = 200),
 #'     CD4  = rnorm(400),
@@ -488,7 +492,21 @@ plot_densities_base <- function(densities_dt,
     )
 }
 
-plot_density_base_single <- function(dt_plot, panel_title, color, ribbon_alpha = .2) {
+
+#' Draw a single base-R density panel
+#'
+#' Helper used by [plot_densities_base()] to render one marker/group
+#' combination. The function validates finite coordinates, initializes an empty
+#' plotting area, draws a filled ribbon, and overlays the density line.
+#'
+#' @param dt_plot A `data.frame`-like object with numeric `x` and `y` columns.
+#' @param panel_title Character scalar used as plot title.
+#' @param color Color used for the density line and ribbon fill.
+#' @param ribbon_alpha Numeric in `[0, 1]` controlling ribbon transparency.
+#'
+#' @return Logical scalar indicating whether a panel was drawn successfully.
+#' @export
+plot_density_base_single <- function(dt_plot, panel_title = NULL, color = "black", ribbon_alpha = .2) {
     dt_plot <- dt_plot[is.finite(dt_plot[["x"]]) & is.finite(dt_plot[["y"]]), , drop = FALSE]
     if (nrow(dt_plot) == 0) {
         warning("Skipping panel with no finite x/y values: ", panel_title)
