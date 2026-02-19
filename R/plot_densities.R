@@ -292,8 +292,9 @@ calc_densities <- function(dt,
 #' users to pass grouping and transformation parameters directly when providing
 #' raw expression data. See [calc_densities()] for accepted arguments.
 #'
-#' @return A [ggplot2::ggplot] object.
-# If x/y are missing, interpret input as raw expression data and compute densities.
+#' @return A ggplot2::ggplot object.
+#' If x/y are missing, interpret input as raw expression data and compute densities.
+#' @examples
 #' dt <- data.table(
 #'     File = rep(c("A", "B"), each = 200),
 #'     CD4  = rnorm(400),
@@ -394,7 +395,8 @@ plot_densities <- function(densities_dt,
 #' raw expression data. See [calc_densities()] for accepted arguments.
 #'
 #' @return Invisibly returns a list with metadata about the generated plots.
-# If x/y are missing, interpret input as raw expression data and compute densities.
+#' If x/y are missing, interpret input as raw expression data and compute densities.
+#' @examples
 #' dt <- data.table(
 #'     File = rep(c("A", "B"), each = 200),
 #'     CD4  = rnorm(400),

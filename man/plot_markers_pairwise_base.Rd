@@ -21,6 +21,7 @@ plot_markers_pairwise_base(
   cex_title = 2,
   modelines = TRUE,
   kwargs_hdr = list(),
+  diagonal_densityplot = FALSE,
   method.args = list(),
   adjust = 1,
   count_transform = function(x) x,
