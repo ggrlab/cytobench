@@ -152,7 +152,9 @@ plot_markers_pairwise_base <- function(df,
                         names(xylab) <- c("x", "y")
                     }
                     plot_n <- plot_n + 1
-                    cat("Add plot ", plot_n, ": ", marker_x, " vs ", marker_y, "\n")
+                    if (verbose) {
+                        cat("Add plot ", plot_n, ": ", marker_x, " vs ", marker_y, "\n")
+                    }
                     if (marker_x == marker_y) {
                         tmpdt <- data.table::data.table(x = vals_x)
                         colnames(tmpdt) <- marker_x
@@ -182,8 +184,14 @@ plot_markers_pairwise_base <- function(df,
                                 # compute_group() uses get_limits() and dimension() of ggplot scales.
                                 # Therefore, implement dummy scales here:
                                 scales = list(
-                                    x = list(get_limits = function() range(vals_x), dimension = function() range(vals_x)),
-                                    y = list(get_limits = function() range(vals_y), dimension = function() range(vals_y))
+                                    x = list(
+                                        get_limits = function() range(vals_x),
+                                        dimension = function() range(vals_x)
+                                    ),
+                                    y = list(
+                                        get_limits = function() range(vals_y),
+                                        dimension = function() range(vals_y)
+                                    )
                                 ),
                                 method = method_densitycalc,
                                 method.args = method.args,
@@ -206,7 +214,11 @@ plot_markers_pairwise_base <- function(df,
                             stop("Unknown geom: ", geom[1])
                         }
                         if (modelines) {
-                            abline(v = combo_modes[[xy_str]][marker_x], h = combo_modes[[xy_str]][marker_y], col = "red")
+                            abline(
+                                v = combo_modes[[xy_str]][marker_x],
+                                h = combo_modes[[xy_str]][marker_y],
+                                col = "red"
+                            )
                         }
                     }
                 }

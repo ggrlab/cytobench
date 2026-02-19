@@ -429,7 +429,6 @@ plot_densities_base <- function(densities_dt,
             groupings = column_color,
             ...
         )
-        cat("Calculated densities_dt\n")
     }
 
     if (!column_marker %in% colnames(densities_dt)) {
