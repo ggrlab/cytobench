@@ -455,7 +455,6 @@ plot_densities_base <- function(densities_dt,
     panel_count <- 0L
     for (marker_x in marker_values) {
         for (color_x in names(color_map)) {
-            cat("Plotted marker ", marker_x, " with color ", color_x, "\n")
             if (color_x == "all") {
                 # All the same color
                 dt_plot <- densities_dt[get(column_marker) == marker_x]
