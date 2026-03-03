@@ -59,10 +59,13 @@ flowSOM_predict <- function(flowsom_result,
         flowsom_result <- UpdateDerivedValues(flowsom_result)
     }
     # 3.2 Predict the clusters for all cells
-    predicted_fs_train_allcells <- FlowSOM::NewData(
-        flowsom_result,
-        input = as.matrix(fcs_first_dt_long[, colsToUse, with = FALSE]),
-        # If transform and scale are NULL, the same as in the flowSOM function will be used
+
+    predicted_fs_train_allcells <- ignore_flowsom_AsTraining_warnings(
+        FlowSOM::NewData(
+            flowsom_result,
+            input = as.matrix(fcs_first_dt_long[, colsToUse, with = FALSE]),
+            # If transform and scale are NULL, the same as in the flowSOM function will be used
+        )
     )
 
     cells_clusters_from_train <- data.table::data.table(fcs_first_dt_long)
