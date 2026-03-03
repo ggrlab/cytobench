@@ -96,15 +96,16 @@
 #' print(p3)
 #'
 plot_compare_alignment <- function(
-    dt_listlist,
-    relevant_features = NULL,
-    n_resolution = 1e3,
-    scale_column_funs = list(
-        "default" = function(x) asinh(x * 100),
-        "raw" = function(x) asinh(x / 1e3)
-    ),
-    ylim = c(0, .4),
-    faceting = c("horizontal", "vertical")) {
+  dt_listlist,
+  relevant_features = NULL,
+  n_resolution = 1e3,
+  scale_column_funs = list(
+      "default" = function(x) asinh(x * 100),
+      "raw" = function(x) asinh(x / 1e3)
+  ),
+  ylim = c(0, .4),
+  faceting = c("horizontal", "vertical")
+) {
     . <- feature <- x <- y <- device <- scale_column_fun <- NULL # to avoid R CMD check note about undefined global variable
     # Combine each method-device list into one data.table, add 'device' column
     rs_sn_long <- lapply(dt_listlist, data.table::rbindlist, idcol = "device", fill = TRUE)

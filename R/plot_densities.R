@@ -373,7 +373,6 @@ plot_densities <- function(densities_dt,
 }
 
 
-
 #' Plot expression density curves
 #'
 #' Visualizes kernel density estimates produced by [calc_densities()] as

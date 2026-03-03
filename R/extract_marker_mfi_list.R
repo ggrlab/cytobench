@@ -39,10 +39,11 @@
 #' )
 #' @export
 extract_marker_mfi_list <- function(
-    sample_to_rescale,
-    extracted_mfi,
-    column_negative = c("negative", "unstained"),
-    column_positive = "positive") {
+  sample_to_rescale,
+  extracted_mfi,
+  column_negative = c("negative", "unstained"),
+  column_positive = "positive"
+) {
     feature <- NULL # to avoid R CMD check note about undefined global variable
 
     # Ensure `extracted_mfi` is a tibble to prevent data.table-specific issues

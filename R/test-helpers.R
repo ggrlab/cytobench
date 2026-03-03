@@ -16,20 +16,21 @@
 #' @export
 #' @keywords test-helper
 simulate_ff <- function(
-    ncells = 250,
-    columns = c(
-        "FITC-A",
-        "PE-A",
-        "ECD-A",
-        "PC5.5-A",
-        "PC7-A",
-        "APC-A",
-        "AF700-A",
-        "AA750-A",
-        "PB-A",
-        "KrO-A"
-    ),
-    flowcore = TRUE) {
+  ncells = 250,
+  columns = c(
+      "FITC-A",
+      "PE-A",
+      "ECD-A",
+      "PC5.5-A",
+      "PC7-A",
+      "APC-A",
+      "AF700-A",
+      "AA750-A",
+      "PB-A",
+      "KrO-A"
+  ),
+  flowcore = TRUE
+) {
     data <- matrix(stats::rnorm(ncells * length(columns)), ncol = length(columns))
     colnames(data) <- columns
     if (flowcore) {

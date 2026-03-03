@@ -64,7 +64,7 @@
 #'     nrow = 3, ncol = 3, byrow = TRUE
 #' )
 #' # Simulate a spillover matrix which is necessarily positive-definite
-#' spill_pd <- base::crossprod(spill, spill) 
+#' spill_pd <- base::crossprod(spill, spill)
 #' colnames(spill_pd) <- rownames(spill_pd) <- paste0("FL", 1:3)
 #'
 #' # Define autofluorescence as percentage of full scale (default: 1048575)

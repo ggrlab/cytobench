@@ -89,27 +89,28 @@
 #' print(p3)
 #' @keywords cytometry
 plot_markers_pairwise <- function(
-    # Arguments for both cases
-    ff_df,
-    cofactor_namedvec,
-    special_cofactor_list = list(),
-    transform_fun = asinh,
-    transform_fun_name = "asinh",
-    verbose = FALSE,
-    engine = c("ggplot", "base"),
-    n_cells = Inf,
-    title_global = NULL,
-    modelines = TRUE,
-    kwargs_hdr = list(),
-    # Arguments specific to ggplot engine
-    geom = c("hex", "points", "pointdensity"),
-    bins = 50,
-    diag_plot = FALSE,
-    debugplots = FALSE,
-    axis_full_labels = TRUE,
-    count_transform = function(x) log10(x + 1),
-    add_ggplot_elements = list(),
-    ...) {
+  # Arguments for both cases
+  ff_df,
+  cofactor_namedvec,
+  special_cofactor_list = list(),
+  transform_fun = asinh,
+  transform_fun_name = "asinh",
+  verbose = FALSE,
+  engine = c("ggplot", "base"),
+  n_cells = Inf,
+  title_global = NULL,
+  modelines = TRUE,
+  kwargs_hdr = list(),
+  # Arguments specific to ggplot engine
+  geom = c("hex", "points", "pointdensity"),
+  bins = 50,
+  diag_plot = FALSE,
+  debugplots = FALSE,
+  axis_full_labels = TRUE,
+  count_transform = function(x) log10(x + 1),
+  add_ggplot_elements = list(),
+  ...
+) {
     if (missing(cofactor_namedvec)) {
         cofactor_namedvec <- setNames(
             rep(1500, ncol(ff_df)),

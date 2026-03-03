@@ -48,14 +48,15 @@
 #' )
 #' flowSOM_performance(fsom$cells_clusters_from_train)
 flowSOM_performance <- function(
-    dt_clustered,
-    flowsom_result,
-    n_metaclusters = NULL,
-    include_clusters = TRUE,
-    ncells = 1e3,
-    seed = 42,
-    relevant_cols = NULL,
-    clustering_map = NULL) {
+  dt_clustered,
+  flowsom_result,
+  n_metaclusters = NULL,
+  include_clusters = TRUE,
+  ncells = 1e3,
+  seed = 42,
+  relevant_cols = NULL,
+  clustering_map = NULL
+) {
     # to avoid R CMD check note about undefined global variable (data.table function)
     . <- cluster <- metaCluster <- NULL
     # Support direct call: flowSOM_performance(flowsom_result)

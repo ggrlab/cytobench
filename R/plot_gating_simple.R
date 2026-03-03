@@ -109,13 +109,14 @@ breaks_auto <- function(x, n = 5) {
 #'
 #' @export
 plot_gating_simple <- function(
-    gatingset,
-    transformlist = NULL,
-    populations = NULL,
-    gg_layer = scattermore::geom_scattermore(alpha = 0.4),
-    facet = TRUE,
-    verbose = FALSE,
-    ...) {
+  gatingset,
+  transformlist = NULL,
+  populations = NULL,
+  gg_layer = scattermore::geom_scattermore(alpha = 0.4),
+  facet = TRUE,
+  verbose = FALSE,
+  ...
+) {
     # ---- Normalize input to a single GatingHierarchy ----
     if (inherits(gatingset, "GatingHierarchy")) {
         gh <- gatingset

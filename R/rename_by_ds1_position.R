@@ -49,7 +49,7 @@ build_name_map <- function(ds1_reference, ds2_original, ds2_renamed) {
                 markernames_ds1 = flowCore::markernames(ds1_reference),
                 markernames_ds2 = flowCore::markernames(ds2_renamed)
             ),
-            NA  # for TIME marker which has no corresponding marker name
+            NA # for TIME marker which has no corresponding marker name
         )
     )
 }
