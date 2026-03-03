@@ -106,6 +106,12 @@ ff_update_names <- function(flowframe,
     kw_names <- names(flowCore::keyword(flowframe))
     flowCore::keyword(flowframe)[is.na(kw_names)] <- NULL
     flowCore::keyword(flowframe)[grepl("flowCore", kw_names)] <- NULL
+
+    
+    # Clean up NULL keywords to avoid downstream issues with flowWorkspace (e.g. gating)
+    keywords_being_null <- sapply(flowCore::keyword(flowframe), is.null)
+    flowCore::keyword(flowframe) <- flowCore::keyword(flowframe)[!keywords_being_null]
+    
     flowframe
 }
 
