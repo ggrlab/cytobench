@@ -34,17 +34,6 @@
 #'
 #' @export
 #' @keywords cytometry
-#' @examples
-#' \dontrun{
-#' gs <- flowWorkspace::load_gating_set("path/to/gating_set")
-#'
-#' # Extract root and a specific population as flowFrames
-#' gated_extract_cells(
-#'     gatingset = gs,
-#'     gatenames = c("root", "/Singlets/CD45+/CD3+"),
-#'     return_x = "flowset"
-#' )
-#' }
 extract_gatingset_cells <- function(gatingset, gatenames = c("root"), return_x = c("flowset", "cytoset", "gatinghierarchy")) {
     # Retrieve per-population counts and percentages.
     counts_freqs <- lapply(c("count", "percent"), function(statistic) {
