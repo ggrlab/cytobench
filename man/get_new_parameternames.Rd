@@ -49,4 +49,3 @@ new_pn <- get_new_parameternames(
 }
 
 }
-\keyword{internal}

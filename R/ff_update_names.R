@@ -148,7 +148,7 @@ ff_update_names <- function(flowframe,
 #' # Expected: a character vector aligned with spillmat parameter order.
 #' }
 #'
-#' @keywords internal
+#' @export
 #'
 get_new_parameternames <- function(ff, spillmat, new_channel_names, markermap_names) {
     # Example spillmats:
