@@ -210,7 +210,13 @@ test_that("FlowSOM optimal, outdir", {
     )
     loaded_fsomresult2 <- qs2::qs_read(file.path(tmpdir, "r1-FlowSOM_result_train.qs2"))
 
-    testthat::expect_equivalent(loaded_fsomresult2, fsom$fs_res_train)
+    compare_fsom_ignore_graph <- function(a,b){
+        testthat::expect_true(igraph::identical_graphs(a[["MST"]][["graph"]], b[["MST"]][["graph"]]))
+        a[["MST"]][["graph"]] <- NULL
+        b[["MST"]][["graph"]] <- NULL
+        testthat::expect_equal(a, b)
+    }
+    compare_fsom_ignore_graph(fsom$fs_res_train, loaded_fsomresult2)
     testthat::expect_true(fsom$fs_res_train$map$nMetaclusters == 10)
     testthat::expect_equal(dim(fsom$fs_res_train$ConsensusClusterPlus_MAP), c(100, 10))
 })
