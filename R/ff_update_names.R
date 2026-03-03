@@ -26,13 +26,13 @@
 #' @keywords internal
 ff_update_names <- function(flowframe,
                             markermap = markermap.cytometer_navios.panel_DURACloneTCELL[, c(
-                                "name", "colnames", "description_channel.flurochrome.marker.awh"
+                                map_oldname, map_newname, map_description
                             )],
-                            spillmat_names = NULL) {
-    req_cols <- c(
-        "name", "colnames",
-        "description_channel.flurochrome.marker.awh"
-    )
+                            spillmat_names = NULL,
+                            map_oldname = "name",
+                            map_newname = "colnames",
+                            map_description = "description_channel.flurochrome.marker.awh") {
+    req_cols <- c(map_oldname, map_newname, map_description)
     if (!inherits(flowframe, "flowFrame")) {
         stop("`flowframe` must be a flowCore::flowFrame.", call. = FALSE)
     }
@@ -44,7 +44,7 @@ ff_update_names <- function(flowframe,
     }
 
     old_channel_names <- flowCore::colnames(flowframe)
-    marker_order <- match(old_channel_names, markermap[["name"]])
+    marker_order <- match(old_channel_names, markermap[[map_oldname]])
     if (any(is.na(marker_order))) {
         stop("Some flowFrame channels are missing from `markermap$name`.",
             call. = FALSE
@@ -53,8 +53,8 @@ ff_update_names <- function(flowframe,
 
     markermap <- tibble::as_tibble(markermap)
     mapped <- markermap[marker_order, ]
-    new_channel_names <- mapped[["colnames"]]
-    new_marker_names <- mapped[["description_channel.flurochrome.marker.awh"]]
+    new_channel_names <- mapped[[map_newname]]
+    new_marker_names <- mapped[[map_description]]
     if (any(is.na(new_channel_names)) || anyDuplicated(new_channel_names)) {
         stop("Mapped channel names contain NA or duplicates.", call. = FALSE)
     }
@@ -82,7 +82,7 @@ ff_update_names <- function(flowframe,
         if (is.null(spillmat)) next
         new_parameternames <- get_new_parameternames(
             ff_old, spillmat,
-            new_channel_names, markermap[["name"]]
+            new_channel_names, markermap[[map_oldname]]
         )
         colnames(spillmats[[spillmat_name]]) <- new_parameternames
         rownames(spillmats[[spillmat_name]]) <- NULL

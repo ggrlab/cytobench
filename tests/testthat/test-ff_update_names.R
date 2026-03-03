@@ -1,4 +1,3 @@
-devtools::load_all()
 mk_test_ff <- function() {
     exprs <- matrix(c(1, 2, 3, 4), ncol = 2)
     colnames(exprs) <- c("A", "B")

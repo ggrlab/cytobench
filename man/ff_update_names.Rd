@@ -6,9 +6,12 @@
 \usage{
 ff_update_names(
   flowframe,
-  markermap = markermap.cytometer_navios.panel_DURACloneTCELL[, c("name", "colnames",
-    "description_channel.flurochrome.marker.awh")],
-  spillmat_names = NULL
+  markermap = markermap.cytometer_navios.panel_DURACloneTCELL[, c(map_oldname,
+    map_newname, map_description)],
+  spillmat_names = NULL,
+  map_oldname = "name",
+  map_newname = "colnames",
+  map_description = "description_channel.flurochrome.marker.awh"
 )
 }
 \arguments{
