@@ -316,7 +316,7 @@ test_that("Plot markers pairwise: Points", {
             },
             transform_fun_name = "log10",
             geom = geom_x,
-            engine = "base", geom = "points",
+            engine = "base",
             cex = 5,
         )
         dev.off()
@@ -379,8 +379,7 @@ test_that("Plot markers pairwise with density", {
         example_ff,
         engine = "base", geom = "points",
         title_global = "Global title, e.g. sample ID",
-        diagonal_densityplot = TRUE,
-        geom = "points"
+        diagonal_densityplot = TRUE
     )
     dev.off()
 
