@@ -125,7 +125,7 @@ test_that("gs_update_names errors on duplicated target channel names", {
     )
 })
 
-test_that("check_updatednames_gs_ff validates application on a flowFrame", {
+test_that("is_updatednames_gs_ff validates renamed GatingSet on flowFrame", {
     ff <- mk_test_ff(c("A", "B"))
     gs <- mk_test_gs(c("A", "B"))
     gs <- gs_update_names(gs = gs, markermap = mk_test_markermap_gs())

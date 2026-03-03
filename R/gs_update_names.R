@@ -4,6 +4,13 @@
 #'
 #' @param gs A `flowWorkspace::GatingSet` to rename.
 #' @param markermap A `data.frame` with map columns used to rename channels.
+#' @param ff_testing
+#' "Optional" `flowCore::flowFrame` used to validate the renamed `GatingSet` via
+#' `is_updatednames_gs_ff()`. It SHOULD be provided, then function will apply the
+#' renamed `GatingSet` to this `flowFrame` to ensure compatibility.
+#'
+#' If you are really sure what you are doing, you can skip this validation by setting
+#' `ff_testing = NULL`, but this is not recommended.
 #' @param map_oldname
 #' A character scalar naming the `markermap` column with current channel names.
 #' @param map_newname
@@ -35,7 +42,12 @@
 #' }
 #'
 #' @export
-gs_update_names <- function(gs, markermap, map_oldname = "name", map_newname = "colnames", map_description = "description_channel.flurochrome.marker.awh") {
+gs_update_names <- function(gs,
+                            markermap,
+                            ff_testing,
+                            map_oldname = "name",
+                            map_newname = "colnames",
+                            map_description = "description_channel.flurochrome.marker.awh") {
     req_cols <- c(map_oldname, map_newname, map_description)
     if (!inherits(gs, "GatingSet")) stop("`gs` must be a flowWorkspace::GatingSet.", call. = FALSE)
     if (!is.data.frame(markermap)) stop("`markermap` must be a data.frame.", call. = FALSE)
@@ -85,19 +97,38 @@ gs_update_names <- function(gs, markermap, map_oldname = "name", map_newname = "
         all = TRUE
     )
     flowCore::markernames(gs) <- new_description_names
+
+    if (!is.null(ff_testing)) {
+        is_updatednames_gs_ff(gs = gs, ff = ff_testing)
+    }
     gs
 }
 
-#' @title Check Renamed GatingSet on FlowFrame
+#' @title Validate Renamed GatingSet on flowFrame
 #' @description
-#' Helper that checks whether a renamed `GatingSet` can be applied to
-#' a `flowFrame`, both without and with compensation.
+#' Helper that validates whether a renamed `flowWorkspace::GatingSet` can be
+#' applied to a `flowCore::flowFrame` with and without compensation.
 #'
 #' @param gs A `flowWorkspace::GatingSet` object.
 #' @param ff A `flowCore::flowFrame` used for validation.
 #'
+#' @details
+#' The function writes a one-event temporary FCS from `ff` and applies `gs`
+#' twice via `flowWorkspace::gh_apply_to_cs()`: first with
+#' `compensation_source = "none"`, then with default compensation behavior.
+#' It errors if either application fails.
+#'
+#' This is important because updating channel names can break gating _and_ spillover/compensation.
+#' You should use this function whenever you renamed a GatingSet!
+#'
 #' @return
 #' Invisibly returns `TRUE` when both applications succeed.
+#'
+#' @examples
+#' \dontrun{
+#' ok <- is_updatednames_gs_ff(gs = gs_renamed, ff = ff_renamed)
+#' # Expected: TRUE (invisibly) when both applications succeed.
+#' }
 #'
 #' @export
 is_updatednames_gs_ff <- function(gs, ff) {
