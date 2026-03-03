@@ -23,7 +23,7 @@
 #' # Expected: ff_new has renamed channels/markers and aligned spillover names.
 #' }
 #'
-#' @keywords internal
+#' @export
 ff_update_names <- function(flowframe,
                             markermap = markermap.cytometer_navios.panel_DURACloneTCELL[, c(
                                 map_oldname, map_newname, map_description
@@ -148,7 +148,6 @@ ff_update_names <- function(flowframe,
 #' # Expected: a character vector aligned with spillmat parameter order.
 #' }
 #'
-#' @export
 #'
 get_new_parameternames <- function(ff, spillmat, new_channel_names, markermap_names) {
     # Example spillmats:

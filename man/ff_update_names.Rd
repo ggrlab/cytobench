@@ -41,4 +41,3 @@ ff_new <- ff_update_names(flowframe = ff_old, markermap = marker_map)
 }
 
 }
-\keyword{internal}
