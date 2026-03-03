@@ -173,13 +173,25 @@ plot_markers_pairwise_ggplot <- function(df,
                     if (!"hdrcde" %in% rownames(installed.packages())) {
                         stop("Package 'hdrcde' is required for adding mode lines. Please install it or set modelines = FALSE.")
                     }
-                    modes <- do.call(hdrcde::hdr.2d, c(
-                        list(
-                            x = transform_fun(df[[marker_x]] / cofactor_x),
-                            y = transform_fun(df[[marker_y]] / cofactor_y)
-                        ),
-                        kwargs_hdr
-                    ))$mode
+                    # The following is 1d density-peaks. Doesnt work perfectly either.
+                    modes <- sapply(c(marker_x, marker_y), function(m) {
+                        res <- do.call(
+                            hdrcde::hdr,
+                            c(
+                                list(x = transform_fun(df[[m]] / ifelse(m == marker_x, cofactor_x, cofactor_y))),
+                                kwargs_hdr
+                            )
+                        )
+                        res$mode
+                    })
+                    # # The following is 2d density-peaks. Doesnt work perfectly either.
+                    # modes <- do.call(hdrcde::hdr.2d, c(
+                    #     list(
+                    #         x = transform_fun(df[[marker_x]] / cofactor_x),
+                    #         y = transform_fun(df[[marker_y]] / cofactor_y)
+                    #     ),
+                    #     kwargs_hdr
+                    # ))$mode
                     names(modes) <- c(marker_x, marker_y)
                     p <- p +
                         ggplot2::geom_vline(xintercept = modes[marker_x], color = "red") +

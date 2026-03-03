@@ -81,8 +81,20 @@ plot_markers_pairwise_base <- function(df,
             stop("Package 'hdrcde' is required for adding mode lines. Please install it or set modelines = FALSE.")
         }
         combo_modes <- lapply(all_combos, function(xy) {
-            modes <- do.call(hdrcde::hdr.2d, c(list(x = df_mat[, xy[1]], y = df_mat[, xy[2]]), kwargs_hdr))$mode
-            names(modes) <- xy
+            # The following is 1d density-peaks. Doesnt work perfectly either. 
+            modes <- sapply(xy, function(m) {
+                res <- do.call(
+                    hdrcde::hdr,
+                    c(
+                        list(x = df_mat[, m]),
+                        kwargs_hdr
+                    )
+                )
+                res$mode
+            })
+            # # The following is 2d density-peaks. Doesnt work perfectly either. 
+            # modes <- do.call(hdrcde::hdr.2d, c(list(x = df_mat[, xy[1]], y = df_mat[, xy[2]]), kwargs_hdr))$mode
+            # names(modes) <- xy
             if (xy[1] == xy[2]) {
                 modes <- modes[1] # for diagonal plots, only one mode exists
             }

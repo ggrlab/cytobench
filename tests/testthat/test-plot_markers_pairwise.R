@@ -38,10 +38,10 @@ test_that("Plot markers pairwise: Add mode-lines", {
         kwargs_hdr = list(prob = 0.99)
     )
     dev.off()
-
+    browser()
     testthat::expect_true(TRUE) # run through test
 })
-
+stop()
 
 test_that("Plot markers pairwise performance", {
     cn <- c(
