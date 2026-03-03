@@ -72,13 +72,14 @@ test_that("Testing rescale_extracted", {
             x_aligned_v2_asinh = asinh(x_aligned_v2),
             x_aligned_v3_asinh = asinh(absolute_sigmoid(x_aligned) * refactor)
         )
+    expected_warn <- "rows containing missing values or values outside the scale range"
     tmpdir <- local_tempdir_time()
     pdf(file.path(tmpdir, "removeme.pdf"))
-    print(tmpplot(df, "x_asinh"))
-    print(tmpplot(df, "x_minmax_asinh"))
-    print(tmpplot(df, "x_aligned_asinh"))
-    print(tmpplot(df, "x_aligned_v2_asinh"))
-    print(tmpplot(df, "x_aligned_v3_asinh"))
+    testthat::expect_warning(print(tmpplot(df, "x_asinh")), expected_warn)
+    testthat::expect_warning(print(tmpplot(df, "x_minmax_asinh")), expected_warn)
+    testthat::expect_warning(print(tmpplot(df, "x_aligned_asinh")), expected_warn)
+    testthat::expect_warning(print(tmpplot(df, "x_aligned_v2_asinh")), expected_warn)
+    testthat::expect_warning(print(tmpplot(df, "x_aligned_v3_asinh")), expected_warn)
     dev.off()
 
     ##### PB:
@@ -108,11 +109,11 @@ test_that("Testing rescale_extracted", {
         )
     tmpdir <- local_tempdir_time()
     pdf(file.path(tmpdir, "removeme.pdf"))
-    print(tmpplot(df, "x_asinh"))
-    print(tmpplot(df, "x_minmax_asinh"))
-    print(tmpplot(df, "x_aligned_asinh"))
-    print(tmpplot(df, "x_aligned_v2_asinh"))
-    print(tmpplot(df, "x_aligned_v3_asinh"))
+    testthat::expect_warning(print(tmpplot(df, "x_asinh")), expected_warn)
+    testthat::expect_warning(print(tmpplot(df, "x_minmax_asinh")), expected_warn)
+    testthat::expect_warning(print(tmpplot(df, "x_aligned_asinh")), expected_warn)
+    testthat::expect_warning(print(tmpplot(df, "x_aligned_v2_asinh")), expected_warn)
+    testthat::expect_warning(print(tmpplot(df, "x_aligned_v3_asinh")), expected_warn)
     dev.off()
     rescaled_sample <- rescale_extracted(
         sample_to_rescale = flowCore::exprs(loaded_cy1),

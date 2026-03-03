@@ -32,7 +32,7 @@ test_that("Plot markers pairwise: Add mode-lines", {
     pdf(file.path(tmpdir, "removeme2.pdf"), height = 5, width = 5)
     plot_markers_pairwise(
         example_ff,
-        engine = "base",
+        engine = "base", geom = "points",
         title_global = "Global title, e.g. sample ID",
         modelines = TRUE,
         kwargs_hdr = list(prob = 0.99)
@@ -69,7 +69,7 @@ test_that("Plot markers pairwise performance", {
     pdf(file.path(tmpdir, "removeme2.pdf"), height = 5, width = 5)
     plot_markers_pairwise(
         example_ff,
-        engine = "base"
+        engine = "base", geom = "points",
     )
     dev.off()
     times <- c(times, Sys.time())
@@ -198,7 +198,7 @@ test_that("Plot markers pairwise", {
     pdf(file.path(tmpdir, "removeme2.pdf"), height = 5, width = 5)
     plot_markers_pairwise(
         example_ff,
-        engine = "base"
+        engine = "base", geom = "points",
     )
     dev.off()
 
@@ -241,7 +241,7 @@ test_that("Plot markers pairwise: Cofactors", {
     pdf(file.path(tmpdir, "removeme2.pdf"), height = 5, width = 5)
     plot_markers_pairwise(
         example_ff,
-        engine = "base",
+        engine = "base", geom = "points",
         cofactor_namedvec = cofactor_namedvec,
         special_cofactor_list = list(),
         transform_fun = function(x) {
@@ -316,7 +316,7 @@ test_that("Plot markers pairwise: Points", {
             },
             transform_fun_name = "log10",
             geom = geom_x,
-            engine = "base",
+            engine = "base", geom = "points",
             cex = 5,
         )
         dev.off()
@@ -353,7 +353,7 @@ test_that("Plot markers pairwise title", {
     pdf(file.path(tmpdir, "removeme2.pdf"), height = 5, width = 5)
     plot_markers_pairwise(
         example_ff,
-        engine = "base",
+        engine = "base", geom = "points",
         title_global = "Global title, e.g. sample ID"
     )
     dev.off()
@@ -377,7 +377,7 @@ test_that("Plot markers pairwise with density", {
     pdf(file.path(tmpdir, "removeme2.pdf"), height = 5, width = 5)
     plot_markers_pairwise(
         example_ff,
-        engine = "base",
+        engine = "base", geom = "points",
         title_global = "Global title, e.g. sample ID",
         diagonal_densityplot = TRUE,
         geom = "points"
@@ -411,4 +411,26 @@ test_that("Check layoutcreation", {
 
     layout_diag <- create_layout(cn, diagonal_densityplot = TRUE)
     testthat::expect_equal(layout_diag, expected = expected_diag)
+})
+
+testthat::test_that("Expect warning with base engine and NO geom", {
+    cn <- c(
+        "FITC-A", "PE-A", "ECD-A"
+    )
+    example_ff <- flowCore::flowFrame(
+        matrix(
+            rnorm(1000 * length(cn), mean = 1000, sd = 100),
+            ncol = length(cn),
+            dimnames = list(NULL, cn)
+        )
+    )
+    tmpdir <- local_tempdir_time()
+    testthat::expect_warning(
+        plot_markers_pairwise(
+            example_ff,
+            engine = "base",
+            title_global = "Global title, e.g. sample ID"
+        ),
+        "geom = 'hex' not implemented in base engine; using 'points' instead"
+    )
 })
