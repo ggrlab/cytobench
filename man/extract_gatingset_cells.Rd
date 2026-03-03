@@ -50,16 +50,4 @@ MFI extraction is first attempted with \code{inverse.transform = TRUE}.
 If that fails, the function retries with \code{inverse.transform = FALSE}
 and emits a warning.
 }
-\examples{
-\dontrun{
-gs <- flowWorkspace::load_gating_set("path/to/gating_set")
-
-# Extract root and a specific population as flowFrames
-gated_extract_cells(
-    gatingset = gs,
-    gatenames = c("root", "/Singlets/CD45+/CD3+"),
-    return_x = "flowset"
-)
-}
-}
 \keyword{cytometry}

@@ -1,12 +1,31 @@
-# For each cytometer panel, it is necessary to have a marker map that maps:
-#  - `name`: The column names in the FCS files
-# to
-#  - `colnames`:
-#       The new column names in the output data
-#  - `description_channel.flurochrome.marker.awh`:
-#       The new description including channel, fluorochrome, marker, and area/width/height split by "-"
-#  - `as_marker`: Whether this channel should be regarded as a marker or not (e.g., FSC, SSC, Time are not markers)
-
+#' @title Marker map: Navios DURAClone BASIC
+#' @description
+#' Static lookup table for mapping channel names and marker labels for the
+#' Navios DURAClone BASIC panel.
+#' @details
+#' This table maps raw channel names (`name`) to harmonized output names
+#' (`colnames`) and harmonized marker descriptions
+#' (`description_channel.flurochrome.marker.awh`).
+#'
+#' Intended use is as a `markermap` input to functions that update flowFrame
+#' and GatingSet channel/marker names.
+#' @format
+#' A data.frame with 12 rows and 11 columns:
+#' \describe{
+#'   \item{panel}{Panel identifier.}
+#'   \item{cytometer}{Cytometer identifier.}
+#'   \item{name}{Original FCS channel name.}
+#'   \item{name_dataset1}{Alternative original name used in dataset1.}
+#'   \item{description_short}{Short marker/channel label.}
+#'   \item{as_marker}{Logical flag for marker channels.}
+#'   \item{fluorochrome}{Fluorochrome label.}
+#'   \item{height_width_area}{Signal dimension (A/W).}
+#'   \item{channel}{Channel family label.}
+#'   \item{colnames}{Harmonized output channel/marker name.}
+#'   \item{description_channel.flurochrome.marker.awh}{Combined descriptor.}
+#' }
+#' @seealso [ff_update_names()], [gs_update_names()]
+#' @export
 markermap.cytometer_navios.panel_DURACloneBASIC <- data.frame(
     "panel" = "DURACloneBASIC",
     "cytometer" = "Navios",
@@ -31,6 +50,35 @@ markermap.cytometer_navios.panel_DURACloneBASIC <- data.frame(
         )
     )
 
+#' @title Marker map: Navios DURAClone TCELL
+#' @description
+#' Static lookup table for mapping channel names and marker labels for the
+#' Navios DURAClone TCELL panel.
+#' @details
+#' This table maps raw channel names (`name`) to harmonized output names
+#' (`colnames`) and harmonized marker descriptions
+#' (`description_channel.flurochrome.marker.awh`).
+#'
+#' It also provides `colnames_2025relativisation` for panel-specific downstream
+#' relativisation workflows.
+#' @format
+#' A data.frame with 14 rows and 12 columns:
+#' \describe{
+#'   \item{panel}{Panel identifier.}
+#'   \item{cytometer}{Cytometer identifier.}
+#'   \item{name}{Original FCS channel name.}
+#'   \item{name_dataset1}{Alternative original name used in dataset1.}
+#'   \item{description_short}{Short marker/channel label.}
+#'   \item{as_marker}{Logical flag for marker channels.}
+#'   \item{fluorochrome}{Fluorochrome label.}
+#'   \item{height_width_area}{Signal dimension (A/W).}
+#'   \item{channel}{Channel family label.}
+#'   \item{colnames}{Harmonized output channel/marker name.}
+#'   \item{description_channel.flurochrome.marker.awh}{Combined descriptor.}
+#'   \item{colnames_2025relativisation}{Relativisation output label.}
+#' }
+#' @seealso [ff_update_names()], [gs_update_names()]
+#' @export
 markermap.cytometer_navios.panel_DURACloneTCELL <- data.frame(
     "panel" = "DURACloneTCELL",
     "cytometer" = "Navios",

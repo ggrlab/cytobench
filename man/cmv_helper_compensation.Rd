@@ -41,10 +41,10 @@ was estimated (manual, auto, or auto_singlestain).
 }
 \examples{
 \dontrun{
-   cytobench::cmv_helper_compensation(
-       ff_unapplied_compensations,
-       compensation_type = "manual"
-   )
+cytobench::cmv_helper_compensation(
+    ff_unapplied_compensations,
+    compensation_type = "manual"
+)
 }
 }
 \keyword{relativisation}
