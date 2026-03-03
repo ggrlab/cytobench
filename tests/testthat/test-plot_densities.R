@@ -9,7 +9,6 @@ test_that("Plotting densities", {
         ),
         regexp = "Expression values after melting cannot be character. Did you set groupings and markers correctly?"
     )
-    browser()
     plot_densities(fs_dt, markers = c("CD4", "CD8"))
     plot_densities(fs_dt, column_color = "File")
 
