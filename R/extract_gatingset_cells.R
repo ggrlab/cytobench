@@ -93,7 +93,18 @@ extract_gatingset_cells <- function(gatingset, gatenames = c("root"), return_x =
     } else {
         # Extract requested populations and coerce output format if needed.
         final_extracted <- sapply(gatenames, simplify = FALSE, function(gatename) {
-            extracted <- flowWorkspace::gh_pop_get_data(gatingset, gatename)
+            tryCatch(
+                {
+                    extracted <- flowWorkspace::gh_pop_get_data(gatingset, gatename)
+                },
+                error = function(e) {
+                    stop(
+                        "In gatename '", gatename, "': ", e$message,
+                        " All available populations: ", paste(paste0("'", pop_paths, "'"), collapse = ", "), 
+                        call. = FALSE
+                    )
+                }
+            )
             extracted <- flowWorkspace::realize_view(extracted)
             if (return_x[1] == "cytoset") {
                 extracted
