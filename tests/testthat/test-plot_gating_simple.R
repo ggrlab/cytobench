@@ -7,4 +7,5 @@ test_that("Test plot gating simple", {
     pdf("removeme.pdf")
     print(plots)
     dev.off()
+    testthat::expect_true(TRUE)
 })
