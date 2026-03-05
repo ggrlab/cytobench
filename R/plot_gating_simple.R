@@ -53,7 +53,7 @@ breaks_auto <- function(x, n = 5) {
 #'
 #' @description
 #' Given a single-sample \strong{GatingSet} or a \strong{GatingHierarchy}, this helper
-#' draws a 2D scatter for each population, showing the parent (pre-gate) and the
+#' draws a 1d/2D scatter for each population, showing the parent (pre-gate) and the
 #' population data (post-gate). Axes are transformed according to the gate's
 #' channel transforms obtained from `flowWorkspace::gh_get_transformations()`.
 #'
@@ -69,6 +69,8 @@ breaks_auto <- function(x, n = 5) {
 #' @param gg_layer A ggplot2 layer (e.g. `scattermore::geom_scattermore(alpha = 0.4)`
 #'   or `ggplot2::geom_point(alpha = 0.2, size = 0.2)`) used to draw points.
 #'   Defaults to a fast scatter layer from **scattermore**.
+#' @param gg_layer_1d A ggplot2 layer used for 1D plots (when a gate has only one parameter).
+#'   Defaults to `ggplot2::geom_density()`.
 #' @param facet Logical, if `TRUE` (default) facets columns by `gatingstatus`
 #'   ("pregate" vs "postgate"). If `FALSE`, returns a single panel with both
 #'   statuses overplotted
@@ -86,8 +88,6 @@ breaks_auto <- function(x, n = 5) {
 #' forward or inverse transforms will be plotted on the untransformed scale with
 #' a warning (unless `verbose = TRUE`).
 #'
-#' \strong{Limitations:} Only 2-D gates are supported (typical rectangle/polygon
-#' gates). Non-2-D populations are skipped with an informative message.
 #'
 #' @examples
 #' \dontrun{
@@ -113,6 +113,7 @@ plot_gating_simple <- function(
   transformlist = NULL,
   populations = NULL,
   gg_layer = scattermore::geom_scattermore(alpha = 0.4),
+  gg_layer_1d = ggplot2::geom_density(),
   facet = TRUE,
   verbose = FALSE,
   ...
@@ -179,15 +180,11 @@ plot_gating_simple <- function(
             return(NULL)
         }
 
-        gate_params <- current_gate@parameters
-        if (length(gate_params) != 2L) {
-            if (!verbose) {
-                message(path_x, "': gate is not 2D (found ", length(gate_params), " params). Using the first column as second axis.")
-            }
-            alternativeparam <- setdiff(flowWorkspace::colnames(gh), names(gate_params))
-            gate_params <- c(gate_params, alternativeparam[1])
-            names(gate_params)[length(gate_params)] <- alternativeparam[1]
+        if (!"parameters" %in% slotNames(current_gate)) {
+            if (!verbose) message("Skipping '", path_x, "': gate does not have 'parameters' slot.")
+            return(NULL)
         }
+        gate_params <- current_gate@parameters
         x_y <- names(gate_params)
 
         # Realize pre- and post-gate data views and extract the two columns
@@ -206,24 +203,32 @@ plot_gating_simple <- function(
             message("Path '", path_x, "': no transform (or inverse) for channel '", x_y[1], "'. Using identity.")
             x_trans <- scales::identity_trans()
         }
-        if (is.null(y_trans) && !verbose) {
+        if (is.null(y_trans) && !verbose && !is.na(x_y[2])) {
             message("Path '", path_x, "': no transform (or inverse) for channel '", x_y[2], "'. Using identity.")
             y_trans <- scales::identity_trans()
         }
 
         # Build plot
-        p <- ggplot2::ggplot(
-            dt_gated,
-            ggplot2::aes(x = .data[[x_y[1]]], y = .data[[x_y[2]]], col = gatingstatus)
-        ) +
-            gg_layer + # user-provided/ default point layer
+        if (length(x_y) == 2) {
+            p <- ggplot2::ggplot(
+                dt_gated,
+                ggplot2::aes(x = .data[[x_y[1]]], y = .data[[x_y[2]]], col = gatingstatus)
+            ) +
+                gg_layer + # user-provided/ default point layer
+                ggplot2::scale_y_continuous(trans = y_trans)
+        } else {
+            p <- ggplot2::ggplot(
+                dt_gated,
+                ggplot2::aes(x = .data[[x_y[1]]], col = gatingstatus)
+            ) +
+                gg_layer_1d
+        }
+        p <- p + # user-provided/ default point layer
             ggpubr::theme_pubr() + # clean theme
             ggplot2::scale_x_continuous(trans = x_trans) +
-            ggplot2::scale_y_continuous(trans = y_trans) +
             ggplot2::ggtitle(path_x)
-
         # Facet or overplot depending on user choice
-        if (isTRUE(facet)) {
+        if (isTRUE(facet) && nrow(p$data) > 0) {
             # If I am faceting, the POST-gate data must be duplicated with a PRE-gate label
             # Otherwise, the "pregate" facet would only show cells that did NOT pass the gate
             p$data <- rbind(p$data, p$data[gatingstatus == "postgate"][, gatingstatus := "pregate"])
