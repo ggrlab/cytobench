@@ -26,21 +26,13 @@
 #'     summary(flowCore::exprs(ff) - flowCore::exprs(reread_ff))
 #' )
 write_memory_FCS <- function(ff) {
-    tmpfile <- base::tempfile()
-    ffpath <- tryCatch(
-        {
-            # Attempt to write the FCS file to /dev/shm (shared memory, fast I/O)
-            ffpath <- file.path("/dev/shm", basename(tmpfile))
-            flowCore::write.FCS(ff, ffpath)
-            ffpath
-        },
-        error = function(e) {
-            # If /dev/shm is unavailable or writing fails, fallback to a tempfile
-            ffpath <- base::tempfile()
-            flowCore::write.FCS(ff,  ffpath)
-            ffpath
-        }
-    )
+    ffpath <- base::tempfile()
+    if (dir.exists("/dev/shm")) {
+        # Use '/dev/shm/{basename(tmpfile)}' instead of the standard tempfile if
+        # it exists (shared memory, fast I/O)
+        ffpath <- file.path("/dev/shm", basename(ffpath))
+    }
+    flowCore::write.FCS(ff,  ffpath)
     reg.finalizer(
         e = .GlobalEnv,
         f = function(e) unlink(ffpath, recursive = TRUE, force = TRUE),
