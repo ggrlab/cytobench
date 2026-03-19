@@ -1,18 +1,18 @@
 Package: cytobench
 Title: Bench of Tools for Cytometry Data and Relativisation
-Version: 1.0.36
-Authors@R: 
+Version: 1.0.37
+Authors@R:
     person("Gunther", "Glehr", , "gunthergl@gmx.net", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-1495-9162"))
 Description: cytobench provides a comprehensive toolkit for preprocessing, normalization, and analysis of flow cytometry data. Especially designed for performing relativisation of flow cytometry data, FlowSOM convenience functions and further convenience functions for flow cytometry data analysis.
 License: MIT + file LICENSE
-biocViews: 
+biocViews:
     Software,
     FlowCytometry,
     DataNormalization,
     Clustering,
     Visualization
-Imports: 
+Imports:
     Biobase,
     flowCore,
     data.table,
@@ -22,33 +22,33 @@ Imports:
     tidyr,
     rlang,
     stats,
-    ggpointdensity, 
+    ggpointdensity,
     patchwork,
-    withr, 
-    cluster, 
+    withr,
+    cluster,
     ConsensusClusterPlus,
-    ggh4x, 
-    distances, 
-    FlowSOM, 
-    flowWorkspace, 
-    ggplot2, 
-    ggpubr, 
-    mlr3, 
-    mlr3tuning, 
-    pacman, 
-    paradox, 
-    pROC, 
-    qs2, 
-    scattermore, 
-    stringr, 
-    hexbin, 
+    ggh4x,
+    distances,
+    FlowSOM,
+    flowWorkspace,
+    ggplot2,
+    ggpubr,
+    mlr3,
+    mlr3tuning,
+    pacman,
+    paradox,
+    pROC,
+    qs2,
+    scattermore,
+    stringr,
+    hexbin,
     feather
-Suggests: 
+Suggests:
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0), 
+    testthat (>= 3.0.0),
     hdrcde
-Depends: 
+Depends:
     R (>= 4.1.0)
 Config/testthat/edition: 3
 Encoding: UTF-8

@@ -31,15 +31,16 @@ write_memory_FCS <- function(ff) {
         {
             # Attempt to write the FCS file to /dev/shm (shared memory, fast I/O)
             ffpath <- file.path("/dev/shm", basename(tmpfile))
+            flowCore::write.FCS(ff, file.path("/dev/shm", basename(tmpfile)))
             ffpath
         },
         error = function(e) {
             # If /dev/shm is unavailable or writing fails, fallback to a tempfile
-            tmpfile
+            tmpfile <- base::tempfile()
+            flowCore::write.FCS(ff,  base::tempfile())
+            ffpath
         }
     )
-
-    flowCore::write.FCS(ff, ffpath)
     reg.finalizer(
         e = .GlobalEnv,
         f = function(e) unlink(ffpath, recursive = TRUE, force = TRUE),
