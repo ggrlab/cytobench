@@ -9,6 +9,7 @@ plot_gating_simple(
   transformlist = NULL,
   populations = NULL,
   gg_layer = scattermore::geom_scattermore(alpha = 0.4),
+  gg_layer_1d = ggplot2::geom_density(),
   facet = TRUE,
   verbose = FALSE,
   ...
@@ -26,6 +27,9 @@ If \code{NULL} (default), all non-root populations are used.}
 or \code{ggplot2::geom_point(alpha = 0.2, size = 0.2)}) used to draw points.
 Defaults to a fast scatter layer from \strong{scattermore}.}
 
+\item{gg_layer_1d}{A ggplot2 layer used for 1D plots (when a gate has only one parameter).
+Defaults to \code{ggplot2::geom_density()}.}
+
 \item{facet}{Logical, if \code{TRUE} (default) facets columns by \code{gatingstatus}
 ("pregate" vs "postgate"). If \code{FALSE}, returns a single panel with both
 statuses overplotted}
@@ -40,7 +44,7 @@ A named \code{list} of \code{ggplot} objects, named by population path.
 }
 \description{
 Given a single-sample \strong{GatingSet} or a \strong{GatingHierarchy}, this helper
-draws a 2D scatter for each population, showing the parent (pre-gate) and the
+draws a 1d/2D scatter for each population, showing the parent (pre-gate) and the
 population data (post-gate). Axes are transformed according to the gate's
 channel transforms obtained from \code{flowWorkspace::gh_get_transformations()}.
 
@@ -56,9 +60,6 @@ This function builds such trans objects from the forward and inverse functions
 returned by \code{gh_get_transformations()}. Populations whose channels lack either
 forward or inverse transforms will be plotted on the untransformed scale with
 a warning (unless \code{verbose = TRUE}).
-
-\strong{Limitations:} Only 2-D gates are supported (typical rectangle/polygon
-gates). Non-2-D populations are skipped with an informative message.
 }
 \examples{
 \dontrun{

@@ -4,13 +4,24 @@
 \alias{write_memory_FCS}
 \title{Write FCS File to Temporary Memory}
 \usage{
-write_memory_FCS(ff)
+write_memory_FCS(ff, envir = rlang::global_env())
 }
 \arguments{
 \item{ff}{A \href{https://rdrr.io/bioc/flowCore/man/flowFrame-class.html}{\code{flowFrame}} object to be written to a file.}
-}
-\value{
-A character string with the file path to the written FCS file.
+
+\item{envir}{The environment governing the file's lifetime. The temporary file
+is deleted when this environment's evaluation completes via \code{\link[withr:defer]{withr::defer()}}.
+Defaults to \code{rlang::global_env()} for session-long persistence (and
+backwards compatibility with the previous \code{reg.finalizer} approach).
+Pass \code{environment()} to tie the file's lifetime to the calling function's
+scope; This is the recommended usage for most workflows:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{my_analysis <- function(ff) \{
+    tmp <- write_memory_FCS(ff, envir = environment())
+    # ... use tmp ...
+\}
+# tmp is cleaned up here
+}\if{html}{\out{</div>}}}
 }
 \description{
 Attempts to write a \code{flowFrame} object to a temporary in-memory file.
